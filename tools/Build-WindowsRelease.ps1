@@ -82,12 +82,14 @@ function Run-CheckedProcess {
 function Build-Test {
     param([string]$Name, [string[]]$TestSources)
     $output = Join-Path $checks "$Name.exe"
-    & $csc @common '/target:exe' "/main:$Name" "/out:$output" @TestSources
-    if ($LASTEXITCODE -ne 0) { throw "$Name compilation failed." }
+    $diagnostics = @(& $csc @common '/target:exe' "/main:$Name" "/out:$output" @TestSources 2>&1)
+    $compilerExit = $LASTEXITCODE
+    $diagnostics | ForEach-Object { Write-Host $_ }
+    if ($compilerExit -ne 0) { throw "$Name compilation failed." }
     return $output
 }
 
-$ledger = Build-Test -Name 'LedgerTests' -TestSources @('Source/Domain.cs', 'Source/Storage.cs', 'Tests/LedgerTests.cs')
+$ledger = Build-Test -Name 'LedgerTests' -TestSources @($sources + 'Tests/LedgerTests.cs')
 Run-CheckedProcess -Executable $ledger -Arguments @() -Name 'accounting'
 $compatibility = Build-Test -Name 'FrameworkCompatibilityTests' -TestSources @('Tests/FrameworkCompatibilityTests.cs')
 Run-CheckedProcess -Executable $compatibility -Arguments @('"' + $executable + '"') -Name 'compatibility'
