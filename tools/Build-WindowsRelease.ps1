@@ -82,7 +82,8 @@ function Run-CheckedProcess {
 function Build-Test {
     param([string]$Name, [string[]]$TestSources)
     $output = Join-Path $checks "$Name.exe"
-    $diagnostics = @(& $csc @common '/target:exe' "/main:$Name" "/out:$output" @TestSources 2>&1)
+    $resolvedSources = @($TestSources | ForEach-Object { (Get-Item -LiteralPath $_).FullName })
+    $diagnostics = @(& $csc @common '/target:exe' "/main:$Name" "/out:$output" @resolvedSources 2>&1)
     $compilerExit = $LASTEXITCODE
     $diagnostics | ForEach-Object { Write-Host $_ }
     if ($compilerExit -ne 0) { throw "$Name compilation failed." }
