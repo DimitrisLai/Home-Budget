@@ -5,6 +5,8 @@
 [Oo]bj/
 [Dd]ebug/
 [Rr]elease/
+[Dd]ist/
+release-assets/
 *.user
 *.suo
 *.pdb

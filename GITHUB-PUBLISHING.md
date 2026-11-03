@@ -1,60 +1,35 @@
-# Publish Budget Desk 1.0.0 on GitHub
+# Automatic Budget Desk releases
 
-## Repository
+Repository: [DimitrisLai/Home-Budget](https://github.com/DimitrisLai/Home-Budget).
 
-The project repository is [DimitrisLai/Home-Budget](https://github.com/DimitrisLai/Home-Budget). The app is named Budget Desk. The repository owner selected the MIT license; keep the existing LICENSE file when uploading or updating the project.
+## What happens automatically
 
-If recreating the repository, use these settings:
+The **Build and publish Windows release** workflow compiles the source on Windows, runs the existing accounting, compatibility, UI and quick-entry/search suites, and starts the real executable with separate empty/demo data. It packages the tested app with source, documentation, screenshots and the repository's MIT license.
 
-| Field | Value |
-| --- | --- |
-| Owner | DimitrisLai |
-| Repository name | Home-Budget |
-| Description | Offline Windows budget manager with accounts, recurring payments, savings goals, split purchases, templates and monthly/yearly reports. |
-| Visibility | Public, to share the uploaded files |
-| Add README | Off — this package supplies README.md |
-| Add .gitignore | No .gitignore — this package supplies one |
-| Add license | MIT License |
+The workflow verifies all internal checksums and the completed ZIP. It creates a draft release, downloads and checks the uploaded assets, then publishes the release as latest. It does not overwrite an existing version. Failed builds or checks stop publication.
 
-The README and ignore file are supplied with the project.
+Users download the attached **BudgetDesk_v1.0.0_Windows.zip** from [Releases](https://github.com/DimitrisLai/Home-Budget/releases), extract it and run BudgetDesk.exe. The second asset, **SHA256SUMS.txt**, contains the ZIP checksum. GitHub also supplies source-code archives.
 
-## Upload the project files
+## Prepare the next version
 
-Extract the Windows ZIP. Open its BudgetDesk folder and use the repository's upload-files action. Put the following at the repository root, rather than nesting the entire BudgetDesk folder:
+1. Finish and test the intended application changes.
+2. Update application/manifest version identifiers, launch labels, README, CHANGELOG and RELEASE-NOTES.md for that version.
+3. Set **VERSION** to the matching three-part number, for example **1.0.1**, and commit the prepared changes to **main** together.
+4. GitHub creates tag **v1.0.1**, builds the matching Windows ZIP, verifies its downloads and publishes the release. No manual release creation or ZIP upload is required.
 
-- Source/, Tests/ and Preview/.
-- README.md, CHANGELOG.md, IDEAS.md, VALIDATION.md, RELEASE-NOTES.md, WINDOWS-CHECKLIST.md and GITHUB-PUBLISHING.md.
-- .gitignore, BudgetDesk.exe.config and the .cmd launch/build/test files.
-- LICENSE, preserving the repository owner's existing MIT license.
+The workflow also runs when its build/publishing files change, allowing a failed setup to be fixed. A manual **Run workflow** action is available for retries. An existing published release remains unchanged; publish a new version for changed application files.
 
-Keep BudgetDesk.exe and the downloadable ZIP as release binaries. SHA256SUMS.txt is for the complete Windows package, so it belongs in that package rather than a partial source upload. The package contains mock previews and test results; real budget files stay in the separate local data folder and are not part of this ZIP.
+## Build details
 
-The ignore file helps keep compiled files, real budget JSON, backups and runtime logs out of future Git commits. When uploading through the website, explicitly select the listed project files.
+- Workflow: **.github/workflows/release.yml**.
+- Build, checks and packaging: **tools/Build-WindowsRelease.ps1**.
+- Stable version marker: **VERSION**.
+- Native evidence included in each ZIP: **Tests/Windows-CI-*.txt**.
+- Microsoft .NET Framework 4.5 reference package: version **1.0.3**, with the SHA-256 recorded in VALIDATION.md and checked before compilation.
+- Build job: read access. Publishing job: repository contents write access through GitHub's built-in token. No personal access token is needed.
 
-Commit the initial upload to the default branch.
-
-## Create the downloadable release
-
-Open [Draft a new release](https://github.com/DimitrisLai/Home-Budget/releases/new) after the source is uploaded.
-
-| Field | Value |
-| --- | --- |
-| Tag | v1.0.0 |
-| Target | The default branch containing the uploaded source |
-| Release title | Budget Desk 1.0.0 |
-| Description | Copy RELEASE-NOTES.md |
-| Attached asset | BudgetDesk_v1.0.0_Windows.zip — attach the ZIP itself |
-| Pre-release | Unchecked |
-| Set as latest | Checked |
-
-Review the files and description, then Publish release. The ready-to-run Windows ZIP is the asset users should download. GitHub also generates source-code archives.
+The existing Rebuild-Windows.cmd remains an optional local rebuild command for users who download source.
 
 ## License
 
-The source and Windows ZIP include the same MIT LICENSE as the repository, with copyright (c) 2026 DimitrisLai. Retain that notice and the license with distributed copies.
-
-## Official references
-
-- [Creating a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository)
-- [Managing releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
-- [Licensing a repository](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)
+The source and Windows ZIP include the same MIT LICENSE selected by the repository owner, with copyright (c) 2026 DimitrisLai. Retain that notice and the license with distributed copies.

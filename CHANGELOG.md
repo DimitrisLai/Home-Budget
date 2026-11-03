@@ -7,6 +7,7 @@
 - Kept all financial behaviour, data paths and schema 4 unchanged.
 - Reworked the README for release use and included release notes, source-upload guidance and a project ignore file.
 - Included the MIT license selected by the repository owner in the source and Windows package.
+- Added automatic Windows compilation, native checks, ZIP/checksum creation and verified GitHub release publishing, without application-logic changes.
 - Retained the categorized backlog for future versions.
 
 ## 0.1.9 — Templates, payees and all-history search

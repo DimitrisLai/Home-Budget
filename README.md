@@ -6,7 +6,7 @@ An offline Windows personal budget manager, created by Dimitris L. Track bank ac
 
 ## Download and run
 
-The ready-to-run download is **BudgetDesk_v1.0.0_Windows.zip**, attached to version 1.0.0 on the [Releases page](https://github.com/DimitrisLai/Home-Budget/releases) once published. Choose **Extract All**, open the **BudgetDesk** folder and run **BudgetDesk.exe**. You do not need Python, Node, Office or a developer tool to use it. GitHub's **Code → Download ZIP** contains source files; compile those with **Rebuild-Windows.cmd**.
+Download **BudgetDesk_v1.0.0_Windows.zip** from the [Releases page](https://github.com/DimitrisLai/Home-Budget/releases). Choose **Extract All**, open the **BudgetDesk** folder and run **BudgetDesk.exe**. You do not need Python, Node, Office or a developer tool to use it. GitHub's **Code → Download ZIP** contains source files; compile those with **Rebuild-Windows.cmd**.
 
 Designed for Windows 10/11 with .NET Framework 4.5 or later. It runs with ordinary user permissions. **Try-Demo.cmd** opens separate sample data.
 
@@ -122,11 +122,11 @@ CSV exports retain full transaction amounts and describe split allocations. A ca
 
 The complete C# 5 source is in **Source/**. **Rebuild-Windows.cmd** compiles it using the Windows .NET Framework C# compiler. Close the app before rebuilding. **Run-Tests-Windows.cmd** runs the accounting/persistence suite and executable compatibility checks. Rebuilding is optional for the supplied ZIP.
 
-The Windows startup overload fix is retained: the executable uses String.TrimEnd(Char[]) and is built against Microsoft's .NET Framework 4.5 references. Test sources and results are in **Tests/**. The developer environment uses Mono/Openbox on Linux; the user confirmed 0.1.9 working on Windows before this release.
+The Windows startup overload fix is retained: the executable uses String.TrimEnd(Char[]) and is built against Microsoft's .NET Framework 4.5 references. Test sources and results are in **Tests/**. The original checks used Mono/Openbox on Linux, and the user confirmed 0.1.9 working on Windows. GitHub also compiles the downloadable release on Windows and reruns accounting, compatibility, UI, quick-entry/search and actual-executable startup checks before publishing. The ZIP includes these native results as **Tests/Windows-CI-*.txt**.
 
 ## Roadmap and publishing
 
-**IDEAS.md** contains only unfinished ideas grouped by purpose. Future feature work can be developed after this release. **GITHUB-PUBLISHING.md** explains how to upload the source and publish the downloadable ZIP with tag **v1.0.0**.
+**IDEAS.md** contains only unfinished ideas grouped by purpose. Future feature work can be developed after this release. Releases are built, checked and published automatically through GitHub Actions when the prepared version changes in **VERSION**. **GITHUB-PUBLISHING.md** explains this process.
 
 Licensed under the [MIT License](LICENSE). Source code is included.
 

@@ -6,7 +6,7 @@ Build date: 3 November 2026.
 
 The user confirmed version 0.1.9 working on Windows and requested promotion to version 1. The 1.0.0 application keeps that confirmed feature set. Comparing every C# source file against the delivered 0.1.9 archive shows identical code after normalizing the version strings. Assembly/file versions, window title, diagnostics, launch/build labels and the manifest are updated. Financial logic, data paths and schema 4 are unchanged.
 
-Release packaging adds a clean README, release notes, GitHub publishing guidance and a project ignore file. The MIT license selected by the repository owner is included unchanged in the source and Windows package. The backlog retains its 29 unfinished ideas. Current mock screenshots show the 1.0.0 build. Adding the license and updating publishing documentation does not change the tested executable.
+Release packaging adds a clean README, release notes, GitHub publishing guidance and a project ignore file. The MIT license selected by the repository owner is included unchanged in the source and Windows package. The backlog retains its 29 unfinished ideas. Current mock screenshots show the 1.0.0 build. The automatic publishing setup changes build and packaging files; application source remains unchanged.
 
 ## Checks rerun for 1.0.0
 
@@ -36,10 +36,16 @@ The unchanged source also retains the earlier completed regression coverage. Inc
 
 These baseline suites were completed for 0.1.9; they are not presented as additional reruns of the version-only 1.0.0 change. Complete model/UI test source remains in Tests.
 
+## Automatic Windows release
+
+The GitHub release workflow builds the same source on Windows with the Microsoft C# compiler and the checksum-verified .NET Framework 4.5 references below. It runs the accounting/persistence suite, executable compatibility checks, general UI suite, quick-entry/search suite, and actual-executable empty/demo startup across all five tabs. All generated sample data and screenshots stay outside the package. A failing check prevents publication.
+
+Each Windows ZIP includes its native results in Tests/Windows-CI-*.txt, including the workflow run, source commit and actual executable hash. The build stages the tested executable once, creates and verifies every internal file checksum, then the publishing job checks the ZIP, source and license again. It uploads a draft release, downloads its assets and verifies their SHA-256 values before publishing. Existing releases are not overwritten.
+
 ## Build and platform
 
 The executable is compiled against Microsoft's .NET Framework 4.5 reference assemblies with implicit Mono references disabled (`-noconfig -nostdlib+`). It retains the original Windows startup fix for String.TrimEnd(Char[]): a compatibility test checks that signature and the Framework 4.5 target. The reference package is [Microsoft.NETFramework.ReferenceAssemblies.net45 1.0.3](https://www.nuget.org/packages/Microsoft.NETFramework.ReferenceAssemblies.net45/1.0.3), SHA-256 `23a9f94ea3e2cb88cd8341af75b811c6fb5cb82516fc696e95ed4620279128e3`.
 
-Release execution checks use Mono 6.8 on Linux with Openbox and a virtual display. Native Windows confirmation comes from the user's 0.1.9 test; 1.0.0 makes no application-logic changes. Source/QuickEntry.cs is included in the application and optional Windows rebuild command. Linux dependencies and reference DLLs are not bundled as runtime requirements.
+The original release execution checks used Mono 6.8 on Linux with Openbox and a virtual display. The user's 0.1.9 Windows test remains the manual confirmation; automated native Windows results accompany the GitHub-built package. Version 1.0.0 makes no application-logic changes. Source/QuickEntry.cs is included in the application and optional Windows rebuild command. Linux dependencies and reference DLLs are not bundled as runtime requirements.
 
 WINDOWS-CHECKLIST.md remains available for later smoke checks. Start-BudgetDesk.cmd creates a startup report if needed.

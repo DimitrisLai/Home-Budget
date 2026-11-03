@@ -21,7 +21,7 @@ SAVINGS GOALS: targets and tracked allocations; no automatic money movement.
 Try-Demo.cmd opens separate sample data.
 Settings & backup offers JSON backup/restore and the data folder.
 IDEAS.md contains future additions. RELEASE-NOTES.md describes 1.0.0.
-GITHUB-PUBLISHING.md explains source upload and the GitHub release.
+GITHUB-PUBLISHING.md explains automatic GitHub releases.
 
 Licensed under the MIT License; see LICENSE.
 If startup fails, run Start-BudgetDesk.cmd and send startup-log.txt.

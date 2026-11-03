@@ -1,0 +1,123 @@
+name: Build and publish Windows release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - VERSION
+      - .github/workflows/release.yml
+      - tools/Build-WindowsRelease.ps1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: budgetdesk-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and test on Windows
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Compile, test and package
+        shell: pwsh
+        run: ./tools/Build-WindowsRelease.ps1
+      - name: Retain checked Windows package
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: budgetdesk-release
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Verify and publish release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Check out release notes and license
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Retrieve checked package
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: budgetdesk-release
+          path: release-assets
+      - name: Inspect complete Windows archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release-assets
+          sha256sum -c SHA256SUMS.txt
+          python3 - <<'PY'
+          import hashlib, pathlib, zipfile
+          root = pathlib.Path('..')
+          version = (root / 'VERSION').read_text().strip()
+          path = pathlib.Path(f'BudgetDesk_v{version}_Windows.zip')
+          assert {p.name for p in pathlib.Path('.').iterdir()} == {path.name, 'SHA256SUMS.txt'}
+          with zipfile.ZipFile(path) as z:
+              assert z.testzip() is None
+              names = {i.filename for i in z.infolist() if not i.is_dir()}
+              assert all(n.startswith('BudgetDesk/') and '..' not in pathlib.PurePosixPath(n).parts for n in names)
+              assert z.read('BudgetDesk/BudgetDesk.exe').startswith(b'MZ')
+              assert z.read('BudgetDesk/LICENSE') == (root / 'LICENSE').read_bytes()
+              assert z.read('BudgetDesk/VERSION').decode().strip() == version
+              assert not any(n.lower().endswith(('.json', '.dll')) for n in names)
+              assert {n for n in names if n.lower().endswith('.exe')} == {'BudgetDesk/BudgetDesk.exe'}
+              checked = set()
+              for line in z.read('BudgetDesk/SHA256SUMS.txt').decode().splitlines():
+                  digest, rel = line.split('  ', 1)
+                  full = 'BudgetDesk/' + rel
+                  assert full not in checked
+                  assert hashlib.sha256(z.read(full)).hexdigest() == digest, rel
+                  checked.add(full)
+              assert checked == names - {'BudgetDesk/SHA256SUMS.txt'}
+              for source in (root / 'Source').glob('*'):
+                  if source.is_file():
+                      assert z.read('BudgetDesk/Source/' + source.name) == source.read_bytes(), source.name
+              assert b'checks passed' in z.read('BudgetDesk/Tests/Windows-CI-summary.txt')
+          print(f'ZIP contents, source, license, test evidence and all checksums verified: {path.name}')
+          PY
+      - name: Publish verified release and check downloads
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="$(tr -d '\r\n' < VERSION)"
+          tag="v$version"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $tag already exists; it will not be overwritten."
+            exit 1
+          fi
+          gh release create "$tag" release-assets/* \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Budget Desk $version" --notes-file RELEASE-NOTES.md --draft
+          downloaded="$RUNNER_TEMP/budgetdesk-published-download"
+          mkdir -p "$downloaded"
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir "$downloaded"
+          cmp release-assets/SHA256SUMS.txt "$downloaded/SHA256SUMS.txt"
+          (cd "$downloaded" && sha256sum -c SHA256SUMS.txt)
+          gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" > "$RUNNER_TEMP/budgetdesk-release.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          release = json.loads((pathlib.Path(os.environ['RUNNER_TEMP']) / 'budgetdesk-release.json').read_text())
+          version = pathlib.Path('VERSION').read_text().strip()
+          assert release['tag_name'] == 'v' + version and not release['draft'] and not release['prerelease']
+          assert release['target_commitish'] == os.environ['GITHUB_SHA']
+          assert {a['name'] for a in release['assets']} == {f'BudgetDesk_v{version}_Windows.zip', 'SHA256SUMS.txt'}
+          assert all(a['state'] == 'uploaded' and a['size'] > 0 for a in release['assets'])
+          print('Published and download-verified:', release['html_url'])
+          PY

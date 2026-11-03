@@ -1,0 +1,2 @@
+# Preserve release input bytes across Windows and Linux checkouts.
+* -text
