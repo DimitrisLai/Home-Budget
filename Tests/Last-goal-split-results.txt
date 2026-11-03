@@ -1,0 +1,38 @@
+PASS goal contributions update progress without moving money, adding entries or changing account totals
+PASS monthly goal suggestions round up and include this month and the target month
+PASS overdue goals show the full remaining amount without a negative monthly suggestion
+PASS goals can have no deadline
+PASS completed and overfunded goals cap progress at one hundred percent and have no negative remaining amount
+PASS invalid goal contributions leave saved amounts unchanged
+PASS goal validation protects targets, saved amounts and currency rates without requiring a bank account link
+PASS a split purchase reduces its account and monthly/yearly spending exactly once
+PASS category allocations add up to the purchase total without duplicating spending
+PASS categories used only inside split purchases cannot be deleted
+PASS invalid split sums, precision, categories, types and ambiguous parent categories are rejected
+PASS editing a split replaces its previous balance effect
+PASS deleting a split reverses the full expense once
+PASS split category reports retain the parent expense's saved foreign exchange rate
+PASS goals and split allocations survive clone, backup and reload together
+PASS existing exports preserve split details while keeping one purchase row
+PASS schema-two upgrades retain one-off plans without overwriting the original budget during load
+PASS the first goals/splits save preserves the exact previous-schema backup
+PASS all five tabs fit at the minimum window width
+PASS the real goal editor saves its target, allocation and deadline while preserving the account balance
+PASS Add savings through the real form persists progress without making a transaction
+PASS goal allocations can be adjusted down without changing bank balances
+PASS cancelling a new goal does not create an incomplete tracker
+PASS the nested split editor saves one expense with two category allocations and one deduction
+PASS category filtering displays and totals only the selected split share
+PASS Monthly overview budgets and category bars use split shares rather than full purchase amounts
+PASS Yearly overview counts the full split purchase only once
+PASS cancelling the parent expense discards accepted split-dialog edits
+PASS editing saved split allocations replaces them without deducting again
+PASS all twenty category inputs fit without scrolling and can form one correctly balanced purchase
+PASS a split can be converted back to one category while preserving the purchase and balance
+PASS all one hundred goals are reachable without clipped rows or scrollbars at 1000x700
+PASS all one hundred goals are reachable without clipped rows or scrollbars at 1320x930
+PASS goals, purchases and progress persist through minimized saves and reload
+PASS failed saves preserve the live goal allocation, split amounts, entries and balances
+
+35 savings-goal and split-purchase checks passed.
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

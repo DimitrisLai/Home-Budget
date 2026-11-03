@@ -1,0 +1,10 @@
+PASS all twenty accounts and payments stay visible through five minimize/restore cycles and minimized saves at 1320x930
+PASS all twenty accounts and payments stay visible through five minimize/restore cycles and minimized saves at 1000x700
+PASS payment selection, pause and double-click editing affect the intended schedule
+PASS all one hundred entries are reachable without scrollbars, with correct later-page editing, totals and filtering
+PASS Monthly overview exposes all twenty categories through page buttons
+PASS the category manager exposes all twenty categories without scrollbars
+PASS all twenty recurring payments can be added through the real editor without restarting or scrolling
+
+7 scroll-free and restore checks passed.
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

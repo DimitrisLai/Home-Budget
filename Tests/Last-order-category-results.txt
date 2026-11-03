@@ -1,0 +1,15 @@
+PASS moving the last bank first preserves the order of the others
+PASS moving a bank later uses its final requested position
+PASS ordering keeps every balance, transaction account and payment account unchanged
+PASS invalid moves leave the budget unchanged
+PASS card drop events reorder immediately and save the bank order
+PASS unrelated external drops are ignored
+PASS the account editor can set and persist a numbered display position
+PASS the visible Add category button saves a custom name, icon and optional budget
+PASS account selectors follow the saved bank order
+PASS custom categories are available immediately when recording an expense
+PASS the direct category button respects the twenty-category limit
+PASS bank order and custom categories survive save and reload together
+
+12 bank-order and category checks passed.
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

@@ -1,0 +1,32 @@
+PASS  empty budget opens, renders and closes through the actual entry point
+PASS  empty budget displays all five pages
+PASS  first launch does not create sample financial data
+PASS  demo budget opens, renders and closes through the actual entry point
+PASS  demo budget displays all five pages
+PASS  demo sample data persists in its isolated folder
+PASS  invalid data path is reported before the window instead of exiting silently
+PASS  unwritable requested log destination falls back without blocking the app
+PASS  log fallback does not overwrite an unrelated file
+PASS  first launch has no financial sample data
+PASS  account form saves a usable account
+PASS  expense form deducts its amount
+PASS  editing an expense replaces its balance effect
+PASS  income form disables expense category
+PASS  income form credits its selected account
+PASS  same-currency transfer fills the received amount
+PASS  transfer form updates both accounts
+PASS  transfer is excluded from spending in the live UI
+PASS  due recurring form records once and deducts its account
+PASS  reopening a saved UI budget does not duplicate bills
+PASS  currency is locked for an account with history
+PASS  category form saves its optional monthly budget
+PASS  settings save a manual exchange rate
+PASS  invalid UI commit changes neither memory nor disk
+PASS  all five pages render at the minimum window size
+PASS  all twenty accounts and twenty recurring payments fit without scrolling
+
+17 UI checks passed.
+
+PASS  existing interactive forms and financial calculations still pass all 17 UI checks
+
+10 startup/integration checks passed.

@@ -1,0 +1,2 @@
+PASS physical mouse drag moves a bank across rows and persists the order
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

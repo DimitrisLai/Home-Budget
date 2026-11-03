@@ -1,0 +1,31 @@
+PASS version-one data migrates without rewriting the file or altering bank order, entries, rates and payment history
+PASS the first current-schema save retains the exact previous budget as an automatic backup
+PASS plans survive reload and incomplete current-schema files are rejected
+PASS future and overdue one-off plans never deduct or auto-post when their due date passes
+PASS forecast date ranges include their endpoints without changing actual spending
+PASS recording a payment in the future is rejected without changing the plan
+PASS recording early uses the actual payment date, removes the plan and deducts exactly once
+PASS reload and deleting a recorded expense do not recreate its original one-off plan
+PASS paying an overdue plan uses the chosen payment date instead of its old due date
+PASS planned references protect accounts and categories, with amount and opening-date validation
+PASS plans estimate with current exchange rates while paid entries retain their recorded rate
+PASS year totals handle leap days and year boundaries, excluding transfers, opening balances and plans
+PASS yearly CSV includes every recorded entry in that year and plans export separately
+PASS planned-expense exports preserve spreadsheet formula protection
+PASS recurring forecasts cover distant years and stop safely at the supported date boundary
+PASS the Future expense button and month picker fit together at minimum width
+PASS the real Future expense editor saves and immediately displays the plan without deduction
+PASS editing a plan into another year keeps it visible in the all-dates list
+PASS Record paid through the real form persists exactly one expense and removes the plan
+PASS the paid one-off expense appears immediately in Recorded entries
+PASS cancelling the future-expense editor creates no plan or balance change
+PASS all one hundred plans remain reachable through page buttons without clipped rows or scrollbars
+PASS overdue filtering uses all dates and resets the plan page
+PASS all twelve yearly rows and the new tab fit without scrolling at 1000x700
+PASS all twelve yearly rows and the new tab fit without scrolling at 1320x930
+PASS double-clicking a yearly month opens its Monthly overview
+PASS plans, recorded payments and bank order coexist after reload
+PASS failed payment saves leave the live plan, entries and balance unchanged
+
+28 yearly-overview and planned-expense checks passed.
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

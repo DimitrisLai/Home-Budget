@@ -1,0 +1,45 @@
+# Validation — Budget Desk 1.0.0
+
+Build date: 3 November 2026.
+
+## Release basis
+
+The user confirmed version 0.1.9 working on Windows and requested promotion to version 1. The 1.0.0 application keeps that confirmed feature set. Comparing every C# source file against the delivered 0.1.9 archive shows identical code after normalizing the version strings. Assembly/file versions, window title, diagnostics, launch/build labels and the manifest are updated. Financial logic, data paths and schema 4 are unchanged.
+
+Release packaging adds a clean README, release notes, GitHub publishing guidance and a project ignore file. The MIT license selected by the repository owner is included unchanged in the source and Windows package. The backlog retains its 29 unfinished ideas. Current mock screenshots show the 1.0.0 build. Adding the license and updating publishing documentation does not change the tested executable.
+
+## Checks rerun for 1.0.0
+
+| Check | Result |
+| --- | --- |
+| Source comparison with confirmed 0.1.9 | Passed: version strings only |
+| Microsoft .NET Framework 4.5 reference build, C# 5, warnings as errors | Passed |
+| Accounting and persistence | 35 passed |
+| General UI and all five pages | 17 passed |
+| Templates, payees and all-history search | 42 passed |
+| Actual-executable startup/integration | 10 passed, including fresh empty/demo page captures and startup-error/fallback checks |
+| Executable API/target compatibility | 2 passed |
+
+The release was also visually reviewed using current screenshots of the dashboard and all-history results. The executable in the packaged ZIP is byte-identical to the tested executable. ZIP integrity and all packaged SHA-256 checksums were verified.
+
+## Confirmed 0.1.9 regression baseline
+
+The unchanged source also retains the earlier completed regression coverage. Included result files identify their original suites:
+
+- 5 compact-account layout checks, covering 42 count/window combinations.
+- 8 live-refresh checks, including 40 additions through the real account editor.
+- 7 scroll-free/restore checks, including ten actual minimize/restore cycles.
+- 12 bank-order and category checks.
+- 28 yearly-overview and one-off-plan checks.
+- 35 savings-goal and split-purchase checks.
+- A separate physical mouse drag test across account-card rows with persistence verification.
+
+These baseline suites were completed for 0.1.9; they are not presented as additional reruns of the version-only 1.0.0 change. Complete model/UI test source remains in Tests.
+
+## Build and platform
+
+The executable is compiled against Microsoft's .NET Framework 4.5 reference assemblies with implicit Mono references disabled (`-noconfig -nostdlib+`). It retains the original Windows startup fix for String.TrimEnd(Char[]): a compatibility test checks that signature and the Framework 4.5 target. The reference package is [Microsoft.NETFramework.ReferenceAssemblies.net45 1.0.3](https://www.nuget.org/packages/Microsoft.NETFramework.ReferenceAssemblies.net45/1.0.3), SHA-256 `23a9f94ea3e2cb88cd8341af75b811c6fb5cb82516fc696e95ed4620279128e3`.
+
+Release execution checks use Mono 6.8 on Linux with Openbox and a virtual display. Native Windows confirmation comes from the user's 0.1.9 test; 1.0.0 makes no application-logic changes. Source/QuickEntry.cs is included in the application and optional Windows rebuild command. Linux dependencies and reference DLLs are not bundled as runtime requirements.
+
+WINDOWS-CHECKLIST.md remains available for later smoke checks. Start-BudgetDesk.cmd creates a startup report if needed.

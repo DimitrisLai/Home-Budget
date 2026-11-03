@@ -1,0 +1,8 @@
+PASS all account counts from 0 to 20 fit without scrolling, clipping or overlap at 1320x930
+PASS all account counts from 0 to 20 fit without scrolling, clipping or overlap at 1000x700
+PASS an existing twenty-account grid reflows when the window is resized
+PASS removing accounts shrinks the section back to a single compact row
+PASS clicking the compact account name still opens the correct editor
+
+5 account layout checks passed (42 account-count/window combinations plus resize, removal and editing).
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

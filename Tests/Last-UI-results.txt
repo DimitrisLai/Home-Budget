@@ -1,0 +1,20 @@
+PASS  first launch has no financial sample data
+PASS  account form saves a usable account
+PASS  expense form deducts its amount
+PASS  editing an expense replaces its balance effect
+PASS  income form disables expense category
+PASS  income form credits its selected account
+PASS  same-currency transfer fills the received amount
+PASS  transfer form updates both accounts
+PASS  transfer is excluded from spending in the live UI
+PASS  due recurring form records once and deducts its account
+PASS  reopening a saved UI budget does not duplicate bills
+PASS  currency is locked for an account with history
+PASS  category form saves its optional monthly budget
+PASS  settings save a manual exchange rate
+PASS  invalid UI commit changes neither memory nor disk
+PASS  all five pages render at the minimum window size
+PASS  all twenty accounts and twenty recurring payments fit without scrolling
+
+17 UI checks passed.
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

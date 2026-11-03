@@ -1,0 +1,34 @@
+# C# / .NET build and editor output
+.vs/
+.vscode/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.pdb
+*.mdb
+*.cache
+*.exe
+*.dll
+*.zip
+
+# Real budget data, backups and runtime files
+budget.json
+budget-*.json
+BudgetDesk-backup-*.json
+unreadable-*.json
+writing-*.tmp
+Backups/
+Data/
+Demo/
+Logs/
+startup-log.txt
+startup-*.txt
+BudgetDesk-*.csv
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store

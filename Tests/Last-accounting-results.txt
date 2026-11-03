@@ -1,0 +1,37 @@
+PASS  empty data is valid and starts without invented balances
+PASS  expenses and income affect only their selected account
+PASS  decimal arithmetic does not accumulate floating point drift
+PASS  transfer preserves the combined balance and is not spending
+PASS  cross-currency transfer uses the actual amount received
+PASS  same-currency transfers reject an unequal received amount
+PASS  transfers cannot target their source account
+PASS  monthly totals isolate the year and month
+PASS  future dated entries do not affect the balance yet
+PASS  entries before the opening date are rejected
+PASS  opening balance applies at start of day
+PASS  edits and deletion recalculate rather than double deducting
+PASS  monthly dates retain the original day after February
+PASS  a schedule can move to a newer account while keeping its original monthly anchor
+PASS  quarterly dates cross years correctly
+PASS  leap year annual payments retain February 29 when possible
+PASS  weekly and daily schedules
+PASS  overdue bills catch up once and affect their actual months
+PASS  no duplicates after saving and reopening
+PASS  deleting a scheduled expense does not replay it
+PASS  paused and manual schedules never auto-deduct
+PASS  recording an early payment books today and advances schedule
+PASS  forecast does not deduct or double count recorded occurrences
+PASS  foreign expense totals retain the recorded rate
+PASS  unknown currency and missing rates are rejected
+PASS  zero amounts and excessive decimal precision are rejected
+PASS  negative balances are allowed and computed accurately
+PASS  referenced accounts and categories cannot be deleted
+PASS  20-account, 20-category and 20-bill limits are enforced
+PASS  malformed backups and future schema versions are rejected
+PASS  duplicate identifiers and orphan references are rejected
+PASS  saving is persistent, atomic, and retains previous versions
+PASS  invalid saves leave the previous financial data untouched
+PASS  CSV exports preserve text, decimals and neutralize formulas
+PASS  sample data is valid and separate from an empty budget
+
+35 passed; 0 failed.

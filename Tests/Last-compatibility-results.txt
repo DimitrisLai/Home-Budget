@@ -1,0 +1,2 @@
+PASS executable startup calls the Framework-compatible String.TrimEnd(Char[]) signature
+PASS executable declares the Windows .NET Framework 4.5 target

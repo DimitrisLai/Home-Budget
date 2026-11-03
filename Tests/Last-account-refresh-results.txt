@@ -1,0 +1,11 @@
+PASS totals, recurring controls and bill rows remain inside the visible page after each of 20 account-form saves at 1320x930
+PASS editing an account refreshes all lower sections at 1320x930
+PASS queued refreshes ignore replaced pages after repeated commits and tab switches at 1320x930
+PASS the live saved page has the same row sizes as a reopened page at 1320x930
+PASS totals, recurring controls and bill rows remain inside the visible page after each of 20 account-form saves at 1000x700
+PASS editing an account refreshes all lower sections at 1000x700
+PASS queued refreshes ignore replaced pages after repeated commits and tab switches at 1000x700
+PASS the live saved page has the same row sizes as a reopened page at 1000x700
+
+8 live-refresh checks passed, including 40 additions through the actual account form.
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

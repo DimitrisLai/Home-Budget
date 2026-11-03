@@ -1,0 +1,45 @@
+PASS templates create fresh drafts dated today without recording or deducting money
+PASS templates can leave the amount for each new entry
+PASS a template draft becomes one expense only when a valid amount is recorded
+PASS split template drafts own independent allocations and do not mutate the reusable template
+PASS saved templates retain split amounts without copying recurring or one-off payment identities
+PASS template references protect accounts/categories and split templates require a fixed total
+PASS new template uses take the current account exchange rate
+PASS income templates are supported without an expense category
+PASS payees are trimmed and matched without case duplicates and remember the latest defaults
+PASS renaming or deleting payee profiles preserves historical payee names and searchability
+PASS deleting unused accounts or categories clears optional payee defaults safely
+PASS history searches every year and combines payee, description and account words without case sensitivity
+PASS history date ranges include both endpoints and leap days
+PASS account search includes transfer destinations and category search includes split allocations
+PASS amount ranges use the full entry amount in its account currency, including exact matches
+PASS invalid search ranges report a problem without changing financial data
+PASS templates, payee preferences and historical payees persist together
+PASS existing result exports include payee names and every matching page only
+PASS schema-three migration preserves goals, plans and historical entries without rewriting during load
+PASS the first template/payee save keeps the exact previous-format backup
+PASS the Payees manager saves optional defaults without recording an entry
+PASS a known payee autofills account and category in the real new-entry form
+PASS payee autofill preserves account and category choices already made by the user
+PASS saving a payee entry records one expense and remembers the final explicit choices
+PASS explicitly choosing an already-selected account or category also protects it from payee autofill
+PASS editing or cancelling a historical payee does not silently change its account or saved text
+PASS the Templates manager saves a reusable optional-amount template without a transaction
+PASS Use template opens a draft and preserves its explicit defaults instead of applying different payee preferences
+PASS cancelling a used template changes neither data nor balances
+PASS saving a template draft records today's expense exactly once
+PASS Save as template can persist a shortcut while cancelling the parent expense records no purchase
+PASS all-history pages expose every entry across more than eight years without clipping, duplicates or scrollbars
+PASS typing a history search resets pagination and finds an older-year purchase
+PASS editing an older search result updates the intended entry without adding another
+PASS invalid date ranges display a clear message without crashing or losing data
+PASS amount filtering and result metrics use all matching history entries
+PASS history category filters and totals correctly isolate the matching split share
+PASS history results restore after minimization and a saved edit
+PASS all templates remain reachable through paged management without a twenty-item limit
+PASS all remembered payees remain reachable through paged management without a twenty-item limit
+PASS history, templates and payee preferences survive the same persisted budget reload
+PASS failed template-entry saves preserve transactions, payee preferences, templates and balances
+
+42 quick-entry, payee and all-history checks passed.
+Gtk not found (missing LD_LIBRARY_PATH to libgtk-x11-2.0.so.0?), using built-in colorscheme

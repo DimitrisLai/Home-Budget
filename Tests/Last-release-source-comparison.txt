@@ -1,0 +1,8 @@
+PASS 1.0.0 retains confirmed 0.1.9 behaviour; source changes are limited to version strings.
+Domain.cs: identical
+Layouts.cs: identical
+Program.cs: version strings only
+QuickEntry.cs: identical
+StartupDiagnostics.cs: version strings only
+Storage.cs: identical
+Ui.cs: version strings only

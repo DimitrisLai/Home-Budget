@@ -1,0 +1,28 @@
+BUDGET DESK 1.0.0
+=================
+
+1. Close any older Budget Desk window.
+2. Extract this ZIP into a new folder.
+3. Open BudgetDesk and run BudgetDesk.exe.
+
+Your existing budget loads automatically from the same data folder.
+Version 1.0.0 has the same features and data format as confirmed version 0.1.9.
+No rebuild is required.
+
+ACCOUNTS & BILLS: add/reorder accounts and manage recurring payments.
+DAILY EXPENSES: expenses, income, transfers, splits and custom categories.
+FUTURE / PLANNED: one-off unpaid plans; Record paid after actual payment.
+TEMPLATES: reusable expense/income drafts with optional amounts or splits.
+PAYEES: remembered account/category suggestions for new entries.
+SEARCH ALL HISTORY: find recorded activity across every year.
+MONTHLY / YEARLY OVERVIEW: totals, budgets and period details.
+SAVINGS GOALS: targets and tracked allocations; no automatic money movement.
+
+Try-Demo.cmd opens separate sample data.
+Settings & backup offers JSON backup/restore and the data folder.
+IDEAS.md contains future additions. RELEASE-NOTES.md describes 1.0.0.
+GITHUB-PUBLISHING.md explains source upload and the GitHub release.
+
+Licensed under the MIT License; see LICENSE.
+If startup fails, run Start-BudgetDesk.cmd and send startup-log.txt.
+Repair-and-Start.cmd remains an optional local rebuild.
