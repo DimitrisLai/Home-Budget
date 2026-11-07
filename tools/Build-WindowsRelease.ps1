@@ -99,20 +99,15 @@ foreach ($name in @('UiSmokeTests', 'QuickEntryTests')) {
     $images = Join-Path $checks "$name-images"
     Run-CheckedProcess -Executable $test -Arguments @('"' + $images + '"') -Name $name
 }
-foreach ($mode in @('empty', 'demo')) {
-    $images = Join-Path $checks "$mode-pages"
-    $data = Join-Path $checks "$mode-data"
-    $arguments = @('"--capture=' + $images + '"', '"--data-dir=' + $data + '"')
-    if ($mode -eq 'demo') { $arguments += '--demo' }
-    Run-CheckedProcess -Executable $executable -Arguments $arguments -Name "startup-$mode" -TimeoutSeconds 60
-    if (@(Get-ChildItem -LiteralPath $images -Filter '*.png').Count -ne 5) { throw "$mode startup did not render all five pages." }
-}
+$startup = Build-Test -Name 'StartupSmokeTests' -TestSources @('Tests/StartupSmokeTests.cs')
+Run-CheckedProcess -Executable $startup -Arguments @('"' + $executable + '"') -Name 'startup' -TimeoutSeconds 120
 $evidence = @(
     "Budget Desk $version — native Windows release checks",
     "Commit: $env:GITHUB_SHA",
     "Run: https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID",
     'Compiled with the Microsoft Windows C# compiler and checksum-verified .NET Framework 4.5 references.',
-    'Accounting, executable compatibility, general UI, quick-entry/search and actual empty/demo startup checks passed.',
+    'Accounting, executable compatibility/capability boundary, general UI, quick-entry/search and actual empty/demo/fallback startup checks passed.',
+    'Screenshot helpers run only in separate test executables; the public executable contains no screen-capture API calls.',
     'All checks used isolated temporary sample budgets. No budget data or test executables are packaged.',
     ('Executable SHA-256: ' + (Get-FileHash -LiteralPath $executable -Algorithm SHA256).Hash.ToLowerInvariant())
 )

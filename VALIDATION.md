@@ -1,3 +1,25 @@
+# Validation — Budget Desk 1.0.1 review candidate
+
+Prepared 7 November 2026 from public v1.0.0 commit aad8fde148c37866155041c50c418d0fc9d135ed.
+
+## Change scope
+
+Removed the optional production screenshot command and its capture-only exception behavior. Normal startup diagnostics and UI error reporting remain. Financial logic and schema 4 are unchanged; application version identifiers are 1.0.1.
+
+UI screenshots remain only in separate test programs. FrameworkCompatibilityTests checks the actual executable for screen-capture calls and native imports in every method body, including compiler-generated helpers. StartupSmokeTests opens/closes the actual executable with isolated empty/demo budgets, checks the retired screenshot flag has no capture effect, and verifies an unusable log destination does not prevent startup or alter the occupied file.
+
+## Candidate checks
+
+Local checks compiled against the Microsoft .NET Framework 4.5 references with warnings as errors and passed 35 accounting/persistence, 17 general UI, 42 quick-entry/payee/history and 3 executable compatibility/capability checks. As a negative control, the new capability check rejected the original v1.0.0 executable at its actual screen-capture call. These local executions used Mono with an isolated virtual display; native startup checks are performed separately on Windows.
+
+The build-only candidate workflow compiles on Windows using the pinned Microsoft .NET Framework 4.5 reference package, with C# 5 and warnings as errors. It runs accounting/persistence, actual-executable compatibility/capability checks, general UI, quick-entry/search and actual-executable startup checks. Results are generated into Tests/Windows-CI-*.txt in the candidate ZIP; a failed check prevents artifact creation.
+
+The candidate is retained as a workflow artifact, without publishing a stable release. The tested executable is staged once and its SHA-256 is included in the generated evidence. Package checks reject additional executables, runtime data and reference DLLs.
+
+Functional and capability checks do not establish antivirus clearance. See SECURITY-REVIEW.md for vendor status. The historical 1.0.0 results below describe that released version, not a rerun of all historical suites for 1.0.1.
+
+---
+
 # Validation — Budget Desk 1.0.0
 
 Build date: 3 November 2026.

@@ -1,4 +1,4 @@
-# Budget Desk 1.0.0
+# Budget Desk 1.0.1 review candidate
 
 An offline Windows personal budget manager, created by Dimitris L. Track bank accounts, cash, spending, recurring payments and savings without a subscription or bank login.
 
@@ -6,7 +6,7 @@ An offline Windows personal budget manager, created by Dimitris L. Track bank ac
 
 ## Download and run
 
-Download **BudgetDesk_v1.0.0_Windows.zip** from the [Releases page](https://github.com/DimitrisLai/Home-Budget/releases). Choose **Extract All**, open the **BudgetDesk** folder and run **BudgetDesk.exe**. You do not need Python, Node, Office or a developer tool to use it. GitHub's **Code → Download ZIP** contains source files; compile those with **Rebuild-Windows.cmd**.
+The stable release remains 1.0.0 on the [Releases page](https://github.com/DimitrisLai/Home-Budget/releases). This branch builds a **BudgetDesk_v1.0.1_Windows.zip** candidate as a GitHub Actions artifact for testing and vendor review. Choose **Extract All**, open the **BudgetDesk** folder and run **BudgetDesk.exe**. You do not need Python, Node, Office or a developer tool to use it. GitHub's **Code → Download ZIP** contains source files; compile those with **Rebuild-Windows.cmd**.
 
 Designed for Windows 10/11 with .NET Framework 4.5 or later. It runs with ordinary user permissions. **Try-Demo.cmd** opens separate sample data.
 
@@ -23,11 +23,13 @@ Designed for Windows 10/11 with .NET Framework 4.5 or later. It runs with ordina
 - Automatic saving, twenty previous versions, JSON backup and restore.
 - Page buttons for longer lists and compact layouts at a supported minimum of 1000 × 700.
 
-## About version 1.0.0
+## About this candidate
 
-This release promotes the user-confirmed 0.1.9 feature set to 1.0.0. Application changes are limited to version identifiers; the financial logic and data format are unchanged. **RELEASE-NOTES.md** describes the release and **VALIDATION.md** records the checks.
+Version 1.0.1 removes a developer screenshot command from the distributed executable. UI screenshots run only in separate test programs. CI checks the public executable for screen-capture API calls, and opens/closes the actual app without production screenshot automation. All budgeting features, financial logic, data paths and schema 4 are unchanged.
 
-**Updating from 0.1.9:** close the old app and extract 1.0.0 into a new folder. Your existing budget loads from the same data location, using the same schema 4. Earlier schema 1–3 backups migrate on load and preserve the previous file when first saved. Executables older than 0.1.9 cannot read schema 4.
+Malwarebytes, SecureAge and Trapmine detected the original 1.0.0 executable in the supplied VirusTotal report. The exact classifier triggers are unknown. Removing an unnecessary developer capability is a source cleanup; it does not establish that the original report was a false positive or that this candidate is cleared. See **SECURITY-REVIEW.md** for public sample details and review status.
+
+**Updating for testing:** close the old app, export a JSON backup and extract the candidate into a new folder. Your existing budget uses the same data location and schema 4. **Try-Demo.cmd** opens separate sample data.
 
 ## Daily entry shortcuts
 

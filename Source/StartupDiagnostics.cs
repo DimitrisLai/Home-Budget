@@ -11,7 +11,6 @@ namespace BudgetDesk
         private static readonly object Sync = new object();
         private static string logPath;
         private static string stage = "Enter application";
-        internal static bool Automated { get; private set; }
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern int MessageBoxW(IntPtr owner, string text, string caption, uint flags);
@@ -22,7 +21,6 @@ namespace BudgetDesk
             foreach (string arg in args)
             {
                 if (arg.StartsWith("--startup-log=", StringComparison.Ordinal)) requested = arg.Substring(14);
-                if (arg.StartsWith("--capture=", StringComparison.Ordinal)) Automated = true;
             }
             string defaultFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BudgetDesk", "Logs");
             string name = "startup-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fffffff") + "-" + Process.GetCurrentProcess().Id + ".txt";
@@ -34,7 +32,7 @@ namespace BudgetDesk
                 {
                     string full = Path.GetFullPath(candidate);
                     Directory.CreateDirectory(Path.GetDirectoryName(full));
-                    File.WriteAllText(full, "Budget Desk 1.0.0 startup report\r\n" +
+                    File.WriteAllText(full, "Budget Desk 1.0.1 startup report\r\n" +
                         "UTC: " + DateTime.UtcNow.ToString("o") + "\r\n" +
                         "OS: " + Environment.OSVersion + "\r\n" +
                         "CLR: " + Environment.Version + "\r\n" +

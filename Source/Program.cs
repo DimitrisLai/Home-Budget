@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -13,8 +12,8 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("Offline personal accounts, recurring payments and daily expenses")]
 [assembly: AssemblyCompany("Dimitris L.")]
 [assembly: AssemblyProduct("Budget Desk")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.5", FrameworkDisplayName = ".NET Framework 4.5")]
 
 namespace BudgetDesk
@@ -38,7 +37,7 @@ namespace BudgetDesk
             }
             catch (Exception ex)
             {
-                StartupDiagnostics.Fail(ex, !StartupDiagnostics.Automated);
+                StartupDiagnostics.Fail(ex, true);
                 return 1;
             }
         }
@@ -47,21 +46,16 @@ namespace BudgetDesk
         private static int Run(string[] args)
         {
             StartupDiagnostics.Stage("Initialize Windows controls");
-            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += delegate(object sender, ThreadExceptionEventArgs e) {
+                uiFailed = true;
+                StartupDiagnostics.Fail(e.Exception, true);
+                Application.Exit();
+            };
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             bool demo = args.Contains("--demo");
-            string capture = args.FirstOrDefault(a => a.StartsWith("--capture="));
             string customData = args.FirstOrDefault(a => a.StartsWith("--data-dir="));
-            if (capture == null)
-            {
-                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-                Application.ThreadException += delegate(object sender, ThreadExceptionEventArgs e) {
-                    uiFailed = true;
-                    StartupDiagnostics.Fail(e.Exception, true);
-                    Application.Exit();
-                };
-            }
             string folder = customData != null ? customData.Substring(11) : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BudgetDesk", demo ? "Demo" : "Data");
             StartupDiagnostics.Stage("Acquire budget lock");
             bool acquired;
@@ -101,7 +95,6 @@ namespace BudgetDesk
                     StartupDiagnostics.Stage("Build main window");
                     using (MainForm form = new MainForm(store, data, demo))
                     {
-                        if (capture != null) SetupCapture(form, capture.Substring(10));
                         form.Shown += delegate { StartupDiagnostics.Stage("Window shown"); };
                         StartupDiagnostics.Stage("Open main window");
                         Application.Run(form);
@@ -111,25 +104,6 @@ namespace BudgetDesk
                 }
                 finally { mutex.ReleaseMutex(); }
             }
-        }
-        private static void SetupCapture(MainForm form, string folder)
-        {
-            Directory.CreateDirectory(folder);
-            System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer { Interval = 700 }; int step = 0;
-            timer.Tick += delegate {
-                if (step < 5)
-                {
-                    form.ShowPage(step); form.Refresh(); Application.DoEvents();
-                    using (Bitmap b = new Bitmap(form.Width, form.Height))
-                    {
-                        using (Graphics g = Graphics.FromImage(b)) g.CopyFromScreen(form.Location, Point.Empty, form.Size);
-                        b.Save(Path.Combine(folder, new[] { "accounts.png", "daily-expenses.png", "monthly-overview.png", "yearly-overview.png", "savings-goals.png" }[step]), System.Drawing.Imaging.ImageFormat.Png);
-                    }
-                    step++;
-                }
-                else { timer.Stop(); timer.Dispose(); form.Close(); }
-            };
-            form.Shown += delegate { timer.Start(); };
         }
     }
 }

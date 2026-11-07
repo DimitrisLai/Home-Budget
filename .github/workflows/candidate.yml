@@ -1,0 +1,34 @@
+name: Build Windows review candidate
+
+on:
+  push:
+    branches: [review/remove-capture-helper]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: budgetdesk-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compile and test review candidate
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Compile, test and package
+        shell: pwsh
+        run: ./tools/Build-WindowsRelease.ps1
+      - name: Retain candidate for testing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: budgetdesk-review-candidate
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30

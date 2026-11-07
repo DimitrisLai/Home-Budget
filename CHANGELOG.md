@@ -1,5 +1,14 @@
 # Budget Desk version history
 
+## 1.0.1 — Review candidate
+
+- Removed the developer-only screenshot command and screen-capture calls from the public executable. UI screenshots remain in separate test programs.
+- Changed CI startup checks to drive the actual app from a separate process, including empty/demo budgets, normal close, log fallback and the retired screenshot flag.
+- Added a compiled-executable check for screen-capture API calls and native imports, alongside the existing Framework compatibility checks.
+- Added a build-only candidate workflow; it does not create a release or change the current stable download.
+- Retained all budgeting features, data paths and schema 4.
+- Vendor review is pending; this candidate is not antivirus clearance.
+
 ## 1.0.0 — First release
 
 - Promoted the Windows-confirmed 0.1.9 feature set to 1.0.0.

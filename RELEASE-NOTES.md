@@ -1,27 +1,11 @@
-# Budget Desk 1.0.0
+# Budget Desk 1.0.1 review candidate
 
-First release of Budget Desk, an offline Windows personal budget manager created by Dimitris L.
+This candidate removes the developer-only screenshot command from the public Windows executable. Screenshot helpers remain in separate UI test programs, which are not included as executables in the download.
 
-This release contains the Windows-confirmed 0.1.9 feature set. Version identifiers and release documentation are updated; financial behaviour and data schema 4 are unchanged.
+The actual app is built and tested on Windows. Startup checks now open and close it from a separate test process. Executable checks retain the .NET Framework 4.5 compatibility guard and reject screen-capture API calls or native imports.
 
-## Included
+All budgeting features, financial calculations, data paths and schema 4 are unchanged from 1.0.0. Close the previous app, export a JSON backup and extract the candidate into a new folder. Run BudgetDesk/BudgetDesk.exe, or Try-Demo.cmd for isolated sample data.
 
-- Reorderable accounts and manual multi-currency rates.
-- Expenses, income, transfers, custom categories and split purchases.
-- Recurring payments and separately tracked one-off future expenses.
-- Monthly/yearly reporting, category budgets and savings goals.
-- Quick-entry templates, payee autofill and all-history search.
-- Automatic saving, JSON backups and CSV exports.
-- Complete editable source and optional Windows rebuild/test commands.
+The original 1.0.0 antivirus report is under review. The exact detection trigger is unknown, and a successful functional build is not antivirus clearance. This candidate has not been published as a new stable release.
 
-## Download
-
-Choose **BudgetDesk_v1.0.0_Windows.zip**, extract it and run **BudgetDesk/BudgetDesk.exe**. GitHub's automatically generated Source code archives contain repository source; the attached Windows ZIP is the ready-to-run download.
-
-Designed for Windows 10/11 with .NET Framework 4.5 or later. No Python, Node, Office or developer tools are required to use the executable.
-
-## Updating
-
-Close the older app, extract this ZIP into a new folder and run the new executable. Existing data remains in `%LOCALAPPDATA%\BudgetDesk\Data`. The format is the same as 0.1.9; earlier supported formats migrate with automatic backups.
-
-Future features are listed in IDEAS.md. Licensed under the [MIT License](LICENSE).
+See SECURITY-REVIEW.md for sample details and VALIDATION.md for test scope. Licensed under the MIT License.

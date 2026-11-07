@@ -2,7 +2,7 @@
 setlocal DisableDelayedExpansion
 cd /d "%~dp0"
 set "BUDGET_REPAIR_LOG=%~dp0repair-log.txt"
->"%BUDGET_REPAIR_LOG%" echo Budget Desk 1.0.0 Windows repair
+>"%BUDGET_REPAIR_LOG%" echo Budget Desk 1.0.1 Windows repair
 if errorlevel 1 goto read_only
 echo Rebuilding Budget Desk for this Windows PC...
 echo Your saved budget is stored separately.

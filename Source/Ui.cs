@@ -230,7 +230,7 @@ namespace BudgetDesk
         public MainForm(BudgetStore store, BudgetData data, bool isDemo)
         {
             Store = store; Data = data; demo = isDemo;
-            Text = "Budget Desk 1.0.0" + (demo ? "  |  DEMO DATA" : "");
+            Text = "Budget Desk 1.0.1" + (demo ? "  |  DEMO DATA" : "");
             MinimumSize = new Size(1000, 700);
             Rectangle workingArea = Screen.PrimaryScreen.WorkingArea;
             Size = new Size(Math.Min(1320, Math.Max(1000, workingArea.Width - 36)), Math.Min(930, Math.Max(700, workingArea.Height - 36)));
