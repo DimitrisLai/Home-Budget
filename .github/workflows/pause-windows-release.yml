@@ -1,0 +1,64 @@
+name: Pause flagged Windows release
+
+on:
+  push:
+    branches: [maintenance/pause-flagged-release]
+    paths: [.github/workflows/pause-windows-release.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pause:
+    name: Move flagged v1.0.0 download to draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Pause the identified release and verify preserved assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases/433146791" > "$RUNNER_TEMP/budgetdesk-release-before.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          release = json.loads((root / 'budgetdesk-release-before.json').read_text())
+          assert release['id'] == 433146791 and release['tag_name'] == 'v1.0.0'
+          assert release['target_commitish'] == 'aad8fde148c37866155041c50c418d0fc9d135ed'
+          assert not release.get('immutable', False)
+          expected = {
+              'BudgetDesk_v1.0.0_Windows.zip': (1235066, 'sha256:2f21dc19e263827aa0783a0ac1c6860061c3344b140c809eed133fead111a0e4'),
+              'SHA256SUMS.txt': (96, 'sha256:211c539b9dac8fd15f638bad39255475808d3264d60220a4f2be842ab25d9110'),
+          }
+          assert {a['name']: (a['size'], a['digest']) for a in release['assets']} == expected
+          notice = ('> [!WARNING]\n'
+                    '> **Windows download paused for antivirus review.**\n'
+                    '> This release has unresolved antivirus detections. A false positive has not been confirmed.\n'
+                    '> The v1.0.1 review candidate has the same reported vendor labels. Vendor review is pending.\n'
+                    '> See [review status](https://github.com/DimitrisLai/Home-Budget/pull/1).\n\n')
+          body = release.get('body') or ''
+          if not body.startswith('> [!WARNING]\n> **Windows download paused for antivirus review.**'):
+              body = notice + body
+          request = {'draft': True, 'make_latest': 'false',
+                     'name': 'Budget Desk 1.0.0 — antivirus review pending', 'body': body}
+          (root / 'budgetdesk-release-patch.json').write_text(json.dumps(request), encoding='utf-8')
+          PY
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/433146791" --input "$RUNNER_TEMP/budgetdesk-release-patch.json" > "$RUNNER_TEMP/budgetdesk-release-after.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          before = json.loads((root / 'budgetdesk-release-before.json').read_text())
+          after = json.loads((root / 'budgetdesk-release-after.json').read_text())
+          assert after['id'] == before['id'] and after['tag_name'] == before['tag_name']
+          assert after['draft'] and after['target_commitish'] == before['target_commitish']
+          assert after['body'].startswith('> [!WARNING]')
+          def assets(release):
+              return sorted((a['id'], a['name'], a['size'], a['digest']) for a in release['assets'])
+          assert assets(before) == assets(after)
+          print('Confirmed: v1.0.0 is a draft. Public Windows download paused; original assets and tag preserved.')
+          PY
