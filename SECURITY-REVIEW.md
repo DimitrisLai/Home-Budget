@@ -19,7 +19,7 @@ The executable is an unsigned managed .NET application. The downloaded Windows a
 
 ## Source finding and cleanup
 
-The original application included an optional `--capture` developer command that cycled through five pages and called `Graphics.CopyFromScreen` to create test screenshots. It was inactive during ordinary launches. VirusTotal's capability analysis identified screen capture. That capability is a plausible contributor to suspicion, but the vendors' exact detection triggers are unknown.
+The original application included an optional `--capture` developer command that cycled through five pages and called `Graphics.CopyFromScreen` to create test screenshots. It was inactive during ordinary launches. VirusTotal's capability analysis identified screen capture. The 1.0.1 follow-up also has the same reported vendor labels after this capability was removed, so the screenshot helper is not an established cause. The vendors' exact detection triggers remain unknown.
 
 The 1.0.1 candidate removes that command and capture code from the public executable. Existing screenshot helpers remain in separate UI test programs. Startup checks now drive the real application from a separate process. An executable-level check rejects screen-capture calls and native capture imports. Budgeting features, financial logic and the data format are unchanged.
 
@@ -27,6 +27,8 @@ This is a reduction of unnecessary application capabilities. It is not an antivi
 
 ## Vendor status
 
-A suspected false-positive request containing the original public sample hash, release/source/build links and this source finding was entered in the official Malwarebytes support form. Malwarebytes requires the account owner's email verification before it submits the request automatically. Researcher review and any reclassification remain pending.
+Malwarebytes confirmed receipt of the support request. Updated VirusTotal details, executable hashes and public source/build links have been sent for researcher assessment. An approved sample-upload channel has been requested if those references are insufficient. Researcher review and any reclassification remain pending.
 
-The 1.0.1 build is a review candidate. It is not published as a new stable release, and no vendor clearance is claimed. After functional testing and vendor review, an accepted candidate can be promoted through the release workflow.
+The original v1.0.0 Windows release has been moved to draft, and automatic Windows publishing is paused by RELEASE-HOLD. Version 1.0.1 remains a review candidate with unresolved reported detections. See [ANTIVIRUS-STATUS.md](ANTIVIRUS-STATUS.md) for the current public status.
+
+These documentation updates do not rebuild or replace the tested executable. Its exact reviewed SHA-256 remains `2b312bd79f3a835296d8f3f7b0386911a7c449e46f1b3106850de93c968fa7cd`, produced by [Windows run 42411149445](https://github.com/DimitrisLai/Home-Budget/actions/runs/42411149445) from commit `67a5e038329bb0430066a802e0821ebe7a7bf031`.

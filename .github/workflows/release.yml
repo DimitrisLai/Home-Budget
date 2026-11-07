@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - VERSION
+      - RELEASE-HOLD
       - .github/workflows/release.yml
       - tools/Build-WindowsRelease.ps1
   workflow_dispatch:
@@ -17,7 +18,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  release_status:
+    name: Check release hold
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      allowed: ${{ steps.status.outputs.allowed }}
+    steps:
+      - name: Check out release status
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Decide whether publishing may proceed
+        id: status
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f RELEASE-HOLD ]]; then
+            echo 'allowed=false' >> "$GITHUB_OUTPUT"
+            echo 'Windows publishing is paused. See ANTIVIRUS-STATUS.md.'
+          else
+            echo 'allowed=true' >> "$GITHUB_OUTPUT"
+          fi
+
   build:
+    needs: release_status
+    if: ${{ needs.release_status.outputs.allowed == 'true' }}
     name: Build and test on Windows
     runs-on: windows-2022
     timeout-minutes: 20

@@ -1,14 +1,17 @@
 # Budget Desk 1.0.1 review candidate
 
+> [!WARNING]
+> **Windows downloads are paused for antivirus review.** Both v1.0.0 and the v1.0.1 review candidate have unresolved antivirus detections. A false positive has not been confirmed. See [current review status](ANTIVIRUS-STATUS.md).
+
 An offline Windows personal budget manager, created by Dimitris L. Track bank accounts, cash, spending, recurring payments and savings without a subscription or bank login.
 
 ![Budget Desk accounts and recurring payments](Preview/Accounts-and-bills.png)
 
-## Download and run
+## Windows download status
 
-The stable release remains 1.0.0 on the [Releases page](https://github.com/DimitrisLai/Home-Budget/releases). This branch builds a **BudgetDesk_v1.0.1_Windows.zip** candidate as a GitHub Actions artifact for testing and vendor review. Choose **Extract All**, open the **BudgetDesk** folder and run **BudgetDesk.exe**. You do not need Python, Node, Office or a developer tool to use it. GitHub's **Code → Download ZIP** contains source files; compile those with **Rebuild-Windows.cmd**.
+Public Windows downloads are temporarily paused while the antivirus reports are reviewed. Version 1.0.1 remains a [review candidate](https://github.com/DimitrisLai/Home-Budget/pull/1). The source and feature documentation remain available below.
 
-Designed for Windows 10/11 with .NET Framework 4.5 or later. It runs with ordinary user permissions. **Try-Demo.cmd** opens separate sample data.
+[ANTIVIRUS-STATUS.md](ANTIVIRUS-STATUS.md) records the exact executable hashes, reported vendor labels and review progress. Publishing is paused by the repository's `RELEASE-HOLD` file.
 
 ## Features
 
@@ -25,11 +28,9 @@ Designed for Windows 10/11 with .NET Framework 4.5 or later. It runs with ordina
 
 ## About this candidate
 
-Version 1.0.1 removes a developer screenshot command from the distributed executable. UI screenshots run only in separate test programs. CI checks the public executable for screen-capture API calls, and opens/closes the actual app without production screenshot automation. All budgeting features, financial logic, data paths and schema 4 are unchanged.
+Version 1.0.1 removes the developer screenshot command from the distributed executable. UI screenshots run only in separate test programs, and the actual app is opened and closed by a separate startup test. Budgeting features, financial logic, data paths and schema 4 are unchanged.
 
-Malwarebytes, SecureAge and Trapmine detected the original 1.0.0 executable in the supplied VirusTotal report. The exact classifier triggers are unknown. Removing an unnecessary developer capability is a source cleanup; it does not establish that the original report was a false positive or that this candidate is cleared. See **SECURITY-REVIEW.md** for public sample details and review status.
-
-**Updating for testing:** close the old app, export a JSON backup and extract the candidate into a new folder. Your existing budget uses the same data location and schema 4. **Try-Demo.cmd** opens separate sample data.
+The same three antivirus labels were reported for the exact tested 1.0.1 executable. Removing the screenshot helper did not resolve them. [ANTIVIRUS-STATUS.md](ANTIVIRUS-STATUS.md) is the current review record. The candidate passed 100 native Windows checks, which are functional evidence rather than antivirus clearance.
 
 ## Daily entry shortcuts
 
@@ -128,7 +129,7 @@ The Windows startup overload fix is retained: the executable uses String.TrimEnd
 
 ## Roadmap and publishing
 
-**IDEAS.md** contains only unfinished ideas grouped by purpose. Future feature work can be developed after this release. Releases are built, checked and published automatically through GitHub Actions when the prepared version changes in **VERSION**. **GITHUB-PUBLISHING.md** explains this process.
+**IDEAS.md** contains only unfinished ideas grouped by purpose. Future feature work can be developed after this release. Automatic Windows publishing is paused while **RELEASE-HOLD** exists. After review is resolved, a prepared version in **VERSION** can be built, checked and published through GitHub Actions. **GITHUB-PUBLISHING.md** explains this process.
 
 Licensed under the [MIT License](LICENSE). Source code is included.
 
