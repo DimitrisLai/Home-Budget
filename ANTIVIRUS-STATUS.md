@@ -1,6 +1,6 @@
 # Windows antivirus review
 
-**Status: 7 November 2026 — Windows downloads and automatic publishing are paused.**
+**Status: 8 November 2026 — Windows downloads and automatic publishing are paused.**
 
 Malwarebytes, SecureAge and Trapmine have reported detections for the original v1.0.0 executable and the v1.0.1 review candidate. A false positive has not been confirmed, and the exact detection triggers are unknown.
 
@@ -28,8 +28,26 @@ Results can change. Undetected results from other engines and successful functio
 - The original application included a developer-only screenshot command. The 1.0.1 candidate removes that capability from the public executable and retains screenshot helpers in separate test programs.
 - Removing the screenshot code did not resolve the reported detections. It is not an established explanation for the flags.
 - The candidate passed [100 native Windows functional and compatibility checks](https://github.com/DimitrisLai/Home-Budget/actions/runs/42411149445). Its packaged executable hash matches the report above.
-- Malwarebytes confirmed receipt of the support request. Updated VirusTotal details, exact hashes, public source and build links have been sent for researcher review. An approved sample-upload channel has been requested if those references are insufficient.
+- Malwarebytes Support acknowledged the earlier sample/source details on 8 November and confirmed forwarding the case to the appropriate department. The new hash-matched diagnostic scan findings and a privacy-minimized text report have also been sent. An approved sample-upload channel has been requested if source/build references are insufficient.
 - Researcher assessment and any vendor reclassification remain pending. No vendor clearance is claimed.
+
+## Diagnostic scan — 8 November 2026
+
+A completed local Malwarebytes Custom Scan detected all five component-isolation controls. Every reported SHA-256 matches the original Windows diagnostic build.
+
+Scanner 5.7.3.376; components 167.0.5780; update package 1.0.116703. The scan covered five file objects with heuristics enabled and reported five detections, zero quarantines. Memory/startup scanning was disabled.
+
+| Control | Malwarebytes label |
+| --- | --- |
+| `01_Window` | `MachineLearning/Anomalous.100%` |
+| `02_Model` | `MachineLearning/Anomalous.96%` |
+| `03_Storage` | `MachineLearning/Anomalous.96%` |
+| `04_Demo_UI` | `MachineLearning/Anomalous.95%` |
+| `05_Full_Startup` | `MachineLearning/Anomalous.95%` |
+
+The minimal `01_Window` control contains no Budget Desk model, storage, full UI or production startup source. Its detection shows that adding those financial features is not required for a flag in this batch. It does not identify a specific shared resource, compiler characteristic or classifier rule as the cause.
+
+These findings strengthen the suspected-false-positive investigation without establishing vendor clearance. The [hash-matched result summary and sanitized report](https://github.com/DimitrisLai/Home-Budget/blob/3f150ea2d20201bb0f09a7ae1265209efeae70f8/Diagnostics/Results/Results_2026-11-08.md) contain the exact hashes and documented limitations. The diagnostic executables have not been rebuilt or replaced.
 
 ## Publishing status
 
