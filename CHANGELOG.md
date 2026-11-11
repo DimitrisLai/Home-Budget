@@ -1,13 +1,15 @@
 # Budget Desk version history
 
-## 1.0.1 — Review candidate
+## 1.0.1 — Full release, 11 November 2026
 
 - Removed the developer-only screenshot command and screen-capture calls from the public executable. UI screenshots remain in separate test programs.
 - Changed CI startup checks to drive the actual app from a separate process, including empty/demo budgets, normal close, log fallback and the retired screenshot flag.
 - Added a compiled-executable check for screen-capture API calls and native imports, alongside the existing Framework compatibility checks.
-- Added a build-only candidate workflow; it does not create a release or change the current stable download.
+- Promoted the complete Windows-tested 1.0.1 candidate after the owner confirmed clean antivirus retests and requested publication.
+- Preserved the exact reviewed application executable while updating documentation, rerunning Windows checks and verifying the final package and uploaded downloads.
+- Added a separate manual-test launcher and numbered Greek acceptance checklist.
 - Retained all budgeting features, data paths and schema 4.
-- Vendor review is pending; this candidate is not antivirus clearance.
+- Updated the dated antivirus record with Malwarebytes' database-fix notice and the clean local rescan.
 
 ## 1.0.0 — First release
 

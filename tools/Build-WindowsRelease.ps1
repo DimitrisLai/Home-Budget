@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param()
+param([string]$ReviewedPackage = '')
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -52,8 +52,41 @@ foreach ($relative in $tracked) {
     Copy-Item -LiteralPath (Join-Path $root $relative) -Destination $destination
 }
 $executable = Join-Path $package 'BudgetDesk.exe'
-& $csc @common '/target:winexe' '/main:BudgetDesk.Program' '/win32manifest:Source/app.manifest' '/win32icon:Source/BudgetDesk.ico' "/out:$executable" @sources
-if ($LASTEXITCODE -ne 0) { throw 'Windows application compilation failed.' }
+if ($ReviewedPackage) {
+    # Promote the exact Windows-tested 1.0.1 binary, preserving its reviewed hash.
+    if ($version -ne '1.0.1') { throw 'Reviewed-package promotion is restricted to version 1.0.1.' }
+    $reviewedZip = (Get-Item -LiteralPath $ReviewedPackage).FullName
+    if ((Get-FileHash -LiteralPath $reviewedZip -Algorithm SHA256).Hash.ToLowerInvariant() -ne '7003cf18e4de56a5c6712adf8165fda70fe28c1357dac244409a8bb249dff390') {
+        throw 'Reviewed candidate archive checksum mismatch.'
+    }
+    $reviewedRoot = Join-Path $work 'reviewed'
+    Expand-Archive -LiteralPath $reviewedZip -DestinationPath $reviewedRoot
+    $reviewed = Join-Path $reviewedRoot 'BudgetDesk'
+    foreach ($line in Get-Content -LiteralPath (Join-Path $reviewed 'SHA256SUMS.txt')) {
+        $digest, $relative = $line -split '  ', 2
+        if ((Get-FileHash -LiteralPath (Join-Path $reviewed $relative) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $digest) {
+            throw "Reviewed package file checksum mismatch: $relative"
+        }
+    }
+    $sourceNames = @(Get-ChildItem -LiteralPath 'Source' -File | Sort-Object Name | ForEach-Object Name)
+    $reviewedNames = @(Get-ChildItem -LiteralPath (Join-Path $reviewed 'Source') -File | Sort-Object Name | ForEach-Object Name)
+    if (Compare-Object $sourceNames $reviewedNames) { throw 'Reviewed and current source file sets differ.' }
+    foreach ($relative in @($sourceNames | ForEach-Object { 'Source/' + $_ }) + @('BudgetDesk.exe.config', 'VERSION')) {
+        if ((Get-FileHash -LiteralPath (Join-Path $root $relative) -Algorithm SHA256).Hash -ne
+            (Get-FileHash -LiteralPath (Join-Path $reviewed $relative) -Algorithm SHA256).Hash) {
+            throw "Current application input differs from reviewed candidate: $relative"
+        }
+    }
+    $reviewedExecutable = Join-Path $reviewed 'BudgetDesk.exe'
+    if ((Get-FileHash -LiteralPath $reviewedExecutable -Algorithm SHA256).Hash.ToLowerInvariant() -ne '2b312bd79f3a835296d8f3f7b0386911a7c449e46f1b3106850de93c968fa7cd') {
+        throw 'Reviewed executable checksum mismatch.'
+    }
+    Copy-Item -LiteralPath $reviewedExecutable -Destination $executable
+    Write-Host 'Retained the exact reviewed 1.0.1 executable; application source/configuration match.'
+} else {
+    & $csc @common '/target:winexe' '/main:BudgetDesk.Program' '/win32manifest:Source/app.manifest' '/win32icon:Source/BudgetDesk.ico' "/out:$executable" @sources
+    if ($LASTEXITCODE -ne 0) { throw 'Windows application compilation failed.' }
+}
 if ([Diagnostics.FileVersionInfo]::GetVersionInfo($executable).FileVersion -ne $assemblyVersion) { throw 'Compiled executable version is incorrect.' }
 
 $checks = Join-Path $work 'checks'
@@ -105,7 +138,8 @@ $evidence = @(
     "Budget Desk $version — native Windows release checks",
     "Commit: $env:GITHUB_SHA",
     "Run: https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID",
-    'Compiled with the Microsoft Windows C# compiler and checksum-verified .NET Framework 4.5 references.',
+    'Application and test sources use the Microsoft Windows C# compiler and checksum-verified .NET Framework 4.5 references.',
+    $(if ($ReviewedPackage) { 'Promoted the unchanged reviewed 1.0.1 executable after checking archive, source, configuration and executable hashes.' } else { 'Compiled a new application executable for this release.' }),
     'Accounting, executable compatibility/capability boundary, general UI, quick-entry/search and actual empty/demo/fallback startup checks passed.',
     'Screenshot helpers run only in separate test executables; the public executable contains no screen-capture API calls.',
     'All checks used isolated temporary sample budgets. No budget data or test executables are packaged.',

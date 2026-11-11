@@ -1,38 +1,28 @@
 # Windows antivirus review
 
-**Status: 7 November 2026 — Windows downloads and automatic publishing are paused.**
+**Status: 11 November 2026 — the owner authorized release of the complete 1.0.1 application after reporting clean antivirus retests.**
 
-Malwarebytes, SecureAge and Trapmine have reported detections for the original v1.0.0 executable and the v1.0.1 review candidate. A false positive has not been confirmed, and the exact detection triggers are unknown.
+## Resolution
 
-The v1.0.0 Windows release is being retained as a draft during review. Version 1.0.1 remains a [draft review candidate](https://github.com/DimitrisLai/Home-Budget/pull/1). The original source tags and build records identify each sample.
+- On 10 November, Malwarebytes Support reported that its research team had released a database fix for the submitted detections.
+- A local Custom Scan on 11 November at 22:07 Czech time completed with 5 objects scanned, 0 threats detected and 0 quarantined. Malwarebytes version: 5.7.3.376; components: 167.0.5780; update package: 1.0.116845. Heuristics were enabled and PUP/PUM were set to Detect.
+- The clean export lists the scanned folder rather than individual clean filenames or hashes. It records the local result; it is not a new per-file hash manifest.
+- The owner subsequently confirmed that all versions were clean and requested selection of the most complete version and a GitHub update. Individual new VirusTotal reports for every historical sample were not independently retrieved as part of this release.
+- The release hold is removed. Full version 1.0.1 retains all 1.0.0 budgeting features and uses the same reviewed application executable. The five component-isolation builds remain investigation material rather than release builds.
 
-## Reported samples
+## Retained release identity
 
-| Version | Executable SHA-256 | Report |
-| --- | --- | --- |
-| 1.0.0 | `87b4f64d4043309f14286844873b943ac236b6f47d442eda291ee343632dcb79` | [VirusTotal](https://www.virustotal.com/gui/file/87b4f64d4043309f14286844873b943ac236b6f47d442eda291ee343632dcb79?nocache=1) |
-| 1.0.1 review candidate | `2b312bd79f3a835296d8f3f7b0386911a7c449e46f1b3106850de93c968fa7cd` | [VirusTotal](https://www.virustotal.com/gui/file/2b312bd79f3a835296d8f3f7b0386911a7c449e46f1b3106850de93c968fa7cd?nocache=1) |
-
-Reported labels at inspection:
-
-| Vendor | Label |
+| Item | Value |
 | --- | --- |
-| Malwarebytes | `MachineLearning/Anomalous.95%` |
-| SecureAge | `Malicious` |
-| Trapmine | `Suspicious.low.ml.score` |
+| Full application version | 1.0.1 |
+| Executable SHA-256 | `2b312bd79f3a835296d8f3f7b0386911a7c449e46f1b3106850de93c968fa7cd` |
+| Original checked candidate ZIP SHA-256 | `7003cf18e4de56a5c6712adf8165fda70fe28c1357dac244409a8bb249dff390` |
+| Original Windows checks | [Run 42411149445](https://github.com/DimitrisLai/Home-Budget/actions/runs/42411149445), 100 passed |
 
-Results can change. Undetected results from other engines and successful functional tests do not establish antivirus clearance.
+The final release ZIP has updated documentation and manual-test files, so its archive hash differs from the original candidate ZIP. Its application executable remains byte-identical. Packaging verifies all application source inputs, reruns the Windows checks and includes current test evidence and checksums.
 
-## Investigation and vendor review
+## Investigation history
 
-- The original application included a developer-only screenshot command. The 1.0.1 candidate removes that capability from the public executable and retains screenshot helpers in separate test programs.
-- Removing the screenshot code did not resolve the reported detections. It is not an established explanation for the flags.
-- The candidate passed [100 native Windows functional and compatibility checks](https://github.com/DimitrisLai/Home-Budget/actions/runs/42411149445). Its packaged executable hash matches the report above.
-- Malwarebytes confirmed receipt of the support request. Updated VirusTotal details, exact hashes, public source and build links have been sent for researcher review. An approved sample-upload channel has been requested if those references are insufficient.
-- Researcher assessment and any vendor reclassification remain pending. No vendor clearance is claimed.
+The original 1.0.0 and candidate 1.0.1 executables were reported by Malwarebytes, SecureAge and Trapmine in early November. Removing the developer screenshot helper did not by itself remove those reports. All five diagnostic controls were also reported locally, including a minimal window without the budgeting modules. Malwarebytes was supplied exact sample hashes, VirusTotal links, the original local report and a diagnostic manifest.
 
-## Publishing status
-
-The `RELEASE-HOLD` file pauses the automatic release workflow before it compiles or publishes a new Windows package. The application and financial data format are unchanged by this repository-status update.
-
-Release promotion can resume after the reported detections have been assessed, the same reviewed executable has been rechecked, and the owner has accepted the Windows candidate. The source, build evidence and package hashes remain the basis for that review.
+The original 1.0.0 release and its source history are retained as historical records. The current full download is 1.0.1. See SECURITY-REVIEW.md for the source cleanup and VALIDATION.md for functional test scope. Private support logs and device details are not included in this repository.

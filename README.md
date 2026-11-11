@@ -1,17 +1,14 @@
-# Budget Desk 1.0.1 review candidate
-
-> [!WARNING]
-> **Windows downloads are paused for antivirus review.** Both v1.0.0 and the v1.0.1 review candidate have unresolved antivirus detections. A false positive has not been confirmed. See [current review status](ANTIVIRUS-STATUS.md).
+# Budget Desk 1.0.1
 
 An offline Windows personal budget manager, created by Dimitris L. Track bank accounts, cash, spending, recurring payments and savings without a subscription or bank login.
 
 ![Budget Desk accounts and recurring payments](Preview/Accounts-and-bills.png)
 
-## Windows download status
+## Download for Windows
 
-Public Windows downloads are temporarily paused while the antivirus reports are reviewed. Version 1.0.1 remains a [review candidate](https://github.com/DimitrisLai/Home-Budget/pull/1). The source and feature documentation remain available below.
+Download **BudgetDesk_v1.0.1_Windows.zip** from the [latest release](https://github.com/DimitrisLai/Home-Budget/releases/latest), extract it and run **BudgetDesk/BudgetDesk.exe**. The attached Windows ZIP is ready to run on Windows 10/11 with .NET Framework 4.5 or later. No developer tools are required.
 
-[ANTIVIRUS-STATUS.md](ANTIVIRUS-STATUS.md) records the exact executable hashes, reported vendor labels and review progress. Publishing is paused by the repository's `RELEASE-HOLD` file.
+For manual checks, run **Test-Sandbox.cmd** to open a separate, initially empty test budget. The [Greek checklist](WINDOWS-CHECKLIST-EL.md) gives numbered steps and expected balances. **Try-Demo.cmd** opens separate sample data.
 
 ## Features
 
@@ -26,11 +23,15 @@ Public Windows downloads are temporarily paused while the antivirus reports are 
 - Automatic saving, twenty previous versions, JSON backup and restore.
 - Page buttons for longer lists and compact layouts at a supported minimum of 1000 × 700.
 
-## About this candidate
+## About version 1.0.1
 
 Version 1.0.1 removes the developer screenshot command from the distributed executable. UI screenshots run only in separate test programs, and the actual app is opened and closed by a separate startup test. Budgeting features, financial logic, data paths and schema 4 are unchanged.
 
-The same three antivirus labels were reported for the exact tested 1.0.1 executable. Removing the screenshot helper did not resolve them. [ANTIVIRUS-STATUS.md](ANTIVIRUS-STATUS.md) is the current review record. The candidate passed 100 native Windows checks, which are functional evidence rather than antivirus clearance.
+Version 1.0.1 is the complete release selected after the antivirus investigation. It retains every 1.0.0 budgeting feature, including yearly reports, future plans, savings goals, splits, templates, payees and all-history search. The five component-isolation executables used during investigation are separate diagnostics.
+
+The release retains the exact previously Windows-tested 1.0.1 executable. Packaging verifies that all application source, configuration and version files match that tested candidate, then reruns the native Windows checks. [ANTIVIRUS-STATUS.md](ANTIVIRUS-STATUS.md) records the dated vendor response and owner retest. [VALIDATION.md](VALIDATION.md) documents the version comparison and test scope.
+
+**Updating:** close the previous app, export a JSON backup and extract 1.0.1 into a new folder. Your budget loads from the same data location, using the same schema 4. Earlier schema 1–3 backups migrate on load and preserve the previous file when first saved. Executables older than 0.1.9 cannot read schema 4.
 
 ## Daily entry shortcuts
 
@@ -129,7 +130,7 @@ The Windows startup overload fix is retained: the executable uses String.TrimEnd
 
 ## Roadmap and publishing
 
-**IDEAS.md** contains only unfinished ideas grouped by purpose. Future feature work can be developed after this release. Automatic Windows publishing is paused while **RELEASE-HOLD** exists. After review is resolved, a prepared version in **VERSION** can be built, checked and published through GitHub Actions. **GITHUB-PUBLISHING.md** explains this process.
+**IDEAS.md** contains only unfinished ideas grouped by purpose. Future feature work can be developed after this release. Prepared versions in **VERSION** are checked and published through GitHub Actions. **GITHUB-PUBLISHING.md** explains this process.
 
 Licensed under the [MIT License](LICENSE). Source code is included.
 

@@ -1,4 +1,26 @@
-# Validation — Budget Desk 1.0.1 review candidate
+# Validation — Budget Desk 1.0.1
+
+Release preparation: 11 November 2026.
+
+## Version selection and retained application
+
+Compared the full 1.0.0 source with the full 1.0.1 review candidate. Domain.cs, Storage.cs, Layouts.cs, QuickEntry.cs and BudgetDesk.ico are byte-identical. Ui.cs changes only its displayed version. The remaining application changes update version identifiers and remove the optional developer screenshot path from Program.cs/StartupDiagnostics.cs. All budgeting behavior, five pages, data paths and schema 4 are retained. The five component-isolation builds are not release alternatives.
+
+All application source and test files in this release match the previously checked 1.0.1 candidate. Release preparation changes documentation, manual-test launch instructions and the publishing process. The original executable SHA-256 is retained: `2b312bd79f3a835296d8f3f7b0386911a7c449e46f1b3106850de93c968fa7cd`.
+
+## Native release checks
+
+The Windows workflow retrieves the original successful candidate artifact, verifies its pinned ZIP hash and all internal file checksums, compares the complete application source/configuration/version file set, and stages its unchanged executable. It recompiles the accounting, UI, quick-entry and compatibility/startup test programs against the checksum-verified Microsoft Framework references, then runs the existing native suites. Any failure blocks package publication.
+
+The prior candidate passed 100 native checks: 35 accounting/persistence, 17 UI, 42 quick-entry/payee/history, 3 executable compatibility/capability and 3 actual-executable startup checks. Fresh run-specific results, source commit, workflow URL and tested executable SHA-256 are generated into Tests/Windows-CI-*.txt in the final ZIP. The final ZIP, all internal checksums, source, license and uploaded downloads are verified before release.
+
+The Greek manual acceptance steps are in WINDOWS-CHECKLIST-EL.md. Test-Sandbox.cmd uses a separate Manual-Tests-1.0.1 data folder. Owner antivirus retests and the vendor response are recorded in ANTIVIRUS-STATUS.md.
+
+The following sections preserve earlier verification records and distinguish historical runs from current release evidence.
+
+---
+
+# Historical checks — Budget Desk 1.0.1 review candidate
 
 Prepared 7 November 2026 from public v1.0.0 commit aad8fde148c37866155041c50c418d0fc9d135ed.
 

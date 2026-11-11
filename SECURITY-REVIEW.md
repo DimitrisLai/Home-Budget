@@ -1,6 +1,8 @@
-# Budget Desk antivirus review
+# Budget Desk antivirus review — source cleanup and history
 
-Review started 7 November 2026. This records public sample facts and a source cleanup, without claiming antivirus clearance.
+Current status: **11 November 2026 — release resumed at the owner's request after clean retests**. See [ANTIVIRUS-STATUS.md](ANTIVIRUS-STATUS.md) for the dated Malwarebytes fix notice and local result. The retained 1.0.1 executable is unchanged.
+
+The sections below record the investigation that started on 7 November 2026.
 
 ## Reported sample
 
@@ -25,10 +27,10 @@ The 1.0.1 candidate removes that command and capture code from the public execut
 
 This is a reduction of unnecessary application capabilities. It is not an antivirus bypass, a promise of changed scan results, or confirmation of a false positive. No packer, obfuscator, security exclusion or replacement trust certificate is introduced.
 
-## Vendor status
+## Vendor resolution and release
 
-Malwarebytes confirmed receipt of the support request. Updated VirusTotal details, executable hashes and public source/build links have been sent for researcher assessment. An approved sample-upload channel has been requested if those references are insufficient. Researcher review and any reclassification remain pending.
+On 10 November Malwarebytes Support reported a database fix. On 11 November the owner supplied a clean local five-object rescan and subsequently confirmed all versions clean and requested publication. The full record and the scope of that evidence are in ANTIVIRUS-STATUS.md.
 
-The original v1.0.0 Windows release has been moved to draft, and automatic Windows publishing is paused by RELEASE-HOLD. Version 1.0.1 remains a review candidate with unresolved reported detections. See [ANTIVIRUS-STATUS.md](ANTIVIRUS-STATUS.md) for the current public status.
+Full version 1.0.1 retains every budgeting feature from 1.0.0. The five isolated component executables are separate diagnostic builds and are not the full release.
 
-These documentation updates do not rebuild or replace the tested executable. Its exact reviewed SHA-256 remains `2b312bd79f3a835296d8f3f7b0386911a7c449e46f1b3106850de93c968fa7cd`, produced by [Windows run 42411149445](https://github.com/DimitrisLai/Home-Budget/actions/runs/42411149445) from commit `67a5e038329bb0430066a802e0821ebe7a7bf031`.
+The released application retains SHA-256 `2b312bd79f3a835296d8f3f7b0386911a7c449e46f1b3106850de93c968fa7cd`, produced by [Windows run 42411149445](https://github.com/DimitrisLai/Home-Budget/actions/runs/42411149445) from commit `67a5e038329bb0430066a802e0821ebe7a7bf031`. The release workflow checks the reviewed archive hash and every current application source/configuration input, reruns native checks and repackages the same executable with updated documentation.

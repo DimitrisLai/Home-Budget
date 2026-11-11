@@ -1,4 +1,4 @@
-BUDGET DESK 1.0.1 REVIEW CANDIDATE
+BUDGET DESK 1.0.1
 =================
 
 1. Close any older Budget Desk window.
@@ -8,7 +8,6 @@ BUDGET DESK 1.0.1 REVIEW CANDIDATE
 Your existing budget loads automatically from the same data folder.
 Version 1.0.1 keeps the 1.0.0 budgeting features and data format.
 A developer screenshot command was removed from the public executable.
-Vendor review is pending; this candidate is not antivirus clearance.
 No rebuild is required.
 
 ACCOUNTS & BILLS: add/reorder accounts and manage recurring payments.
@@ -21,6 +20,8 @@ MONTHLY / YEARLY OVERVIEW: totals, budgets and period details.
 SAVINGS GOALS: targets and tracked allocations; no automatic money movement.
 
 Try-Demo.cmd opens separate sample data.
+Test-Sandbox.cmd opens a separate, initially empty manual-test budget.
+WINDOWS-CHECKLIST-EL.md contains numbered Greek acceptance checks.
 Settings & backup offers JSON backup/restore and the data folder.
 IDEAS.md contains future additions. RELEASE-NOTES.md describes 1.0.1.
 GITHUB-PUBLISHING.md explains automatic GitHub releases.
