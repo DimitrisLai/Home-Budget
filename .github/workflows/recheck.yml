@@ -1,0 +1,47 @@
+name: Extended Windows verification
+
+on:
+  push:
+    branches: [review/recheck-2026-11-14]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: budgetdesk-extended-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Run all existing Windows suites
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Retrieve and verify published Windows package
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          gh release download "v$version" --repo $env:GITHUB_REPOSITORY --pattern "BudgetDesk_v${version}_Windows.zip" --pattern SHA256SUMS.txt --dir checked-package
+          if ($LASTEXITCODE -ne 0) { throw 'Release download failed.' }
+          $hash, $name = (Get-Content checked-package/SHA256SUMS.txt -Raw).Trim() -split '  ', 2
+          if ((Get-FileHash (Join-Path checked-package $name) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $hash) { throw 'Published archive checksum differs.' }
+      - name: Compile and run full regression review
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          ./tools/Run-ExtendedReview.ps1 -ApplicationPackage "checked-package/BudgetDesk_v${version}_Windows.zip"
+      - name: Retain isolated review evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: budgetdesk-extended-review
+          path: review-results/
+          if-no-files-found: warn
+          retention-days: 30
