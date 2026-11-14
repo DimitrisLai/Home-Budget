@@ -2,6 +2,8 @@
 
 Release preparation: 11 November 2026.
 
+Follow-up review, 14 November 2026: all 11 existing native Windows suites passed, **195 checks with no failures**, against the unchanged published 1.0.1 application. See [the complete review record](Reviews/2026-11-14.md) and [Windows run 43581892081](https://github.com/DimitrisLai/Home-Budget/actions/runs/43581892081). No application-source change or new executable was needed.
+
 ## Version selection and retained application
 
 Compared the full 1.0.0 source with the full 1.0.1 review candidate. Domain.cs, Storage.cs, Layouts.cs, QuickEntry.cs and BudgetDesk.ico are byte-identical. Ui.cs changes only its displayed version. The remaining application changes update version identifiers and remove the optional developer screenshot path from Program.cs/StartupDiagnostics.cs. All budgeting behavior, five pages, data paths and schema 4 are retained. The five component-isolation builds are not release alternatives.
