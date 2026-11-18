@@ -1,8 +1,8 @@
-# Budget Desk 1.1
+# Budget Desk 1.1.1
 
 An offline personal budget manager for Windows, created by Dimitris L.
 
-[Download BudgetDesk_v1.1.0_Windows.zip](https://github.com/DimitrisLai/Home-Budget/releases/download/v1.1.0/BudgetDesk_v1.1.0_Windows.zip) · [Releases and checksums](https://github.com/DimitrisLai/Home-Budget/releases)
+[Download BudgetDesk_v1.1.1_Windows.zip](https://github.com/DimitrisLai/Home-Budget/releases/download/v1.1.1/BudgetDesk_v1.1.1_Windows.zip) · [Releases and checksums](https://github.com/DimitrisLai/Home-Budget/releases)
 
 ## Start or update
 
@@ -20,7 +20,7 @@ The three user guides work offline. Open the HTML file for your language in the 
 
 ## Daily use
 
-- **Accounts & bills** shows the account cards in your chosen display order, the combined balance and up to 20 recurring schedules with manual, automatic and paused states.
+- **Accounts & bills** shows the account cards in your chosen display order, the combined balance and up to 20 recurring schedules with manual, automatic and paused states. Paused payments have a red card with a bold Paused label. Resuming restores the active card colors.
 - **Daily expenses** records expenses, income and transfers with local dates and times. Add splits, use templates, remember a payee, find entries across the full history and keep unpaid plans separately.
 - **Amount / currency** starts with the selected account's currency. Select a different receipt currency and check the account charge before saving. For example, paying 20 EUR from a CZK account at 25 CZK per EUR deducts 500 CZK. A later change in rates preserves the booked charge.
 - **Monthly overview** shows income, spending, net and category budgets. **Yearly overview** opens a month on double-click. CSV exports include all matching pages.

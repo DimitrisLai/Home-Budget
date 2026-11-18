@@ -4,11 +4,11 @@ cd /d "%~dp0"
 set "BUDGET_APP_DIR=%~dp0"
 if exist "%~dp0..\BudgetDesk.exe.config" set "BUDGET_APP_DIR=%~dp0..\"
 set "BUDGET_REPORT_DIR=%~dp0"
->"%BUDGET_REPORT_DIR%startup-log.txt" echo Budget Desk 1.1.0 Windows launcher
+>"%BUDGET_REPORT_DIR%startup-log.txt" echo Budget Desk 1.1.1 Windows launcher
 if errorlevel 1 set "BUDGET_REPORT_DIR=%TEMP%\BudgetDesk-"
 set "BUDGET_START_LOG=%BUDGET_REPORT_DIR%startup-log.txt"
 set "BUDGET_CONSOLE_LOG=%BUDGET_REPORT_DIR%startup-console.txt"
->"%BUDGET_START_LOG%" echo Budget Desk 1.1.0 Windows launcher
+>"%BUDGET_START_LOG%" echo Budget Desk 1.1.1 Windows launcher
 >>"%BUDGET_START_LOG%" echo Windows: %OS%   Architecture: %PROCESSOR_ARCHITECTURE%
 reg query "HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" /v Release >>"%BUDGET_START_LOG%" 2>&1
 if not exist "%BUDGET_APP_DIR%BudgetDesk.exe" goto missing

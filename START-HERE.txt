@@ -1,4 +1,4 @@
-BUDGET DESK 1.1.0 — WINDOWS
+BUDGET DESK 1.1.1 — WINDOWS
 
 Updating? First export a JSON backup in the old app under Settings & backup,
 then close it. Extract the entire new ZIP to a new folder.

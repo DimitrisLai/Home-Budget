@@ -20,6 +20,7 @@ namespace BudgetDesk
         internal static readonly Color Canvas = Color.FromArgb(244, 247, 250);
         internal static readonly Color Line = Color.FromArgb(222, 229, 236);
         internal static readonly Color Red = Color.FromArgb(187, 58, 66);
+        internal static readonly Color DarkRed = Color.FromArgb(145, 35, 45);
         internal static Font Font(float size, bool bold) { return new Font("Segoe UI", size, bold ? FontStyle.Bold : FontStyle.Regular); }
         internal static Label Label(string text, float size, bool bold, Color color)
         {
@@ -231,7 +232,7 @@ namespace BudgetDesk
         public MainForm(BudgetStore store, BudgetData data, bool isDemo)
         {
             Store = store; Data = data; demo = isDemo;
-            Text = "Budget Desk 1.1.0" + (demo ? "  |  DEMO DATA" : "");
+            Text = "Budget Desk 1.1.1" + (demo ? "  |  DEMO DATA" : "");
             MinimumSize = new Size(1000, 700);
             Rectangle workingArea = Screen.PrimaryScreen.WorkingArea;
             Size = new Size(Math.Min(1320, Math.Max(1000, workingArea.Width - 36)), Math.Min(930, Math.Max(700, workingArea.Height - 36)));
@@ -445,26 +446,36 @@ namespace BudgetDesk
         private Panel BillCard(RecurringBill bill, Panel host)
         {
             Account account = Data.Accounts.First(x => x.Id == bill.AccountId); DateTime due = Ledger.DueMoment(bill);
-            Panel card = new Panel { Name = "RecurringCard", Tag = bill.Id, Size = new Size(240, 64), Padding = new Padding(7, 3, 7, 3), Cursor = Cursors.Hand, BackColor = bill.Id == selectedBillId ? Theme.Pale : Color.White, TabStop = true, AccessibleName = bill.Name };
+            bool paused = !bill.Enabled;
+            RecurringCardPanel card = new RecurringCardPanel(paused) { Name = "RecurringCard", Tag = bill.Id, Size = new Size(240, 64), Padding = new Padding(7, 3, 7, 3), Cursor = Cursors.Hand, TabStop = true, AccessibleName = bill.Name };
+            card.SetSelected(bill.Id == selectedBillId);
             TableLayoutPanel fields = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 3, Margin = new Padding(0) };
             fields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); fields.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 62));
             fields.RowStyles.Add(new RowStyle(SizeType.Absolute, 15)); fields.RowStyles.Add(new RowStyle(SizeType.Absolute, 18)); fields.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            Label title = Theme.Label(Icons.Named(bill.Name, bill.Icon), 9, true, bill.Enabled ? Theme.Ink : Theme.Muted); title.AutoEllipsis = true; fields.Controls.Add(title, 0, 0); fields.SetColumnSpan(title, 2);
-            Label amount = Theme.Label(Theme.MoneyText(bill.Amount, bill.PurchaseCurrency ?? account.Currency), 11, true, Theme.Teal); amount.AutoEllipsis = true; fields.Controls.Add(amount, 0, 1);
-            Label date = Theme.Label(due.ToString(String.IsNullOrEmpty(bill.DueTime) ? "d MMM" : "d/M HH:mm", CultureInfo.GetCultureInfo("en-GB")), 8.5f, true, bill.Enabled && due <= DateTime.Now ? Theme.Red : Theme.Muted); date.TextAlign = ContentAlignment.MiddleRight; fields.Controls.Add(date, 1, 1);
+            Label title = Theme.Label(Icons.Named(bill.Name, bill.Icon), 9, true, paused ? Color.White : Theme.Ink); title.AutoEllipsis = true; fields.Controls.Add(title, 0, 0); fields.SetColumnSpan(title, 2);
+            Label amount = Theme.Label(Theme.MoneyText(bill.Amount, bill.PurchaseCurrency ?? account.Currency), 11, true, paused ? Color.White : Theme.Teal); amount.AutoEllipsis = true; fields.Controls.Add(amount, 0, 1);
+            Color dueColor = due <= DateTime.Now ? Theme.Red : Theme.Muted;
+            Label date = Theme.Label(due.ToString(String.IsNullOrEmpty(bill.DueTime) ? "d MMM" : "d/M HH:mm", CultureInfo.GetCultureInfo("en-GB")), 8.5f, true, paused ? Color.White : dueColor); date.TextAlign = ContentAlignment.MiddleRight; fields.Controls.Add(date, 1, 1);
             string unit = bill.Unit == "Months" ? "mo" : bill.Unit == "Weeks" ? "wk" : bill.Unit == "Years" ? "yr" : "d";
             string shortAccount = account.Name.Length > 14 ? account.Name.Substring(0, 13) + "…" : account.Name;
-            Label detail = Theme.Label(shortAccount + " · " + bill.Interval + unit + " · " + (!bill.Enabled ? "Paused" : bill.AutoRecord ? "Auto" : "Manual"), 7.5f, false, Theme.Muted); detail.AutoEllipsis = true; fields.Controls.Add(detail, 0, 2); fields.SetColumnSpan(detail, 2);
+            string summary = shortAccount + " · " + bill.Interval + unit;
+            string detailText = paused ? "Paused · " + summary : summary + (bill.AutoRecord ? " · Auto" : " · Manual");
+            Label detail = Theme.Label(detailText, 7.5f, paused, paused ? Color.White : Theme.Muted); detail.AutoEllipsis = true; fields.Controls.Add(detail, 0, 2); fields.SetColumnSpan(detail, 2);
             card.Controls.Add(fields);
             ToolTip tip = new ToolTip { InitialDelay = 250, AutoPopDelay = 15000 };
             string text = bill.Name + "\n" + Theme.MoneyText(bill.Amount, bill.PurchaseCurrency ?? account.Currency) + "\nFrom: " + account.Name + "\nNext due: " + Ledger.DateLabel(Ledger.Iso(due), bill.DueTime) + "\nEvery " + bill.Interval + " " + bill.Unit.ToLowerInvariant() + "\n" + (!bill.Enabled ? "Paused" : bill.AutoRecord ? "Automatic recording" : "Manual recording");
+            card.AccessibleDescription = text;
             foreach (Control control in new Control[] { card, fields, title, amount, date, detail })
             {
                 tip.SetToolTip(control, text);
-                control.Click += delegate { selectedBillId = bill.Id; card.Focus(); foreach (Control sibling in host.Controls) { sibling.BackColor = (string)sibling.Tag == selectedBillId ? Theme.Pale : Color.White; sibling.Invalidate(); } };
+                control.Click += delegate {
+                    selectedBillId = bill.Id;
+                    card.Focus();
+                    foreach (RecurringCardPanel sibling in host.Controls.OfType<RecurringCardPanel>())
+                        sibling.SetSelected((string)sibling.Tag == selectedBillId);
+                };
                 control.DoubleClick += delegate { ActionSafely(delegate { BillEditor(Data.Bills.First(x => x.Id == bill.Id)); }); };
             }
-            card.Paint += delegate(object sender, PaintEventArgs e) { using (Pen pen = new Pen(bill.Id == selectedBillId ? Theme.Teal : Theme.Line)) e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1); };
             card.KeyDown += delegate(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) BillEditor(Data.Bills.First(x => x.Id == bill.Id)); };
             card.Disposed += delegate { tip.Dispose(); };
             return card;
