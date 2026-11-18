@@ -918,7 +918,11 @@ namespace BudgetDesk
                 Button save = Theme.Button("Use split", true), cancel = Theme.Button("Cancel", false); save.Name = "SavePurchaseSplit"; cancel.DialogResult = DialogResult.Cancel;
                 buttons.Controls.Add(save); buttons.Controls.Add(cancel); shell.Controls.Add(buttons, 0, 3); f.Controls.Add(shell); f.AcceptButton = save; f.CancelButton = cancel;
                 save.Click += delegate {
-                    try { List<ExpenseSplit> parts = amounts.Where(p => p.Value.Value > 0).Select(p => new ExpenseSplit { CategoryId = p.Key, Amount = p.Value.Value }).ToList();
+                    try {
+                        // Keep booked split order when editing, including which share receives a rounding cent.
+                        var categoryIds = initial.Select(part => part.CategoryId).Concat(Data.Categories.Select(c => c.Id)).Distinct();
+                        var parts = categoryIds.Where(id => amounts[id].Value > 0)
+                            .Select(id => new ExpenseSplit { CategoryId = id, Amount = amounts[id].Value }).ToList();
                         Ledger.ValidateExpenseParts(Data, parts, total); result = parts; f.DialogResult = DialogResult.OK; f.Close();
                     }
                     catch (BudgetException ex) { MessageBox.Show(f, ex.Message, "Check split amounts", MessageBoxButtons.OK, MessageBoxIcon.Information); }

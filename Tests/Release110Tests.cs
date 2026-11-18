@@ -93,6 +93,13 @@ internal static class Release110Tests
                 Check(choices.All(i => i.Text.StartsWith(i.Id)) && choices.Select(i => i.Id).SequenceEqual(choices.Select(i => i.Id).OrderBy(s => s, StringComparer.CurrentCultureIgnoreCase)), "icon picker is alphabetical and every option starts with its name");
                 typeof(NamePicker).GetMethod("OnKeyPress", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(picker, new object[] { new KeyPressEventArgs('s') });
                 Check(Icons.Selected(picker) == choices.First(i => i.Id.StartsWith("S")).Id, "one letter jumps to the first matching option");
+                var next = new KeyPressEventArgs('s');
+                typeof(NamePicker).GetMethod("OnKeyPress", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(picker, new object[] { next });
+                Check(Icons.Selected(picker) == choices.First(i => i.Id.StartsWith("S")).Id && next.Handled, "repeated initials still select the first name");
+                picker.DropDownStyle = ComboBoxStyle.DropDown;
+                var typed = new KeyPressEventArgs('z');
+                typeof(NamePicker).GetMethod("OnKeyPress", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(picker, new object[] { typed });
+                Check(!typed.Handled, "editable payee fields accept freely typed names");
             }
             using (var host = new Form()) using (var pager = new PagedGridPanel("sort"))
             {
@@ -131,6 +138,26 @@ internal static class Release110Tests
             if (modalFailure != null) throw modalFailure;
             var entry = form.Store.Load().Entries.Single();
             Check(entry.PurchaseCurrency == "EUR" && entry.Amount == 12.5m && entry.ExchangeRate == 24.8m && Ledger.Balance(form.Data, "cz", DateTime.Today) == 9690m && entry.Time == "08:17:09", "the real editor saves 12.50 EUR at 24.8 as exactly 310 CZK with the chosen time");
+            var plan = new PlannedExpense { Id = "tomorrow", DueDate = Ledger.Iso(DateTime.Today.AddDays(1)), DueTime = "15:30:00",
+                CategoryId = d.Categories[0].Id, AccountId = "cz", Amount = 90, Description = "Booked train" };
+            form.Commit(data => data.PlannedExpenses.Add(plan));
+            DateTime confirmed = DateTime.MinValue;
+            using (var timer = new Timer { Interval = 1350 })
+            {
+                timer.Tick += delegate {
+                    timer.Stop();
+                    var editor = Application.OpenForms.OfType<Editor>().Single();
+                    confirmed = DateTime.Now;
+                    editor.Save.PerformClick();
+                };
+                timer.Start();
+                typeof(MainForm).GetMethod("RecordPlannedEditor", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(form, new object[] { plan });
+            }
+            var receipt = form.Store.Load().Entries.Single(e => e.PlanId == plan.Id);
+            DateTime posted = Ledger.Moment(receipt.Date, receipt.Time);
+            Check(posted >= confirmed.AddTicks(-(confirmed.Ticks % TimeSpan.TicksPerSecond)) && posted <= DateTime.Now
+                && receipt.ScheduledDate == plan.DueDate && receipt.ScheduledTime == plan.DueTime && form.Data.PlannedExpenses.Count == 0,
+                "Record paid uses the confirmation click time and retains the original due date and time");
         }
     }
     [STAThread]

@@ -92,7 +92,7 @@ namespace BudgetDesk
         {
             this.grid = grid;
             grid.ColumnHeaderMouseClick += delegate(object sender, DataGridViewCellMouseEventArgs e) {
-                if (e.Button == MouseButtons.Left) { Cycle(e.ColumnIndex); changed(); }
+                if (e.Button == MouseButtons.Left && e.ColumnIndex >= 0) { Cycle(e.ColumnIndex); changed(); }
             };
         }
         internal void Cycle(int index)

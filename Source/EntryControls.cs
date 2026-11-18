@@ -23,6 +23,7 @@ namespace BudgetDesk
                     }
                 }
                 e.Handled = true;
+                return;
             }
             base.OnKeyPress(e);
         }
