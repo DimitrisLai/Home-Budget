@@ -139,7 +139,7 @@ internal static class QuickEntryTests
             BudgetData prior = Data(); prior.Entries.Add(Expense(prior, "Old purchase", Today.AddMonths(-1), 20)); prior.Goals.Add(new SavingsGoal { Id = "goal", Name = "Keep goal", Icon = "Star", Currency = "CZK", TargetAmount = 5000, SavedAmount = 1000 }); prior.PlannedExpenses.Add(new PlannedExpense { Id = "plan", Description = "Keep plan", AccountId = "bank", CategoryId = prior.Categories[0].Id, DueDate = Ledger.Iso(Today.AddDays(20)), Amount = 100 });
             JavaScriptSerializer serializer = new JavaScriptSerializer(); var old = serializer.Deserialize<Dictionary<string, object>>(BudgetStore.Serialize(prior)); old["SchemaVersion"] = 3; old.Remove("Payees"); old.Remove("Templates"); string oldJson = serializer.Serialize(old).Replace(",\"Payee\":null", "");
             string upgradeFolder = Path.Combine(temp, "upgrade"); Directory.CreateDirectory(upgradeFolder); File.WriteAllText(Path.Combine(upgradeFolder, "budget.json"), oldJson); BudgetStore upgradedStore = new BudgetStore(upgradeFolder); BudgetData upgraded = upgradedStore.Load();
-            Check(upgraded.SchemaVersion == 4 && upgraded.Goals.Single().SavedAmount == 1000 && upgraded.PlannedExpenses.Single().Id == "plan" && upgraded.Entries.Single().Description == "Old purchase" && File.ReadAllText(upgradedStore.FilePath) == oldJson, "schema-three migration preserves goals, plans and historical entries without rewriting during load");
+            Check(upgraded.SchemaVersion == Ledger.CurrentSchemaVersion && upgraded.Goals.Single().SavedAmount == 1000 && upgraded.PlannedExpenses.Single().Id == "plan" && upgraded.Entries.Single().Description == "Old purchase" && File.ReadAllText(upgradedStore.FilePath) == oldJson, "schema-three migration preserves goals, plans and historical entries without rewriting during load");
             Template(upgraded); upgradedStore.Save(upgraded); Check(Directory.GetFiles(Path.Combine(upgradeFolder, "Backups")).Any(p => File.ReadAllText(p) == oldJson), "the first template/payee save keeps the exact previous-format backup");
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException); Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
             d = Data(); BudgetStore store = new BudgetStore(Path.Combine(temp, "ui")); store.Save(d);
@@ -158,7 +158,7 @@ internal static class QuickEntryTests
                     Capture(f, "payee-autofill"); Icons.Choose((ComboBox)Field(f, "Account / send from"), "bank"); Icons.Choose((ComboBox)Field(f, "Expense category"), main.Data.Categories[0].Id);
                     ((ComboBox)Named(f, "EntryPayee")).Text = ""; ((ComboBox)Named(f, "EntryPayee")).Text = "Market";
                     Check(Icons.Selected((ComboBox)Field(f, "Account / send from")) == "bank" && Icons.Selected((ComboBox)Field(f, "Expense category")) == main.Data.Categories[0].Id, "payee autofill preserves account and category choices already made by the user");
-                    Field(f, "Description").Text = "Manual purchase"; ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 123.45m;
+                    Field(f, "Description").Text = "Manual purchase"; ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 123.45m;
                     foreach (Control c in Tree(f).Where(c => c is ComboBox || c is NumericUpDown || c is Button)) Visible(c);
                 }, true);
                 Check(main.Data.Payees.Single().DefaultAccountId == "bank" && main.Data.Entries.Single().Payee == "Market" && Ledger.Balance(main.Data, "bank", Today) == 9876.55m, "saving a payee entry records one expense and remembers the final explicit choices");
@@ -181,12 +181,12 @@ internal static class QuickEntryTests
                 Check(main.Data.Templates.Single().Amount == null && main.Data.Entries.Count == 1, "the Templates manager saves a reusable optional-amount template without a transaction");
                 main.Commit(data => Ledger.RememberPayee(data, "Market", "cash", data.Categories[3].Id));
                 before = BudgetStore.Serialize(main.Data);
-                UseThroughManager(main, delegate(Form f) { Check(((NumericUpDown)Field(f, "Amount (account currency)")).Value == 0 && Icons.Selected((ComboBox)Field(f, "Account / send from")) == "bank", "Use template opens a draft and preserves its explicit defaults instead of applying different payee preferences"); Capture(f, "template-draft"); }, false);
+                UseThroughManager(main, delegate(Form f) { Check(((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value == 0 && Icons.Selected((ComboBox)Field(f, "Account / send from")) == "bank", "Use template opens a draft and preserves its explicit defaults instead of applying different payee preferences"); Capture(f, "template-draft"); }, false);
                 Check(before == BudgetStore.Serialize(main.Data), "cancelling a used template changes neither data nor balances");
-                UseThroughManager(main, delegate(Form f) { ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 50; }, true);
+                UseThroughManager(main, delegate(Form f) { ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 50; }, true);
                 Check(main.Data.Entries.Count == 2 && main.Data.Entries.Last().Date == Ledger.Iso(Today) && Ledger.Balance(main.Data, "bank", Today) == 9826.55m, "saving a template draft records today's expense exactly once");
                 Editor(main, delegate { Call(main, "EntryEditor", null, "Expense"); }, delegate(Form f) {
-                    Field(f, "Description").Text = "Fuel shortcut"; ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 750;
+                    Field(f, "Description").Text = "Fuel shortcut"; ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 750;
                     Nested(main, f, delegate { ((Button)Named(f, "SaveAsTemplate")).PerformClick(); }, delegate(Form template) { Named(template, "TemplateName").Text = "Fuel quick entry"; }, true);
                 }, false);
                 Check(main.Data.Templates.Count == 2 && main.Data.Entries.Count == 2 && main.Data.Templates.Any(x => x.Name == "Fuel quick entry"), "Save as template can persist a shortcut while cancelling the parent expense records no purchase");

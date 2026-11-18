@@ -1,6 +1,6 @@
 # Budget Desk — Windows smoke-test checklist
 
-Open the new BudgetDesk.exe to check your existing budget. Try-Demo.cmd provides separate sample data for testing new entries. The user confirmed 0.1.9 working before the version-only promotion to 1.0.0. This checklist remains useful for later releases.
+Open the new BudgetDesk.exe to check your existing budget. Support/Try-Demo.cmd provides separate sample data for testing new entries. The user confirmed 0.1.9 working before the version-only promotion to 1.0.0. This checklist remains useful for later releases.
 
 - [ ] Existing accounts, bank order, balances, entries, plans and savings goals load correctly.
 - [ ] Daily expenses → Templates → + New: save a template with an optional amount. Use it, enter an amount and Save. Exactly one new transaction is recorded.

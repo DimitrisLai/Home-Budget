@@ -166,7 +166,7 @@ internal static class GoalSplitTests
                 Check(main.Data.Goals.Count == 1, "cancelling a new goal does not create an incomplete tracker");
                 main.ShowPage(1); Pump();
                 Dialog(main, delegate { Call(main, "EntryEditor", null, "Expense"); }, delegate(Form f) {
-                    Field(f, "Description").Text = "Supermarket split"; ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 1000;
+                    Field(f, "Description").Text = "Supermarket split"; ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 1000;
                     SplitDialog(main, f, 600, 400, "split-purchase-editor", true, false);
                     if (Field(f, "Expense category").Enabled) throw new Exception("A split still allows an ambiguous parent category.");
                     foreach (Control c in Tree(f).Where(c => c is NumericUpDown || c is ComboBox)) Visible(c);

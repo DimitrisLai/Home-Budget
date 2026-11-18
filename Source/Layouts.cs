@@ -75,10 +75,50 @@ namespace BudgetDesk
     internal sealed class GridItem
     {
         internal object[] Cells;
+        internal object[] SortKeys;
+        internal object Key(int column) { return SortKeys == null ? Cells[column] : SortKeys[column]; }
         internal string Id;
         internal int ColorColumn = -1;
         internal Color Color = Color.Empty;
         internal GridItem(string id, params object[] cells) { Id = id; Cells = cells; }
+    }
+
+    internal sealed class ColumnOrder
+    {
+        private readonly DataGridView grid;
+        private int column = -1;
+        private SortOrder direction;
+        internal ColumnOrder(DataGridView grid, Action changed)
+        {
+            this.grid = grid;
+            grid.ColumnHeaderMouseClick += delegate(object sender, DataGridViewCellMouseEventArgs e) {
+                if (e.Button == MouseButtons.Left) { Cycle(e.ColumnIndex); changed(); }
+            };
+        }
+        internal void Cycle(int index)
+        {
+            direction = index != column || direction == SortOrder.None ? SortOrder.Ascending :
+                direction == SortOrder.Ascending ? SortOrder.Descending : SortOrder.None;
+            column = index;
+            foreach (DataGridViewColumn c in grid.Columns)
+                c.HeaderCell.SortGlyphDirection = c.Index == column ? direction : SortOrder.None;
+        }
+        internal IEnumerable<T> Apply<T>(IEnumerable<T> rows, Func<T, int, object> key)
+        {
+            if (direction == SortOrder.None) return rows;
+            return direction == SortOrder.Ascending
+                ? rows.OrderBy(r => key(r, column), SortKeyComparer.Instance)
+                : rows.OrderByDescending(r => key(r, column), SortKeyComparer.Instance);
+        }
+        private sealed class SortKeyComparer : IComparer<object>
+        {
+            internal static readonly SortKeyComparer Instance = new SortKeyComparer();
+            public int Compare(object left, object right)
+            {
+                if (left is string && right is string) return StringComparer.CurrentCultureIgnoreCase.Compare((string)left, (string)right);
+                return System.Collections.Comparer.Default.Compare(left, right);
+            }
+        }
     }
 
     // Only the rows that fit are materialized into the grid. Every other row is
@@ -89,6 +129,8 @@ namespace BudgetDesk
         private readonly Button previous, next;
         private readonly Label info;
         private List<GridItem> items = new List<GridItem>();
+        private List<GridItem> original = new List<GridItem>();
+        private readonly ColumnOrder sort;
         private bool rendering;
         private int capacity = 1, pageIndex;
         internal event EventHandler PageChanged;
@@ -100,6 +142,17 @@ namespace BudgetDesk
         {
             Name = name; Dock = DockStyle.Fill; Margin = new Padding(0); BackColor = Color.White;
             Grid = Theme.Grid(); Grid.Name = name + "Grid"; Grid.Dock = DockStyle.None;
+            sort = new ColumnOrder(Grid, delegate { ApplyOrder(true); });
+            Grid.KeyPress += delegate(object source, KeyPressEventArgs e) {
+                if (!Char.IsLetter(e.KeyChar) || items.Count == 0 || Grid.CurrentCell == null) return;
+                int column = Grid.CurrentCell.ColumnIndex;
+                int index = items.FindIndex(item => item.Key(column) is string && System.Globalization.CultureInfo.CurrentCulture.CompareInfo.IsPrefix(
+                    (string)item.Key(column), e.KeyChar.ToString(), System.Globalization.CompareOptions.IgnoreCase | System.Globalization.CompareOptions.IgnoreNonSpace));
+                if (index < 0) return;
+                PageIndex = index / capacity;
+                Grid.CurrentCell = Grid.Rows[index % capacity].Cells[column];
+                e.Handled = true;
+            };
             previous = Theme.Button("Previous", false); next = Theme.Button("Next", false);
             previous.Name = name + "Previous"; next.Name = name + "Next";
             previous.Margin = next.Margin = new Padding(0);
@@ -112,7 +165,12 @@ namespace BudgetDesk
         }
         private bool Minimized { get { Form owner = FindForm(); return owner != null && owner.WindowState == FormWindowState.Minimized; } }
         internal void SetRows(IEnumerable<GridItem> rows, bool resetPage)
-        { items = rows.ToList(); if (resetPage) pageIndex = 0; RenderRows(); }
+        { original = rows.ToList(); ApplyOrder(resetPage); }
+        private void ApplyOrder(bool resetPage)
+        {
+            items = sort.Apply(original, (row, column) => row.Key(column)).ToList();
+            PageIndex = resetPage ? 0 : pageIndex;
+        }
         private void MovePage(int amount)
         {
             pageIndex = Math.Max(0, Math.Min(PageCount - 1, pageIndex + amount)); RenderRows();

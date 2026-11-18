@@ -119,22 +119,28 @@ jobs:
               names = {i.filename for i in z.infolist() if not i.is_dir()}
               assert all(n.startswith('BudgetDesk/') and '..' not in pathlib.PurePosixPath(n).parts for n in names)
               assert z.read('BudgetDesk/BudgetDesk.exe').startswith(b'MZ')
-              assert z.read('BudgetDesk/LICENSE') == (root / 'LICENSE').read_bytes()
-              assert z.read('BudgetDesk/VERSION').decode().strip() == version
+              assert {n.split('/')[1] for n in names} == {'BudgetDesk.exe', 'BudgetDesk.exe.config', 'Manuals', 'Support'}
+              for language in ('English', 'Cesky', 'Ellinika'):
+                  manual = f'Manuals/{language}.html'
+                  assert z.read('BudgetDesk/' + manual) == (root / manual).read_bytes()
+              for name in ('Test-Sandbox.cmd', 'Try-Demo.cmd', 'Rebuild-Windows.cmd'):
+                  assert 'BudgetDesk/Support/' + name in names
+              assert z.read('BudgetDesk/Support/LICENSE') == (root / 'LICENSE').read_bytes()
+              assert z.read('BudgetDesk/Support/VERSION').decode().strip() == version
               assert not any(n.lower().endswith(('.json', '.dll')) for n in names)
               assert {n for n in names if n.lower().endswith('.exe')} == {'BudgetDesk/BudgetDesk.exe'}
               checked = set()
-              for line in z.read('BudgetDesk/SHA256SUMS.txt').decode().splitlines():
+              for line in z.read('BudgetDesk/Support/SHA256SUMS.txt').decode().splitlines():
                   digest, rel = line.split('  ', 1)
                   full = 'BudgetDesk/' + rel
                   assert full not in checked
                   assert hashlib.sha256(z.read(full)).hexdigest() == digest, rel
                   checked.add(full)
-              assert checked == names - {'BudgetDesk/SHA256SUMS.txt'}
+              assert checked == names - {'BudgetDesk/Support/SHA256SUMS.txt'}
               for source in (root / 'Source').glob('*'):
                   if source.is_file():
-                      assert z.read('BudgetDesk/Source/' + source.name) == source.read_bytes(), source.name
-              assert b'checks passed' in z.read('BudgetDesk/Tests/Windows-CI-summary.txt')
+                      assert z.read('BudgetDesk/Support/Source/' + source.name) == source.read_bytes(), source.name
+              assert b'checks passed' in z.read('BudgetDesk/Support/Tests/Windows-CI-summary.txt')
           print(f'ZIP contents, source, license, test evidence and all checksums verified: {path.name}')
           PY
       - name: Publish verified release and check downloads

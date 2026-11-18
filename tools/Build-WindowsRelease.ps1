@@ -100,6 +100,9 @@ function Run-CheckedProcess {
     $process = Start-Process @start
     if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
         Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+        foreach ($log in @($stdout, $stderr)) {
+            if (Test-Path -LiteralPath $log) { Get-Content -LiteralPath $log -Tail 30 | ForEach-Object { Write-Host $_ } }
+        }
         throw "$Name exceeded its timeout."
     }
     $process.WaitForExit()
@@ -127,7 +130,7 @@ $ledger = Build-Test -Name 'LedgerTests' -TestSources @($sources + 'Tests/Ledger
 Run-CheckedProcess -Executable $ledger -Arguments @() -Name 'accounting'
 $compatibility = Build-Test -Name 'FrameworkCompatibilityTests' -TestSources @('Tests/FrameworkCompatibilityTests.cs')
 Run-CheckedProcess -Executable $compatibility -Arguments @('"' + $executable + '"') -Name 'compatibility'
-foreach ($name in @('UiSmokeTests', 'QuickEntryTests')) {
+foreach ($name in @('UiSmokeTests', 'QuickEntryTests', 'AccountLayoutTests', 'AccountRefreshTests', 'ScrollFreeTests', 'OrderCategoryTests', 'YearPlanTests', 'GoalSplitTests', 'Release110Tests')) {
     $test = Build-Test -Name $name -TestSources @($sources + "Tests/$name.cs")
     $images = Join-Path $checks "$name-images"
     Run-CheckedProcess -Executable $test -Arguments @('"' + $images + '"') -Name $name
@@ -148,11 +151,17 @@ $evidence = @(
 $evidence | Set-Content -LiteralPath (Join-Path $package 'Tests/Windows-CI-summary.txt') -Encoding utf8
 $evidence | Add-Content -LiteralPath (Join-Path $package 'VALIDATION.md') -Encoding utf8
 
+# The launch folder exposes only the executable, its configuration and two named folders.
+$support = Join-Path $package 'Support'
+New-Item -ItemType Directory -Path $support | Out-Null
+Get-ChildItem -LiteralPath $package -Force | Where-Object { $_.Name -notin @('BudgetDesk.exe', 'BudgetDesk.exe.config', 'Manuals', 'Support') } | ForEach-Object {
+    Move-Item -LiteralPath $_.FullName -Destination $support
+}
 $manifestLines = @(Get-ChildItem -LiteralPath $package -Recurse -File -Force | Sort-Object FullName | ForEach-Object {
     $relative = [IO.Path]::GetRelativePath($package, $_.FullName).Replace('\', '/')
     ((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + $relative)
 })
-[IO.File]::WriteAllLines((Join-Path $package 'SHA256SUMS.txt'), $manifestLines, [Text.UTF8Encoding]::new($false))
+[IO.File]::WriteAllLines((Join-Path $support 'SHA256SUMS.txt'), $manifestLines, [Text.UTF8Encoding]::new($false))
 foreach ($line in $manifestLines) {
     $digest, $relative = $line -split '  ', 2
     if ((Get-FileHash -LiteralPath (Join-Path $package $relative) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $digest) { throw "Package checksum mismatch: $relative" }
