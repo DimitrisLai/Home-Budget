@@ -1,5 +1,14 @@
 # Budget Desk version history
 
+## 1.1.0 — 18 November 2026
+
+- Added local times to ledger entries, future expenses and recurring schedules. Paid and scheduled times are stored separately.
+- Added per-purchase currency, editable conversion rate, account-amount preview, foreign splits and support throughout reports, templates, backups and CSV.
+- Placed names before icons, separated account balances from their icons, and added alphabetic pickers with single-letter navigation.
+- Added typed, three-state heading sorting across pages and reports.
+- Provided complete offline English, Czech and Greek manuals and a compact Windows ZIP launch folder.
+- Added schema 5 migration for old budgets and Windows regression checks for the new financial and interface behavior.
+
 ## 1.0.1 — Full release, 11 November 2026
 
 - Removed the developer-only screenshot command and screen-capture calls from the public executable. UI screenshots remain in separate test programs.

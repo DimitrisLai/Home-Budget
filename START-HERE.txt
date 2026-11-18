@@ -1,31 +1,16 @@
-BUDGET DESK 1.0.1
-=================
+BUDGET DESK 1.1.0 — WINDOWS
 
-1. Close any older Budget Desk window.
-2. Extract this ZIP into a new folder.
-3. Open BudgetDesk and run BudgetDesk.exe.
+Updating? First export a JSON backup in the old app under Settings & backup,
+then close it. Extract the entire new ZIP to a new folder.
+Open BudgetDesk.exe in the BudgetDesk folder. Keep its .config file beside it.
 
-Your existing budget loads automatically from the same data folder.
-Version 1.0.1 keeps the 1.0.0 budgeting features and data format.
-A developer screenshot command was removed from the public executable.
-No rebuild is required.
+Manuals/English.html       English user manual
+Manuals/Cesky.html         Česká uživatelská příručka
+Manuals/Ellinika.html      Ελληνικό εγχειρίδιο χρήσης
 
-ACCOUNTS & BILLS: add/reorder accounts and manage recurring payments.
-DAILY EXPENSES: expenses, income, transfers, splits and custom categories.
-FUTURE / PLANNED: one-off unpaid plans; Record paid after actual payment.
-TEMPLATES: reusable expense/income drafts with optional amounts or splits.
-PAYEES: remembered account/category suggestions for new entries.
-SEARCH ALL HISTORY: find recorded activity across every year.
-MONTHLY / YEARLY OVERVIEW: totals, budgets and period details.
-SAVINGS GOALS: targets and tracked allocations; no automatic money movement.
+Support/Test-Sandbox.cmd   Separate, initially empty budget for testing
+Support/Try-Demo.cmd       Separate budget with sample data
+Support/Start-BudgetDesk.cmd  Starts the app with diagnostics if needed
 
-Try-Demo.cmd opens separate sample data.
-Test-Sandbox.cmd opens a separate, initially empty manual-test budget.
-WINDOWS-CHECKLIST-EL.md contains numbered Greek acceptance checks.
-Settings & backup offers JSON backup/restore and the data folder.
-IDEAS.md contains future additions. RELEASE-NOTES.md describes 1.0.1.
-GITHUB-PUBLISHING.md explains automatic GitHub releases.
-
-Licensed under the MIT License; see LICENSE.
-If startup fails, run Start-BudgetDesk.cmd and send startup-log.txt.
-Repair-and-Start.cmd remains an optional local rebuild.
+In the source checkout the commands and supporting documents are at the root.
+The Windows ZIP keeps them together in Support.

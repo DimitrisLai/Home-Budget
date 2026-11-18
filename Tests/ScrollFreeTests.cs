@@ -136,7 +136,7 @@ internal static class ScrollFreeTests
                 Tree(main).OfType<Button>().Single(x => x.Text == "Pause / resume").PerformClick(); Pump();
                 Check(!main.Data.Bills.Single(x => x.Id == target).Enabled && main.Data.Bills.Count(x => !x.Enabled) == 1, "Pause changed the wrong payment.");
                 cards = Tree(main).OfType<Panel>().Single(x => x.Name == "RecurringCards"); Control chosen = cards.Controls.Cast<Control>().Single(x => (string)x.Tag == target);
-                Dialog(main, delegate { typeof(Control).GetMethod("OnDoubleClick", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(chosen, new object[] { EventArgs.Empty }); }, delegate(Form editor) { Field(editor, "Payment name").Text = "Edited payment"; ((NumericUpDown)Field(editor, "Amount (account currency)")).Value = 789m; });
+                Dialog(main, delegate { typeof(Control).GetMethod("OnDoubleClick", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(chosen, new object[] { EventArgs.Empty }); }, delegate(Form editor) { Field(editor, "Payment name").Text = "Edited payment"; ((NumericUpDown)editor.Controls.Find("EntryAmount", true).Single()).Value = 789m; });
                 Check(main.Data.Bills.Single(x => x.Id == target).Amount == 789m && main.Data.Bills.Single(x => x.Id == target).Name == "Edited payment", "Payment-card editing did not persist.");
                 Dashboard(main); Console.WriteLine("PASS payment selection, pause and double-click editing affect the intended schedule");
                 main.ShowPage(1); Pump(); PagedGridPanel entries = Tree(main).OfType<PagedGridPanel>().Single();
@@ -175,7 +175,7 @@ internal static class ScrollFreeTests
                 for (int count = 1; count <= 20; count++)
                 {
                     int number = count;
-                    Dialog(main, delegate { Tree(main).OfType<Button>().Single(x => x.Text == "+ Recurring payment").PerformClick(); }, delegate(Form editor) { Field(editor, "Payment name").Text = "Live payment " + number; ((NumericUpDown)Field(editor, "Amount (account currency)")).Value = number * 10; ((DateTimePicker)Field(editor, "Next unpaid date")).Value = DateTime.Today.AddDays(number); });
+                    Dialog(main, delegate { Tree(main).OfType<Button>().Single(x => x.Text == "+ Recurring payment").PerformClick(); }, delegate(Form editor) { Field(editor, "Payment name").Text = "Live payment " + number; ((NumericUpDown)editor.Controls.Find("EntryAmount", true).Single()).Value = number * 10; ((DateTimePicker)editor.Controls.Find("BillDueDate", true).Single()).Value = DateTime.Today.AddDays(number); });
                     Check(main.Data.Bills.Count == count, "A newly saved payment is missing."); Dashboard(main);
                 }
                 Capture(main, images, "twenty-payments-after-live-add"); main.Close();

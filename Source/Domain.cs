@@ -28,6 +28,10 @@ namespace BudgetDesk
         public string Id { get; set; }
         public string Kind { get; set; }
         public string Date { get; set; }
+        public string Time { get; set; }
+        public string ScheduledTime { get; set; }
+        public string PurchaseCurrency { get; set; }
+        public decimal ExchangeRate { get; set; }
         public string AccountId { get; set; }
         public string ToAccountId { get; set; }
         public string CategoryId { get; set; }
@@ -64,6 +68,7 @@ namespace BudgetDesk
         public string Payee { get; set; }
         public string Description { get; set; }
         public string AccountId { get; set; }
+        public string PurchaseCurrency { get; set; }
         public string CategoryId { get; set; }
         public decimal? Amount { get; set; }
         public List<ExpenseSplit> Splits { get; set; }
@@ -96,6 +101,9 @@ namespace BudgetDesk
     {
         public string Id { get; set; }
         public string DueDate { get; set; }
+        public string DueTime { get; set; }
+        public string PurchaseCurrency { get; set; }
+        public decimal ExchangeRate { get; set; }
         public string AccountId { get; set; }
         public string CategoryId { get; set; }
         public string Description { get; set; }
@@ -111,6 +119,9 @@ namespace BudgetDesk
         public string CategoryId { get; set; }
         public decimal Amount { get; set; }
         public string AnchorDate { get; set; }
+        public string DueTime { get; set; }
+        public string PurchaseCurrency { get; set; }
+        public decimal ExchangeRate { get; set; }
         public int Interval { get; set; }
         public string Unit { get; set; }
         public int NextIndex { get; set; }
@@ -165,7 +176,7 @@ namespace BudgetDesk
         public static readonly string[] Currencies = { "CZK", "EUR", "USD", "GBP", "CHF", "PLN" };
         public static readonly string[] Units = { "Months", "Weeks", "Years", "Days" };
         public const int ItemLimit = 20;
-        public const int CurrentSchemaVersion = 4;
+        public const int CurrentSchemaVersion = 5;
         public static string NewId() { return Guid.NewGuid().ToString("N"); }
         public static string Iso(DateTime date) { return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); }
         public static DateTime Day(string value)
@@ -175,6 +186,42 @@ namespace BudgetDesk
                 || d.Year < 1900 || d.Year > 2199)
                 throw new BudgetException("A date must be between 1900 and 2199 (yyyy-MM-dd).");
             return d;
+        }
+        public static string Clock(DateTime value) { return value.ToString("HH:mm:ss", CultureInfo.InvariantCulture); }
+        public static DateTime Moment(string date, string time)
+        {
+            DateTime day = Day(date), clock;
+            if (String.IsNullOrEmpty(time)) return day;
+            if (!DateTime.TryParseExact(time, "HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out clock))
+                throw new BudgetException("Use a valid local time (HH:mm:ss).");
+            return day.Add(clock.TimeOfDay);
+        }
+        public static string DateLabel(string date, string time)
+        {
+            return Moment(date, time).ToString(String.IsNullOrEmpty(time) ? "d MMM yyyy" : "d MMM yyyy HH:mm:ss", CultureInfo.GetCultureInfo("en-GB"));
+        }
+        public static bool PlanOverdue(PlannedExpense plan, DateTime now)
+        {
+            return String.IsNullOrEmpty(plan.DueTime) ? Day(plan.DueDate) < now.Date : Moment(plan.DueDate, plan.DueTime) < now;
+        }
+        public static decimal AccountAmount(decimal amount, decimal exchangeRate)
+        {
+            return exchangeRate == 0 ? amount : Decimal.Round(amount * exchangeRate, 2, MidpointRounding.AwayFromZero);
+        }
+        static void CheckPurchase(string currency, decimal quote, Account account, decimal amount)
+        {
+            if (String.IsNullOrEmpty(currency)) { Require(quote == 0, "An account-currency payment uses no conversion."); return; }
+            Require(Currencies.Contains(currency) && currency != account.Currency, "Choose a supported purchase currency.");
+            Require(quote > 0 && quote <= 1000000m && Decimal.Round(quote, 8) == quote,
+                "Enter the exchange rate in account currency per unit of purchase currency (up to eight decimal places).");
+            Money(AccountAmount(amount, quote), true, "Converted account amount");
+        }
+        public static decimal SuggestedQuote(BudgetData data, string purchase, string accountCurrency)
+        {
+            decimal rate;
+            if (!data.Rates.TryGetValue(purchase, out rate)) return 0;
+            decimal quote = Decimal.Round(rate / Rate(data, accountCurrency), 8, MidpointRounding.AwayFromZero);
+            return quote <= 1000000m ? quote : 0;
         }
         public static void Require(bool condition, string message)
         {
@@ -239,9 +286,11 @@ namespace BudgetDesk
                 Require(e.Kind == "Expense" || e.Kind == "Income" || e.Kind == "Transfer", "Unknown entry type.");
                 Account a = d.Accounts.FirstOrDefault(x => x.Id == e.AccountId);
                 Require(a != null, "An entry refers to a missing account.");
-                DateTime date = Day(e.Date);
+                DateTime date = Moment(e.Date, e.Time).Date;
                 Require(date >= Day(a.OpeningDate), "The entry date is before the account's starting date.");
                 Money(e.Amount, true, "Amount");
+                CheckPurchase(e.PurchaseCurrency, e.ExchangeRate, a, e.Amount);
+                Require(e.Kind != "Transfer" || String.IsNullOrEmpty(e.PurchaseCurrency), "Enter transfers in the sending account currency.");
                 Require(e.RateToCzk > 0 && e.RateToCzk <= 1000000m, "An entry has an invalid exchange rate.");
                 Require(e.Description != null && e.Description.Length <= 300, "Descriptions can have up to 300 characters.");
                 Require(e.Payee == null || e.Payee.Length <= 80, "Payee names can have up to 80 characters.");
@@ -260,7 +309,7 @@ namespace BudgetDesk
                     Require(target.Currency != a.Currency || e.Amount == e.ReceivedAmount,
                         "Transfers in the same currency must send and receive the same amount.");
                 }
-                if (!String.IsNullOrEmpty(e.ScheduledDate)) Day(e.ScheduledDate);
+                if (!String.IsNullOrEmpty(e.ScheduledDate)) Moment(e.ScheduledDate, e.ScheduledTime);
                 if (!String.IsNullOrEmpty(e.PlanId)) Require(e.Kind == "Expense" && !String.IsNullOrEmpty(e.ScheduledDate), "A recorded one-off plan must be an expense with its original due date.");
             }
             foreach (PlannedExpense p in d.PlannedExpenses)
@@ -268,8 +317,9 @@ namespace BudgetDesk
                 TextValue(p.Description, "Planned expense description", 300);
                 Account a = d.Accounts.FirstOrDefault(x => x.Id == p.AccountId);
                 Require(a != null && d.Categories.Any(c => c.Id == p.CategoryId), "Choose an account and category for each planned expense.");
-                Require(Day(p.DueDate) >= Day(a.OpeningDate), "The planned date is before the account's starting date.");
+                Require(Moment(p.DueDate, p.DueTime) >= Day(a.OpeningDate), "The planned date is before the account's starting date.");
                 Money(p.Amount, true, "Planned amount");
+                CheckPurchase(p.PurchaseCurrency, p.ExchangeRate, a, p.Amount);
                 Require(!d.Entries.Any(e => e.PlanId == p.Id), "This planned expense has already been recorded.");
             }
             foreach (RecurringBill b in d.Bills)
@@ -278,6 +328,8 @@ namespace BudgetDesk
                 Account a = d.Accounts.FirstOrDefault(x => x.Id == b.AccountId);
                 Require(a != null && d.Categories.Any(c => c.Id == b.CategoryId), "Choose an account and category for each recurring payment.");
                 Money(b.Amount, true, "Payment amount");
+                CheckPurchase(b.PurchaseCurrency, b.ExchangeRate, a, b.Amount);
+                Moment(b.AnchorDate, b.DueTime);
                 Require(Units.Contains(b.Unit) && b.Interval >= 1 && b.Interval <= 120 && b.NextIndex >= 0 && b.NextIndex <= 100000,
                     "Use a repeat interval from 1 to 120 and a valid next payment.");
                 Require(DueDate(b) >= Day(a.OpeningDate), "The next payment is before the account's starting date.");
@@ -302,6 +354,7 @@ namespace BudgetDesk
                 Require(t.Kind == "Expense" || t.Kind == "Income", "Templates support expenses or income.");
                 Require(t.Description != null && t.Description.Length <= 300 && (t.Payee == null || t.Payee.Length <= 80), "Check the template description and payee length.");
                 Require(d.Accounts.Any(a => a.Id == t.AccountId), "Choose an account for the template.");
+                Require(String.IsNullOrEmpty(t.PurchaseCurrency) || Currencies.Contains(t.PurchaseCurrency), "Choose a supported template currency.");
                 if (t.Amount.HasValue) Money(t.Amount.Value, true, "Template amount");
                 bool split = t.Splits != null && t.Splits.Count > 0;
                 if (split) { Require(t.Kind == "Expense" && String.IsNullOrEmpty(t.CategoryId) && t.Amount.HasValue, "A split template needs a fixed expense total."); ValidateExpenseParts(d, t.Splits, t.Amount.Value); }
@@ -319,7 +372,7 @@ namespace BudgetDesk
         public static decimal ToBase(BudgetData d, decimal amount, string currency)
         { return amount * Rate(d, currency) / Rate(d, d.BaseCurrency); }
         public static decimal EntryInBase(BudgetData d, Entry e)
-        { return e.Amount * e.RateToCzk / Rate(d, d.BaseCurrency); }
+        { return AccountAmount(e.Amount, e.ExchangeRate) * e.RateToCzk / Rate(d, d.BaseCurrency); }
         public static bool HasSplits(Entry e) { return e.Splits != null && e.Splits.Count > 0; }
         public static void ValidateExpenseParts(BudgetData d, List<ExpenseSplit> parts, decimal total)
         {
@@ -334,7 +387,19 @@ namespace BudgetDesk
         public static decimal CategoryExpenseAmount(Entry e, string categoryId)
         { return e.Kind != "Expense" ? 0 : HasSplits(e) ? e.Splits.Where(p => p.CategoryId == categoryId).Sum(p => p.Amount) : e.CategoryId == categoryId ? e.Amount : 0; }
         public static decimal CategoryExpenseInBase(BudgetData d, Entry e, string categoryId)
-        { return CategoryExpenseAmount(e, categoryId) * e.RateToCzk / Rate(d, d.BaseCurrency); }
+        { decimal share = CategoryExpenseAmount(e, categoryId);
+            if (share == 0) return 0;
+            if (e.ExchangeRate == 0) return share * e.RateToCzk / Rate(d, d.BaseCurrency);
+            if (!HasSplits(e)) return EntryInBase(d, e);
+            // Allocate rounded account cents by cumulative share so all categories reconcile to the bank charge.
+            decimal before = 0;
+            foreach (ExpenseSplit part in e.Splits)
+            {
+                if (part.CategoryId == categoryId)
+                    return (AccountAmount(before + part.Amount, e.ExchangeRate) - AccountAmount(before, e.ExchangeRate)) * e.RateToCzk / Rate(d, d.BaseCurrency);
+                before += part.Amount;
+            }
+            return 0; }
         public static decimal GoalRemaining(SavingsGoal goal) { return Math.Max(0, goal.TargetAmount - goal.SavedAmount); }
         public static int GoalPercent(SavingsGoal goal) { return (int)Math.Min(100, Decimal.Floor(goal.SavedAmount / goal.TargetAmount * 100)); }
         public static decimal GoalMonthlyAmount(SavingsGoal goal, DateTime today)
@@ -363,7 +428,7 @@ namespace BudgetDesk
         {
             QuickEntryTemplate t = d.Templates.FirstOrDefault(x => x.Id == templateId); Require(t != null, "Choose an existing template.");
             return new Entry { Id = NewId(), Kind = t.Kind, Date = Iso(date), Payee = t.Payee, Description = t.Description, AccountId = t.AccountId, CategoryId = t.CategoryId,
-                Amount = t.Amount ?? 0, RateToCzk = Rate(d, d.Accounts.First(a => a.Id == t.AccountId).Currency),
+                Time = Clock(date), PurchaseCurrency = t.PurchaseCurrency, Amount = t.Amount ?? 0, RateToCzk = Rate(d, d.Accounts.First(a => a.Id == t.AccountId).Currency),
                 Splits = t.Splits == null ? null : t.Splits.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() };
         }
         public static QuickEntryTemplate TemplateFromEntry(Entry e)
@@ -371,7 +436,7 @@ namespace BudgetDesk
             Require(e.Kind == "Expense" || e.Kind == "Income", "Choose an expense or income for a quick-entry template.");
             string name = !String.IsNullOrWhiteSpace(e.Description) ? e.Description : !String.IsNullOrWhiteSpace(e.Payee) ? e.Payee : "New template";
             return new QuickEntryTemplate { Id = NewId(), Name = name.Length > 80 ? name.Substring(0, 80) : name, Kind = e.Kind, Payee = e.Payee, Description = e.Description ?? "", AccountId = e.AccountId, CategoryId = e.CategoryId,
-                Amount = e.Amount > 0 ? (decimal?)e.Amount : null, Splits = e.Splits == null ? null : e.Splits.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() };
+                PurchaseCurrency = e.PurchaseCurrency, Amount = e.Amount > 0 ? (decimal?)e.Amount : null, Splits = e.Splits == null ? null : e.Splits.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() };
         }
         public static IEnumerable<Entry> SearchEntries(BudgetData d, EntrySearch query)
         {
@@ -403,7 +468,7 @@ namespace BudgetDesk
             decimal total = a.OpeningBalance;
             foreach (Entry e in d.Entries.Where(x => Day(x.Date) <= asOf.Date))
             {
-                if (e.AccountId == a.Id) total += e.Kind == "Income" ? e.Amount : -e.Amount;
+                if (e.AccountId == a.Id) total += (e.Kind == "Income" ? 1 : -1) * AccountAmount(e.Amount, e.ExchangeRate);
                 if (e.Kind == "Transfer" && e.ToAccountId == a.Id) total += e.ReceivedAmount;
             }
             return total;
@@ -420,7 +485,7 @@ namespace BudgetDesk
         public static decimal YearTotal(BudgetData d, int year, string kind)
         { return YearEntries(d, year).Where(e => e.Kind == kind).Sum(e => EntryInBase(d, e)); }
         public static decimal PlanInBase(BudgetData d, PlannedExpense p)
-        { return ToBase(d, p.Amount, d.Accounts.First(a => a.Id == p.AccountId).Currency); }
+        { return ToBase(d, AccountAmount(p.Amount, p.ExchangeRate), d.Accounts.First(a => a.Id == p.AccountId).Currency); }
         public static decimal OneOffTotal(BudgetData d, DateTime from, DateTime through)
         { return d.PlannedExpenses.Where(p => Day(p.DueDate) >= from.Date && Day(p.DueDate) <= through.Date).Sum(p => PlanInBase(d, p)); }
         public static void RecordPlanned(BudgetData d, string id, DateTime paidOn, DateTime today)
@@ -430,9 +495,9 @@ namespace BudgetDesk
             Account a = d.Accounts.First(x => x.Id == p.AccountId);
             Require(paidOn.Date <= today.Date && paidOn.Date >= Day(a.OpeningDate), "Choose a payment date between the account's starting date and today.");
             Day(Iso(paidOn));
-            d.Entries.Add(new Entry { Id = NewId(), Kind = "Expense", Date = Iso(paidOn), AccountId = p.AccountId,
+            d.Entries.Add(new Entry { Id = NewId(), Kind = "Expense", Date = Iso(paidOn), Time = Clock(paidOn), AccountId = p.AccountId,
                 CategoryId = p.CategoryId, Description = p.Description, Amount = p.Amount, RateToCzk = Rate(d, a.Currency),
-                PlanId = p.Id, ScheduledDate = p.DueDate });
+                PlanId = p.Id, ScheduledDate = p.DueDate, ScheduledTime = p.DueTime, PurchaseCurrency = p.PurchaseCurrency, ExchangeRate = p.ExchangeRate });
             d.PlannedExpenses.Remove(p);
         }
 
@@ -458,22 +523,27 @@ namespace BudgetDesk
             catch (OverflowException) { throw new BudgetException("The payment schedule is too large."); }
         }
         public static DateTime DueDate(RecurringBill b) { return Occurrence(b, b.NextIndex); }
+        public static DateTime DueMoment(RecurringBill bill) { return Moment(Iso(DueDate(bill)), bill.DueTime); }
         public static string OccurrenceKey(RecurringBill b) { return b.Id + ":" + Iso(DueDate(b)); }
 
         public static bool RecordNext(BudgetData d, RecurringBill b, DateTime today)
         {
-            DateTime due = DueDate(b);
+            return RecordOccurrence(d, b, today, false);
+        }
+        private static bool RecordOccurrence(BudgetData d, RecurringBill b, DateTime now, bool automatic)
+        {
+            DateTime due = DueMoment(b);
             string key = OccurrenceKey(b);
             bool fresh = !d.ProcessedOccurrences.Contains(key);
             if (fresh)
             {
                 Account a = d.Accounts.First(x => x.Id == b.AccountId);
-                DateTime booked = due > today.Date ? today.Date : due;
+                DateTime booked = automatic ? due : now;
                 Require(booked >= Day(a.OpeningDate), "The payment is before the account's starting date.");
                 d.Entries.Add(new Entry {
-                    Id = NewId(), Kind = "Expense", Date = Iso(booked), AccountId = b.AccountId,
+                    Id = NewId(), Kind = "Expense", Date = Iso(booked), Time = automatic ? b.DueTime : Clock(booked), AccountId = b.AccountId,
                     CategoryId = b.CategoryId, Description = b.Name, Amount = b.Amount,
-                    RateToCzk = Rate(d, a.Currency), BillId = b.Id, ScheduledDate = Iso(due)
+                    RateToCzk = Rate(d, a.Currency), BillId = b.Id, ScheduledDate = Iso(due), ScheduledTime = b.DueTime, PurchaseCurrency = b.PurchaseCurrency, ExchangeRate = b.ExchangeRate
                 });
                 d.ProcessedOccurrences.Add(key);
             }
@@ -486,10 +556,10 @@ namespace BudgetDesk
             foreach (RecurringBill b in d.Bills.Where(x => x.Enabled && x.AutoRecord))
             {
                 int guard = 0;
-                while (DueDate(b) <= today.Date)
+                while (DueMoment(b) <= today)
                 {
                     Require(++guard <= 10000, "This schedule has more than 10,000 overdue payments. Edit its next due date first.");
-                    if (RecordNext(d, b, today)) count++;
+                    if (RecordOccurrence(d, b, today, true)) count++;
                 }
             }
             return count;
@@ -517,7 +587,7 @@ namespace BudgetDesk
         }
         public static decimal PlannedTotal(BudgetData d, DateTime from, DateTime through)
         {
-            return d.Bills.Sum(b => PlannedDates(b, from, through).Count() * ToBase(d, b.Amount,
+            return d.Bills.Sum(b => PlannedDates(b, from, through).Count() * ToBase(d, AccountAmount(b.Amount, b.ExchangeRate),
                 d.Accounts.First(a => a.Id == b.AccountId).Currency));
         }
 

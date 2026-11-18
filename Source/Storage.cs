@@ -36,8 +36,10 @@ namespace BudgetDesk
             {
                 if (d.Payees == null) d.Payees = new List<PayeeProfile>();
                 if (d.Templates == null) d.Templates = new List<QuickEntryTemplate>();
-                d.SchemaVersion = Ledger.CurrentSchemaVersion;
+                d.SchemaVersion = 4;
             }
+            // Older entries retain a date only and are denominated in their own account currency.
+            if (d != null && d.SchemaVersion == 4) d.SchemaVersion = 5;
             Ledger.Validate(d); return d;
         }
         public static BudgetData Clone(BudgetData d) { return Parse(Serialize(d)); }
@@ -100,31 +102,36 @@ namespace BudgetDesk
         { return EntriesCsv(d, Ledger.SearchEntries(d, query)); }
         static string EntriesCsv(BudgetData d, IEnumerable<Entry> entries)
         {
-            StringBuilder s = new StringBuilder("Date,Type,Description,Category,From account,Amount,Currency,To account,Received amount,Destination currency,Reporting amount,Reporting currency,Payee\r\n");
-            foreach (Entry e in entries.OrderBy(x => x.Date).ThenBy(x => x.Id))
+            StringBuilder s = new StringBuilder("Date,Type,Description,Category,From account,Amount,Currency,To account,Received amount,Destination currency,Reporting amount,Reporting currency,Payee,Time,Account amount,Account currency,Account units per purchase unit,Original due date,Original due time\r\n");
+            foreach (Entry e in entries.OrderBy(x => x.Date).ThenBy(x => x.Time).ThenBy(x => x.Id))
             {
                 Account a = d.Accounts.First(x => x.Id == e.AccountId);
                 Account target = d.Accounts.FirstOrDefault(x => x.Id == e.ToAccountId);
                 Category c = d.Categories.FirstOrDefault(x => x.Id == e.CategoryId);
-                string categoryText = Ledger.HasSplits(e) ? "Split: " + String.Join("; ", e.Splits.Select(p => d.Categories.First(x => x.Id == p.CategoryId).Name + "=" + p.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " " + a.Currency)) : c == null ? "" : c.Name;
+                string purchaseCurrency = e.PurchaseCurrency ?? a.Currency;
+                string categoryText = Ledger.HasSplits(e) ? "Split: " + String.Join("; ", e.Splits.Select(p => d.Categories.First(x => x.Id == p.CategoryId).Name + "=" + p.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " " + purchaseCurrency)) : c == null ? "" : c.Name;
                 string[] cells = { e.Date, e.Kind, e.Description, categoryText, a.Name,
-                    e.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), a.Currency,
+                    e.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), purchaseCurrency,
                     target == null ? "" : target.Name, e.Kind == "Transfer" ? e.ReceivedAmount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : "",
                     target == null ? "" : target.Currency,
-                    e.Kind == "Transfer" ? "" : Ledger.EntryInBase(d, e).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), d.BaseCurrency, e.Payee ?? "" };
+                    e.Kind == "Transfer" ? "" : Ledger.EntryInBase(d, e).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), d.BaseCurrency, e.Payee ?? "", e.Time,
+                    Ledger.AccountAmount(e.Amount, e.ExchangeRate).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), a.Currency,
+                    e.ExchangeRate == 0 ? "" : e.ExchangeRate.ToString(System.Globalization.CultureInfo.InvariantCulture), e.ScheduledDate, e.ScheduledTime };
                 s.AppendLine(String.Join(",", cells.Select(Cell)));
             }
             return s.ToString();
         }
         public static string PlansCsv(BudgetData d)
         {
-            StringBuilder s = new StringBuilder("Due date,Description,Category,Account,Amount,Currency,Estimated reporting amount,Reporting currency,Status\r\n");
-            foreach (PlannedExpense p in d.PlannedExpenses.OrderBy(x => x.DueDate).ThenBy(x => x.Id))
+            StringBuilder s = new StringBuilder("Due date,Description,Category,Account,Amount,Currency,Estimated reporting amount,Reporting currency,Status,Due time,Account amount,Account currency,Account units per purchase unit\r\n");
+            foreach (PlannedExpense p in d.PlannedExpenses.OrderBy(x => x.DueDate).ThenBy(x => x.DueTime).ThenBy(x => x.Id))
             {
                 Account a = d.Accounts.First(x => x.Id == p.AccountId);
                 Category c = d.Categories.First(x => x.Id == p.CategoryId);
-                string[] cells = { p.DueDate, p.Description, c.Name, a.Name, p.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), a.Currency,
-                    Ledger.PlanInBase(d, p).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), d.BaseCurrency, "Planned - not deducted" };
+                string[] cells = { p.DueDate, p.Description, c.Name, a.Name, p.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), p.PurchaseCurrency ?? a.Currency,
+                    Ledger.PlanInBase(d, p).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), d.BaseCurrency, "Planned - not deducted", p.DueTime,
+                    Ledger.AccountAmount(p.Amount, p.ExchangeRate).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), a.Currency,
+                    p.ExchangeRate == 0 ? "" : p.ExchangeRate.ToString(System.Globalization.CultureInfo.InvariantCulture) };
                 s.AppendLine(String.Join(",", cells.Select(Cell)));
             }
             return s.ToString();

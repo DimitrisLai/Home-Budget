@@ -81,28 +81,28 @@ internal static class UiSmokeTests
                 string bank = main.Data.Accounts[0].Id, cash = main.Data.Accounts[1].Id;
                 main.ShowPage(1);
                 Dialog("EntryEditor", new object[] { null, "Expense" }, delegate(Form f) {
-                    Field(f, "Description").Text = "Groceries"; ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 250.25m;
+                    Field(f, "Description").Text = "Groceries"; ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 250.25m;
                 }, "new-expense", true);
                 Check(Ledger.Balance(main.Data, bank, DateTime.Today) == 9749.75m && main.Data.Entries.Count == 1, "expense form deducts its amount");
                 Dialog("EntryEditor", new object[] { main.Data.Entries[0], "Expense" }, delegate(Form f) {
-                    ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 300m;
+                    ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 300m;
                 }, null, true);
                 Check(Ledger.Balance(main.Data, bank, DateTime.Today) == 9700m && main.Data.Entries.Count == 1, "editing an expense replaces its balance effect");
                 Dialog("EntryEditor", new object[] { null, "Income" }, delegate(Form f) {
-                    Field(f, "Description").Text = "Pay"; ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 1000m;
+                    Field(f, "Description").Text = "Pay"; ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 1000m;
                     Check(!Field(f, "Expense category").Enabled, "income form disables expense category");
                 }, null, true);
                 Check(Ledger.Balance(main.Data, bank, DateTime.Today) == 10700m, "income form credits its selected account");
                 Dialog("EntryEditor", new object[] { null, "Transfer" }, delegate(Form f) {
-                    Field(f, "Description").Text = "ATM withdrawal"; ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 100m;
+                    Field(f, "Description").Text = "ATM withdrawal"; ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 100m;
                     Check(!Field(f, "Received (target currency)").Enabled && ((NumericUpDown)Field(f, "Received (target currency)")).Value == 100m, "same-currency transfer fills the received amount");
                 }, "new-transfer", true);
                 Check(Ledger.Balance(main.Data, bank, DateTime.Today) == 10600m && Ledger.Balance(main.Data, cash, DateTime.Today) == 600m, "transfer form updates both accounts");
                 Check(Ledger.MonthTotal(main.Data, DateTime.Today, "Expense") == 300m, "transfer is excluded from spending in the live UI");
                 main.ShowPage(0);
                 Dialog("BillEditor", new object[] { null }, delegate(Form f) {
-                    Field(f, "Payment name").Text = "Internet"; ((NumericUpDown)Field(f, "Amount (account currency)")).Value = 99m;
-                    ((DateTimePicker)Field(f, "Next unpaid date")).Value = DateTime.Today;
+                    Field(f, "Payment name").Text = "Internet"; ((NumericUpDown)f.Controls.Find("EntryAmount", true).Single()).Value = 99m;
+                    ((DateTimePicker)f.Controls.Find("BillDueDate", true).Single()).Value = DateTime.Today;
                 }, "new-recurring-payment", true);
                 Check(main.Data.Bills.Count == 1 && main.Data.Entries.Count == 4 && Ledger.Balance(main.Data, bank, DateTime.Today) == 10501m, "due recurring form records once and deducts its account");
                 BudgetData reloaded = main.Store.Load();

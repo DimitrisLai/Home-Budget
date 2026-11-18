@@ -5,12 +5,14 @@ set "BUDGET_COMPILER=%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 if not exist "%BUDGET_COMPILER%" set "BUDGET_COMPILER=%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\csc.exe"
 if not exist "%BUDGET_COMPILER%" goto compiler_missing
 if not exist "Source\StartupDiagnostics.cs" goto source_missing
+set "BUDGET_OUTPUT=%~dp0BudgetDesk.exe"
+if exist "%~dp0..\BudgetDesk.exe.config" set "BUDGET_OUTPUT=%~dp0..\BudgetDesk.exe"
 echo Building Budget Desk with the Microsoft Windows C# compiler...
-"%BUDGET_COMPILER%" /nologo /target:winexe /platform:anycpu /optimize+ /langversion:5 /codepage:65001 /win32manifest:Source\app.manifest /win32icon:Source\BudgetDesk.ico /out:BudgetDesk.rebuilt.exe /reference:System.dll /reference:System.Core.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll /reference:System.Web.Extensions.dll Source\Domain.cs Source\Storage.cs Source\Ui.cs Source\QuickEntry.cs Source\Layouts.cs Source\StartupDiagnostics.cs Source\Program.cs
+"%BUDGET_COMPILER%" /nologo /target:winexe /platform:anycpu /optimize+ /langversion:5 /codepage:65001 /win32manifest:Source\app.manifest /win32icon:Source\BudgetDesk.ico /out:BudgetDesk.rebuilt.exe /reference:System.dll /reference:System.Core.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll /reference:System.Web.Extensions.dll Source\*.cs
 if errorlevel 1 goto build_failed
-move /y "BudgetDesk.rebuilt.exe" "BudgetDesk.exe" >nul
+move /y "BudgetDesk.rebuilt.exe" "%BUDGET_OUTPUT%" >nul
 if errorlevel 1 goto replace_failed
-echo Budget Desk 1.0.1 built successfully.
+echo Budget Desk 1.1.0 built successfully.
 if /i not "%~1"=="/quiet" pause
 exit /b 0
 

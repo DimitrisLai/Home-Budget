@@ -36,7 +36,7 @@ namespace BudgetDesk
             b.FlatAppearance.MouseOverBackColor = primary ? Color.FromArgb(0, 101, 96) : Pale;
             return b;
         }
-        internal static ComboBox Combo() { return new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Font = Font(10.5f, false), Dock = DockStyle.Fill, Margin = new Padding(0, 10, 0, 8) }; }
+        internal static ComboBox Combo() { return new NamePicker { DropDownStyle = ComboBoxStyle.DropDownList, Font = Font(10.5f, false), Dock = DockStyle.Fill, Margin = new Padding(0, 10, 0, 8) }; }
         internal static NumericUpDown Money(decimal value)
         {
             return new NumericUpDown { DecimalPlaces = 2, Minimum = -999999999999m, Maximum = 999999999999m,
@@ -62,7 +62,7 @@ namespace BudgetDesk
             return g;
         }
         internal static void Column(DataGridView g, string name, string label, float weight)
-        { g.Columns.Add(new DataGridViewTextBoxColumn { Name = name, HeaderText = label, FillWeight = weight, MinimumWidth = 70, SortMode = DataGridViewColumnSortMode.NotSortable }); }
+        { g.Columns.Add(new DataGridViewTextBoxColumn { Name = name, HeaderText = label, FillWeight = weight, MinimumWidth = 70, SortMode = DataGridViewColumnSortMode.Programmatic }); }
     }
 
     internal sealed class Pick
@@ -82,10 +82,11 @@ namespace BudgetDesk
             { "Internet", "◎" }, { "Food", "◒" }, { "Coins", "◉" }, { "Other", "◇" }
         };
         internal static string Glyph(string key) { return key != null && All.ContainsKey(key) ? All[key] : "◇"; }
+        internal static string Named(string name, string key) { return name + "   " + Glyph(key); }
         internal static ComboBox Picker(string key)
         {
             ComboBox c = Theme.Combo();
-            foreach (var x in All) c.Items.Add(new Pick(x.Key, x.Value + "    " + x.Key));
+            foreach (var x in All.OrderBy(pair => pair.Key, StringComparer.CurrentCultureIgnoreCase)) c.Items.Add(new Pick(x.Key, Named(x.Key, x.Key)));
             Choose(c, key); return c;
         }
         internal static void Choose(ComboBox c, string id)
@@ -230,7 +231,7 @@ namespace BudgetDesk
         public MainForm(BudgetStore store, BudgetData data, bool isDemo)
         {
             Store = store; Data = data; demo = isDemo;
-            Text = "Budget Desk 1.0.1" + (demo ? "  |  DEMO DATA" : "");
+            Text = "Budget Desk 1.1.0" + (demo ? "  |  DEMO DATA" : "");
             MinimumSize = new Size(1000, 700);
             Rectangle workingArea = Screen.PrimaryScreen.WorkingArea;
             Size = new Size(Math.Min(1320, Math.Max(1000, workingArea.Width - 36)), Math.Min(930, Math.Max(700, workingArea.Height - 36)));
@@ -260,7 +261,7 @@ namespace BudgetDesk
             }
             shell.Controls.Add(nav, 0, 1);
             pageHost = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0) }; shell.Controls.Add(pageHost, 0, 2);
-            status = Theme.Label(demo ? "DEMO  /  Sample figures only. Your real budget is separate." : "Saved on this computer  /  Your next step: add an account.", 9, false, Theme.Muted);
+            status = Theme.Label(demo ? "DEMO  /  Sample figures only. Your real budget is separate." : (Data.Accounts.Count == 0 ? "Saved on this computer  /  Your next step: add an account." : "Saved on this computer"), 9, false, Theme.Muted);
             shell.Controls.Add(status, 0, 3); Controls.Add(shell);
             ShowPage(0);
             clock = new Timer { Interval = 60000 };
@@ -289,13 +290,22 @@ namespace BudgetDesk
             if (accountDragId != null) return;
             try
             {
-                BudgetData d = BudgetStore.Clone(Data); int count = Ledger.PostDue(d, DateTime.Today);
+                BudgetData d = BudgetStore.Clone(Data); int count = Ledger.PostDue(d, DateTime.Now);
                 if (count > 0)
                 {
                     Store.Save(d); Data = d; ShowPage(pageIndex);
                     status.Text = count + " recurring payment" + (count == 1 ? "" : "s") + " recorded. View them in Daily expenses.";
                 }
-                else if (initial && !File.Exists(Store.FilePath)) Store.Save(Data);
+                else
+                {
+                    if (initial && !File.Exists(Store.FilePath)) Store.Save(Data);
+                    if (pageIndex == 1 && showPlans && Data.PlannedExpenses.Count > 0)
+                    {
+                        FillPlans(false);
+                        Label overdue = Descendants(currentPage).OfType<Label>().FirstOrDefault(l => l.Name == "OverduePlanAmount");
+                        if (overdue != null) overdue.Text = Theme.MoneyText(Data.PlannedExpenses.Where(p => Ledger.PlanOverdue(p, DateTime.Now)).Sum(p => Ledger.PlanInBase(Data, p)), Data.BaseCurrency);
+                    }
+                }
                 reportingTimerError = false;
             }
             catch (Exception ex)
@@ -402,8 +412,8 @@ namespace BudgetDesk
             Label amount = Theme.Label(Theme.MoneyText(Ledger.TotalBalance(Data, DateTime.Today), Data.BaseCurrency), 16, true, Color.White); amount.TextAlign = ContentAlignment.MiddleRight; amount.AutoEllipsis = true;
             total.Controls.Add(amount); total.Controls.Add(caption);
             Panel bills = new Panel { Name = "RecurringCards", AutoScroll = false, BackColor = Theme.Canvas };
-            if (!Data.Bills.Any(x => x.Id == selectedBillId)) selectedBillId = Data.Bills.OrderBy(x => Ledger.DueDate(x)).Select(x => x.Id).FirstOrDefault();
-            foreach (RecurringBill bill in Data.Bills.OrderBy(x => Ledger.DueDate(x))) bills.Controls.Add(BillCard(bill, bills));
+            if (!Data.Bills.Any(x => x.Id == selectedBillId)) selectedBillId = Data.Bills.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase).Select(x => x.Id).FirstOrDefault();
+            foreach (RecurringBill bill in Data.Bills.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)) bills.Controls.Add(BillCard(bill, bills));
             if (Data.Bills.Count == 0)
             {
                 Label empty = Theme.Label("Add rent, subscriptions or insurance. Each payment has its own account and repeat interval.", 10.5f, false, Theme.Muted);
@@ -419,12 +429,12 @@ namespace BudgetDesk
             record.Click += delegate { ActionSafely(delegate {
                 RecurringBill bill = selected(); string id = bill.Id;
                 if (!Confirm("Record " + bill.Name + " for " + Theme.MoneyText(bill.Amount, Data.Accounts.First(x => x.Id == bill.AccountId).Currency) + "?\n\nIt will be deducted from its account and included in expenses.")) return;
-                Commit(d => Ledger.RecordNext(d, d.Bills.First(x => x.Id == id), DateTime.Today));
+                Commit(d => Ledger.RecordNext(d, d.Bills.First(x => x.Id == id), DateTime.Now));
             }); };
             toggle.Click += delegate { ActionSafely(delegate {
                 RecurringBill bill = selected(); string id = bill.Id;
-                if (!bill.Enabled && bill.AutoRecord && Ledger.DueDate(bill) <= DateTime.Today && !Confirm("Resuming this schedule will record its overdue payments. Continue?")) return;
-                Commit(d => { RecurringBill value = d.Bills.First(x => x.Id == id); value.Enabled = !value.Enabled; Ledger.PostDue(d, DateTime.Today); });
+                if (!bill.Enabled && bill.AutoRecord && Ledger.DueMoment(bill) <= DateTime.Now && !Confirm("Resuming this schedule will record its overdue payments. Continue?")) return;
+                Commit(d => { RecurringBill value = d.Bills.First(x => x.Id == id); value.Enabled = !value.Enabled; Ledger.PostDue(d, DateTime.Now); });
             }); };
             Panel billHeader = Section("Recurring payments", Data.Bills.Count + " / 20", record, edit, toggle, addBill); billHeader.Name = "RecurringHeader";
             Label hint = Theme.Label("Click a payment to select · Double-click to edit · Hover for full details · Monthly figures are on Monthly overview.", 8, false, Theme.Muted); hint.Name = "DashboardHint"; hint.Dock = DockStyle.None;
@@ -434,20 +444,20 @@ namespace BudgetDesk
         }
         private Panel BillCard(RecurringBill bill, Panel host)
         {
-            Account account = Data.Accounts.First(x => x.Id == bill.AccountId); DateTime due = Ledger.DueDate(bill);
+            Account account = Data.Accounts.First(x => x.Id == bill.AccountId); DateTime due = Ledger.DueMoment(bill);
             Panel card = new Panel { Name = "RecurringCard", Tag = bill.Id, Size = new Size(240, 64), Padding = new Padding(7, 3, 7, 3), Cursor = Cursors.Hand, BackColor = bill.Id == selectedBillId ? Theme.Pale : Color.White, TabStop = true, AccessibleName = bill.Name };
             TableLayoutPanel fields = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 3, Margin = new Padding(0) };
             fields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); fields.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 62));
             fields.RowStyles.Add(new RowStyle(SizeType.Absolute, 15)); fields.RowStyles.Add(new RowStyle(SizeType.Absolute, 18)); fields.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            Label title = Theme.Label(Icons.Glyph(bill.Icon) + " " + bill.Name, 9, true, bill.Enabled ? Theme.Ink : Theme.Muted); title.AutoEllipsis = true; fields.Controls.Add(title, 0, 0); fields.SetColumnSpan(title, 2);
-            Label amount = Theme.Label(Theme.MoneyText(bill.Amount, account.Currency), 11, true, Theme.Teal); amount.AutoEllipsis = true; fields.Controls.Add(amount, 0, 1);
-            Label date = Theme.Label(due.ToString("d MMM", CultureInfo.GetCultureInfo("en-GB")), 8.5f, true, bill.Enabled && due <= DateTime.Today ? Theme.Red : Theme.Muted); date.TextAlign = ContentAlignment.MiddleRight; fields.Controls.Add(date, 1, 1);
+            Label title = Theme.Label(Icons.Named(bill.Name, bill.Icon), 9, true, bill.Enabled ? Theme.Ink : Theme.Muted); title.AutoEllipsis = true; fields.Controls.Add(title, 0, 0); fields.SetColumnSpan(title, 2);
+            Label amount = Theme.Label(Theme.MoneyText(bill.Amount, bill.PurchaseCurrency ?? account.Currency), 11, true, Theme.Teal); amount.AutoEllipsis = true; fields.Controls.Add(amount, 0, 1);
+            Label date = Theme.Label(due.ToString(String.IsNullOrEmpty(bill.DueTime) ? "d MMM" : "d/M HH:mm", CultureInfo.GetCultureInfo("en-GB")), 8.5f, true, bill.Enabled && due <= DateTime.Now ? Theme.Red : Theme.Muted); date.TextAlign = ContentAlignment.MiddleRight; fields.Controls.Add(date, 1, 1);
             string unit = bill.Unit == "Months" ? "mo" : bill.Unit == "Weeks" ? "wk" : bill.Unit == "Years" ? "yr" : "d";
             string shortAccount = account.Name.Length > 14 ? account.Name.Substring(0, 13) + "…" : account.Name;
             Label detail = Theme.Label(shortAccount + " · " + bill.Interval + unit + " · " + (!bill.Enabled ? "Paused" : bill.AutoRecord ? "Auto" : "Manual"), 7.5f, false, Theme.Muted); detail.AutoEllipsis = true; fields.Controls.Add(detail, 0, 2); fields.SetColumnSpan(detail, 2);
             card.Controls.Add(fields);
             ToolTip tip = new ToolTip { InitialDelay = 250, AutoPopDelay = 15000 };
-            string text = bill.Name + "\n" + Theme.MoneyText(bill.Amount, account.Currency) + "\nFrom: " + account.Name + "\nNext due: " + due.ToString("d MMM yyyy") + "\nEvery " + bill.Interval + " " + bill.Unit.ToLowerInvariant() + "\n" + (!bill.Enabled ? "Paused" : bill.AutoRecord ? "Automatic recording" : "Manual recording");
+            string text = bill.Name + "\n" + Theme.MoneyText(bill.Amount, bill.PurchaseCurrency ?? account.Currency) + "\nFrom: " + account.Name + "\nNext due: " + Ledger.DateLabel(Ledger.Iso(due), bill.DueTime) + "\nEvery " + bill.Interval + " " + bill.Unit.ToLowerInvariant() + "\n" + (!bill.Enabled ? "Paused" : bill.AutoRecord ? "Automatic recording" : "Manual recording");
             foreach (Control control in new Control[] { card, fields, title, amount, date, detail })
             {
                 tip.SetToolTip(control, text);
@@ -464,11 +474,11 @@ namespace BudgetDesk
             decimal balance = Ledger.Balance(Data, a.Id, DateTime.Today);
             Panel p = new Panel { Name = "AccountCard", Tag = a.Id, Width = 240, Height = 58, BackColor = Color.White, Margin = new Padding(0), Padding = new Padding(9, 4, 9, 4), Cursor = Cursors.Hand };
             TableLayoutPanel t = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 2, Margin = new Padding(0) };
-            t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 23)); t.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20));
+            t.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 25)); t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20));
             t.RowStyles.Add(new RowStyle(SizeType.Absolute, 18)); t.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            Label icon = Theme.Label(Icons.Glyph(a.Icon), 18, true, Theme.Teal); t.Controls.Add(icon, 0, 0); t.SetRowSpan(icon, 2);
-            Label name = Theme.Label(a.Name, 9.5f, true, Theme.Ink); name.AutoEllipsis = true; t.Controls.Add(name, 1, 0);
-            Label value = Theme.Label(Theme.MoneyText(balance, a.Currency), 13, true, balance < 0 ? Theme.Red : Theme.Ink); value.AutoEllipsis = true; t.Controls.Add(value, 1, 1); t.SetColumnSpan(value, 2);
+            Label icon = Theme.Label(Icons.Glyph(a.Icon), 11, false, Theme.Teal); icon.Name = "AccountIcon"; icon.TextAlign = ContentAlignment.MiddleCenter; t.Controls.Add(icon, 1, 0);
+            Label name = Theme.Label(a.Name, 9.5f, true, Theme.Ink); name.Name = "AccountName"; name.AutoEllipsis = true; t.Controls.Add(name, 0, 0);
+            Label value = Theme.Label(Theme.MoneyText(balance, a.Currency), 13, true, balance < 0 ? Theme.Red : Theme.Ink); value.Name = "AccountBalance"; value.AutoEllipsis = true; t.Controls.Add(value, 0, 1); t.SetColumnSpan(value, 3);
             Label edit = Theme.Label("•••", 9, true, Theme.Muted); t.Controls.Add(edit, 2, 0); p.Controls.Add(t);
             ToolTip details = new ToolTip { InitialDelay = 300, AutoPopDelay = 10000 };
             foreach (Control c in new Control[] { p, t, icon, name, value, edit }) details.SetToolTip(c, a.Name + "\n" + Theme.MoneyText(balance, a.Currency) + "\nDrag to reorder · Click to edit display position or account details");
@@ -538,14 +548,14 @@ namespace BudgetDesk
         {
             ComboBox c = Theme.Combo();
             if (includeAll) c.Items.Add(new Pick("", "All accounts"));
-            foreach (Account a in Data.Accounts) c.Items.Add(new Pick(a.Id, Icons.Glyph(a.Icon) + "  " + a.Name + "  (" + a.Currency + ")"));
-            Icons.Choose(c, selected); return c;
+            foreach (Account a in Data.Accounts.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)) c.Items.Add(new Pick(a.Id, Icons.Named(a.Name, a.Icon) + "  (" + a.Currency + ")"));
+            Icons.Choose(c, !includeAll && String.IsNullOrEmpty(selected) && Data.Accounts.Count > 0 ? Data.Accounts[0].Id : selected); return c;
         }
         private ComboBox CategoryChoices(string selected, bool includeAll)
         {
             ComboBox c = Theme.Combo(); if (includeAll) c.Items.Add(new Pick("", "All categories"));
-            foreach (Category cat in Data.Categories) c.Items.Add(new Pick(cat.Id, Icons.Glyph(cat.Icon) + "  " + cat.Name));
-            Icons.Choose(c, selected); return c;
+            foreach (Category cat in Data.Categories.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)) c.Items.Add(new Pick(cat.Id, Icons.Named(cat.Name, cat.Icon)));
+            Icons.Choose(c, !includeAll && String.IsNullOrEmpty(selected) && Data.Categories.Count > 0 ? Data.Categories[0].Id : selected); return c;
         }
         private ComboBox Strings(IEnumerable<string> values, string selected)
         {
@@ -584,7 +594,7 @@ namespace BudgetDesk
             {
                 metrics.Controls.Add(Metric("ALL ONE-OFF PLANS", Theme.MoneyText(Data.PlannedExpenses.Sum(p => Ledger.PlanInBase(Data, p)), Data.BaseCurrency), "Not deducted · all dates and accounts", false), 0, 0);
                 metrics.Controls.Add(Metric("DUE IN NEXT 30 DAYS", Theme.MoneyText(Ledger.OneOffTotal(Data, DateTime.Today, DateTime.Today.AddDays(30)), Data.BaseCurrency), "Today through the next 30 days", false), 1, 0);
-                metrics.Controls.Add(Metric("OVERDUE", Theme.MoneyText(Data.PlannedExpenses.Where(p => Ledger.Day(p.DueDate) < DateTime.Today).Sum(p => Ledger.PlanInBase(Data, p)), Data.BaseCurrency), "Still planned · record only when paid", true), 2, 0);
+                metrics.Controls.Add(Metric("OVERDUE", Theme.MoneyText(Data.PlannedExpenses.Where(p => Ledger.PlanOverdue(p, DateTime.Now)).Sum(p => Ledger.PlanInBase(Data, p)), Data.BaseCurrency), "Still planned · record only when paid", true, "OverduePlanAmount"), 2, 0);
             }
             else if (allHistory)
             {
@@ -627,7 +637,7 @@ namespace BudgetDesk
             filters.Controls.Add(account, 0, 0); filters.Controls.Add(category, 1, 0); filters.Controls.Add(kind, 2, 0); filters.Controls.Add(search, 3, 0); t.Controls.Add(filters, 0, 4);
             PagedGridPanel pager = new PagedGridPanel(showPlans ? "PlansPager" : "EntriesPager"); entriesPager = pager; entriesGrid = pager.Grid;
             pager.PageChanged += delegate { if (showPlans) plansPageIndex = pager.PageIndex; else entriesPageIndex = pager.PageIndex; };
-            Theme.Column(entriesGrid, "date", showPlans ? "DUE DATE" : "DATE", 13); Theme.Column(entriesGrid, "description", "DESCRIPTION", 26); Theme.Column(entriesGrid, "category", "CATEGORY", 17);
+            Theme.Column(entriesGrid, "date", showPlans ? "DUE DATE / TIME" : "DATE / TIME", 22); Theme.Column(entriesGrid, "description", "DESCRIPTION", 26); Theme.Column(entriesGrid, "category", "CATEGORY", 17);
             Theme.Column(entriesGrid, "account", "ACCOUNT", 22); Theme.Column(entriesGrid, "amount", "AMOUNT", 16); Theme.Column(entriesGrid, "type", showPlans ? "STATUS" : "TYPE", 14);
             bool extraFilters = allHistory && !showPlans;
             if (extraFilters) t.Controls.Add(HistoryFilters(), 0, 5);
@@ -663,16 +673,17 @@ namespace BudgetDesk
             if (categoryFilter != "") items = items.Where(p => p.CategoryId == categoryFilter);
             if (!String.IsNullOrWhiteSpace(searchText)) items = items.Where(p => p.Description.IndexOf(searchText, StringComparison.CurrentCultureIgnoreCase) >= 0);
             if (planWhen == "Next 30 days") items = items.Where(p => Ledger.Day(p.DueDate) >= DateTime.Today && Ledger.Day(p.DueDate) <= DateTime.Today.AddDays(30));
-            else if (planWhen == "Overdue") items = items.Where(p => Ledger.Day(p.DueDate) < DateTime.Today);
-            List<PlannedExpense> list = items.OrderBy(p => p.DueDate).ThenBy(p => p.Id).ToList();
+            else if (planWhen == "Overdue") items = items.Where(p => Ledger.PlanOverdue(p, DateTime.Now));
+            List<PlannedExpense> list = items.OrderBy(p => p.DueDate).ThenBy(p => p.DueTime).ThenBy(p => p.Id).ToList();
             List<GridItem> rows = new List<GridItem>();
             foreach (PlannedExpense p in list)
             {
                 Account a = Data.Accounts.First(x => x.Id == p.AccountId); Category c = Data.Categories.First(x => x.Id == p.CategoryId);
                 int days = (Ledger.Day(p.DueDate) - DateTime.Today).Days;
-                string when = days < 0 ? "Overdue " + (-days) + "d" : days == 0 ? "Due today" : "In " + days + " days";
-                rows.Add(new GridItem(p.Id, Ledger.Day(p.DueDate).ToString("d MMM yyyy", CultureInfo.GetCultureInfo("en-GB")), p.Description, Icons.Glyph(c.Icon) + "  " + c.Name,
-                    a.Name, Theme.MoneyText(p.Amount, a.Currency), when) { ColorColumn = 5, Color = days < 0 ? Theme.Red : Theme.Muted });
+                bool late = Ledger.PlanOverdue(p, DateTime.Now);
+                string when = late && days == 0 ? "Overdue today" : days < 0 ? "Overdue " + (-days) + "d" : days == 0 ? "Due today" : "In " + days + " days";
+                rows.Add(new GridItem(p.Id, Ledger.DateLabel(p.DueDate, p.DueTime), p.Description, Icons.Named(c.Name, c.Icon),
+                    a.Name, Theme.MoneyText(p.Amount, p.PurchaseCurrency ?? a.Currency), when) { SortKeys = new object[] { Ledger.Moment(p.DueDate, p.DueTime), p.Description, c.Name, a.Name, p.Amount, when }, ColorColumn = 5, Color = late ? Theme.Red : Theme.Muted });
             }
             int wantedPage = resetPage ? 0 : plansPageIndex;
             entriesPager.SetRows(rows, resetPage); entriesPager.PageIndex = wantedPage;
@@ -683,23 +694,25 @@ namespace BudgetDesk
             if (showPlans) { FillPlans(resetPage); return; }
             List<GridItem> rows = new List<GridItem>();
             List<Entry> list;
-            try { list = Ledger.SearchEntries(Data, BuildEntrySearch()).OrderByDescending(x => x.Date).ThenByDescending(x => x.Id).ToList(); }
+            try { list = Ledger.SearchEntries(Data, BuildEntrySearch()).OrderByDescending(x => x.Date).ThenByDescending(x => x.Time).ThenByDescending(x => x.Id).ToList(); }
             catch (BudgetException ex) { entriesPager.SetRows(new GridItem[0], true); filteredTotal.Text = ex.Message; UpdateHistoryMetrics(0, 0); return; }
             foreach (Entry e in list)
             {
                 Account a = Data.Accounts.First(x => x.Id == e.AccountId); Category c = Data.Categories.FirstOrDefault(x => x.Id == e.CategoryId);
                 Account to = Data.Accounts.FirstOrDefault(x => x.Id == e.ToAccountId);
                 bool split = Ledger.HasSplits(e), share = split && categoryFilter != "";
-                string cat = e.Kind == "Transfer" ? "Between accounts" : split ? (share ? Data.Categories.First(x => x.Id == categoryFilter).Name + " [split]" : "Split · " + e.Splits.Count + " categories") : c == null ? "Income" : Icons.Glyph(c.Icon) + "  " + c.Name;
+                string cat = e.Kind == "Transfer" ? "Between accounts" : split ? (share ? Data.Categories.First(x => x.Id == categoryFilter).Name + " [split]" : "Split · " + e.Splits.Count + " categories") : c == null ? "Income" : Icons.Named(c.Name, c.Icon);
                 decimal shownAmount = share ? Ledger.CategoryExpenseAmount(e, categoryFilter) : e.Amount;
-                string amount = (e.Kind == "Expense" ? "− " : e.Kind == "Income" ? "+ " : "↔ ") + Theme.MoneyText(shownAmount, a.Currency);
-                rows.Add(new GridItem(e.Id, Ledger.Day(e.Date).ToString("d MMM yyyy", CultureInfo.GetCultureInfo("en-GB")), (String.IsNullOrWhiteSpace(e.Payee) ? "" : e.Payee + " · ") + e.Description + (share ? "  [share of " + Theme.MoneyText(e.Amount, a.Currency) + "]" : split ? "  [split]" : "") + (!String.IsNullOrEmpty(e.BillId) ? "  [bill]" : !String.IsNullOrEmpty(e.PlanId) ? "  [one-off]" : ""), cat,
-                    a.Name + (to == null ? "" : " → " + to.Name), amount, e.Kind) { ColorColumn = 4, Color = e.Kind == "Income" ? Theme.Teal : e.Kind == "Expense" ? Theme.Red : Theme.Muted });
+                string amount = (e.Kind == "Expense" ? "− " : e.Kind == "Income" ? "+ " : "↔ ") + Theme.MoneyText(shownAmount, e.PurchaseCurrency ?? a.Currency);
+                rows.Add(new GridItem(e.Id, Ledger.DateLabel(e.Date, e.Time), (String.IsNullOrWhiteSpace(e.Payee) ? "" : e.Payee + " · ") + e.Description + (share ? "  [share of " + Theme.MoneyText(e.Amount, e.PurchaseCurrency ?? a.Currency) + "]" : split ? "  [split]" : "") + (!String.IsNullOrEmpty(e.BillId) ? "  [bill]" : !String.IsNullOrEmpty(e.PlanId) ? "  [one-off]" : ""), cat,
+                    a.Name + (to == null ? "" : " → " + to.Name), amount, e.Kind) { SortKeys = new object[] {
+                        Ledger.Moment(e.Date, e.Time), (String.IsNullOrWhiteSpace(e.Payee) ? "" : e.Payee + " · ") + e.Description, cat,
+                        a.Name + (to == null ? "" : " → " + to.Name), e.Kind == "Expense" ? -shownAmount : shownAmount, e.Kind }, ColorColumn = 4, Color = e.Kind == "Income" ? Theme.Teal : e.Kind == "Expense" ? Theme.Red : Theme.Muted });
             }
             int wantedPage = resetPage ? 0 : entriesPageIndex;
             entriesPager.SetRows(rows, resetPage); entriesPager.PageIndex = wantedPage;
             decimal filtered = list.Where(x => x.Kind == "Expense").Sum(x => categoryFilter == "" ? Ledger.EntryInBase(Data, x) : Ledger.CategoryExpenseInBase(Data, x, categoryFilter));
-            filteredTotal.Text = list.Count + " matching entries  /  Expenses across these results: " + Theme.MoneyText(filtered, Data.BaseCurrency) + (allHistory ? "  /  Amount filters use the full entry in its account currency." : "  /  Search payee, description, account or category.");
+            filteredTotal.Text = list.Count + " matching entries  /  Expenses across these results: " + Theme.MoneyText(filtered, Data.BaseCurrency) + (allHistory ? "  /  Amount filters use the full entry in its transaction currency." : "  /  Search payee, description, account or category.");
             UpdateHistoryMetrics(list.Where(x => x.Kind == "Income").Sum(x => Ledger.EntryInBase(Data, x)), filtered);
         }
 
@@ -727,10 +740,11 @@ namespace BudgetDesk
                 decimal actual = entries.Sum(e => Ledger.CategoryExpenseInBase(Data, e, c.Id));
                 decimal budget = c.MonthlyBudgetCzk / Ledger.Rate(Data, Data.BaseCurrency);
                 if (actual > 0) chart.Values.Add(new KeyValuePair<string, decimal>(c.Name, actual));
-                GridItem item = new GridItem(c.Id, Icons.Glyph(c.Icon) + "  " + c.Name, Theme.MoneyText(actual, Data.BaseCurrency), budget > 0 ? Theme.MoneyText(budget, Data.BaseCurrency) : "—", budget > 0 ? Theme.MoneyText(budget - actual, Data.BaseCurrency) : "—");
+                GridItem item = new GridItem(c.Id, Icons.Named(c.Name, c.Icon), Theme.MoneyText(actual, Data.BaseCurrency), budget > 0 ? Theme.MoneyText(budget, Data.BaseCurrency) : "—", budget > 0 ? Theme.MoneyText(budget - actual, Data.BaseCurrency) : "—");
+                item.SortKeys = new object[] { c.Name, actual, budget > 0 ? (decimal?)budget : null, budget > 0 ? (decimal?)(budget - actual) : null };
                 if (budget > 0 && actual > budget) { item.ColorColumn = 3; item.Color = Theme.Red; } categoryRows.Add(item);
             }
-            overviewPager.SetRows(categoryRows, true);
+            overviewPager.SetRows(categoryRows.OrderBy(x => (string)x.Key(0), StringComparer.CurrentCultureIgnoreCase), true);
             detail.Controls.Add(chart, 0, 0); detail.Controls.Add(overviewPager, 1, 0); t.Controls.Add(detail, 0, 3);
             t.Controls.Add(Theme.Label("Budgets are optional; set them in Daily expenses → Categories. Transfers are excluded from income and expense totals. Foreign entries keep the rate saved when recorded.", 9, false, Theme.Muted), 0, 4);
         }
@@ -761,16 +775,30 @@ namespace BudgetDesk
             Theme.Column(grid, "month", "MONTH", 16); Theme.Column(grid, "income", "INCOME", 17); Theme.Column(grid, "expense", "PAID EXPENSES", 18);
             Theme.Column(grid, "net", "NET", 17); Theme.Column(grid, "plans", "ONE-OFF PLANS", 18); Theme.Column(grid, "bills", "BILLS TO PAY", 18);
             grid.DefaultCellStyle.Font = Theme.Font(9, false);
+            var months = new List<GridItem>();
             for (int month = 1; month <= 12; month++)
             {
                 DateTime from = new DateTime(selectedYear, month, 1), through = new DateTime(selectedYear, month, DateTime.DaysInMonth(selectedYear, month));
                 decimal received = Ledger.MonthTotal(Data, from, "Income"), spent = Ledger.MonthTotal(Data, from, "Expense");
-                int row = grid.Rows.Add(from.ToString("MMMM", CultureInfo.GetCultureInfo("en-GB")), Theme.MoneyText(received, Data.BaseCurrency), Theme.MoneyText(spent, Data.BaseCurrency),
-                    Theme.MoneyText(received - spent, Data.BaseCurrency), Theme.MoneyText(Ledger.OneOffTotal(Data, from, through), Data.BaseCurrency), Theme.MoneyText(Ledger.PlannedTotal(Data, from, through), Data.BaseCurrency));
-                grid.Rows[row].Tag = month;
-                grid.Rows[row].Cells[3].Style.ForeColor = received - spent < 0 ? Theme.Red : Theme.Teal;
-                if (selectedYear == DateTime.Today.Year && month == DateTime.Today.Month) grid.Rows[row].DefaultCellStyle.BackColor = Theme.Pale;
+                decimal planned = Ledger.OneOffTotal(Data, from, through), scheduled = Ledger.PlannedTotal(Data, from, through);
+                months.Add(new GridItem(month.ToString(CultureInfo.InvariantCulture), from.ToString("MMMM", CultureInfo.GetCultureInfo("en-GB")), Theme.MoneyText(received, Data.BaseCurrency),
+                    Theme.MoneyText(spent, Data.BaseCurrency), Theme.MoneyText(received - spent, Data.BaseCurrency), Theme.MoneyText(planned, Data.BaseCurrency), Theme.MoneyText(scheduled, Data.BaseCurrency)) {
+                    SortKeys = new object[] { month, received, spent, received - spent, planned, scheduled }, Color = received < spent ? Theme.Red : Theme.Teal });
             }
+            ColumnOrder order = null;
+            Action showMonths = delegate {
+                grid.Rows.Clear();
+                foreach (GridItem item in order.Apply(months, (m, column) => m.Key(column)))
+                {
+                    int month = (int)item.Key(0), index = grid.Rows.Add(item.Cells);
+                    grid.Rows[index].Tag = month;
+                    grid.Rows[index].Cells[3].Style.ForeColor = item.Color;
+                    if (selectedYear == DateTime.Today.Year && month == DateTime.Today.Month) grid.Rows[index].DefaultCellStyle.BackColor = Theme.Pale;
+                }
+                int rowHeight = Math.Max(20, Math.Min(38, (grid.ClientSize.Height - grid.ColumnHeadersHeight - 2) / 12));
+                foreach (DataGridViewRow row in grid.Rows) row.Height = rowHeight;
+            };
+            order = new ColumnOrder(grid, showMonths); showMonths();
             Action fit = delegate {
                 if (WindowState == FormWindowState.Minimized || grid.IsDisposed) return;
                 int height = Math.Max(20, Math.Min(38, (grid.ClientSize.Height - grid.ColumnHeadersHeight - 2) / 12));
@@ -797,14 +825,16 @@ namespace BudgetDesk
             Theme.Column(grid, "name", "GOAL", 30); Theme.Column(grid, "target", "TARGET", 18); Theme.Column(grid, "saved", "SAVED", 18); Theme.Column(grid, "left", "LEFT", 18);
             Theme.Column(grid, "progress", "PROGRESS", 16); Theme.Column(grid, "date", "TARGET DATE", 19); Theme.Column(grid, "monthly", "PER MONTH", 18);
             List<GridItem> rows = new List<GridItem>();
-            foreach (SavingsGoal goal in Data.Goals)
+            foreach (SavingsGoal goal in Data.Goals.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase))
             {
                 bool complete = Ledger.GoalRemaining(goal) == 0, hasDate = !String.IsNullOrEmpty(goal.TargetDate);
                 string date = complete ? "Complete" : !hasDate ? "No target date" : Ledger.Day(goal.TargetDate).ToString("d MMM yyyy", CultureInfo.GetCultureInfo("en-GB"));
                 if (!complete && hasDate && Ledger.Day(goal.TargetDate) < DateTime.Today) date += " · overdue";
-                rows.Add(new GridItem(goal.Id, Icons.Glyph(goal.Icon) + "  " + goal.Name, Theme.MoneyText(goal.TargetAmount, goal.Currency), Theme.MoneyText(goal.SavedAmount, goal.Currency),
+                rows.Add(new GridItem(goal.Id, Icons.Named(goal.Name, goal.Icon), Theme.MoneyText(goal.TargetAmount, goal.Currency), Theme.MoneyText(goal.SavedAmount, goal.Currency),
                     Theme.MoneyText(Ledger.GoalRemaining(goal), goal.Currency), Ledger.GoalPercent(goal) + "%", date,
-                    hasDate && !complete ? Theme.MoneyText(Ledger.GoalMonthlyAmount(goal, DateTime.Today), goal.Currency) : "—") { ColorColumn = 5, Color = complete ? Theme.Teal : hasDate && Ledger.Day(goal.TargetDate) < DateTime.Today ? Theme.Red : Theme.Muted });
+                    hasDate && !complete ? Theme.MoneyText(Ledger.GoalMonthlyAmount(goal, DateTime.Today), goal.Currency) : "—") { SortKeys = new object[] { goal.Name, goal.TargetAmount, goal.SavedAmount, Ledger.GoalRemaining(goal), Ledger.GoalPercent(goal),
+                        hasDate && !complete ? (DateTime?)Ledger.Day(goal.TargetDate) : null, hasDate && !complete ? (decimal?)Ledger.GoalMonthlyAmount(goal, DateTime.Today) : null },
+                        ColorColumn = 5, Color = complete ? Theme.Teal : hasDate && Ledger.Day(goal.TargetDate) < DateTime.Today ? Theme.Red : Theme.Muted });
             }
             pager.PageChanged += delegate { goalsPageIndex = pager.PageIndex; }; int wantedPage = goalsPageIndex; pager.SetRows(rows, false); pager.PageIndex = wantedPage;
             grid.CellPainting += delegate(object sender, DataGridViewCellPaintingEventArgs e) {
@@ -872,10 +902,11 @@ namespace BudgetDesk
                 fields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30)); fields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20)); fields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30)); fields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
                 for (int row = 0; row < rowCount; row++) fields.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / rowCount));
                 Dictionary<string, NumericUpDown> amounts = new Dictionary<string, NumericUpDown>();
-                for (int i = 0; i < Data.Categories.Count; i++)
+                var orderedCategories = Data.Categories.OrderBy(c => c.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+                for (int i = 0; i < orderedCategories.Count; i++)
                 {
-                    Category category = Data.Categories[i]; ExpenseSplit old = initial.FirstOrDefault(p => p.CategoryId == category.Id);
-                    Label label = Theme.Label(Icons.Glyph(category.Icon) + "  " + category.Name, 9.5f, true, Theme.Ink); label.AutoEllipsis = true;
+                    Category category = orderedCategories[i]; ExpenseSplit old = initial.FirstOrDefault(p => p.CategoryId == category.Id);
+                    Label label = Theme.Label(Icons.Named(category.Name, category.Icon), 9.5f, true, Theme.Ink); label.AutoEllipsis = true;
                     NumericUpDown amount = Theme.Money(old == null ? 0 : old.Amount); amount.Minimum = 0; amount.Name = "SplitAmount-" + category.Id; amount.Margin = new Padding(3, 6, 14, 6); amount.Font = Theme.Font(10, false);
                     fields.Controls.Add(label, i % 2 * 2, i / 2); fields.Controls.Add(amount, i % 2 * 2 + 1, i / 2); amounts.Add(category.Id, amount);
                 }
@@ -887,7 +918,11 @@ namespace BudgetDesk
                 Button save = Theme.Button("Use split", true), cancel = Theme.Button("Cancel", false); save.Name = "SavePurchaseSplit"; cancel.DialogResult = DialogResult.Cancel;
                 buttons.Controls.Add(save); buttons.Controls.Add(cancel); shell.Controls.Add(buttons, 0, 3); f.Controls.Add(shell); f.AcceptButton = save; f.CancelButton = cancel;
                 save.Click += delegate {
-                    try { List<ExpenseSplit> parts = amounts.Where(p => p.Value.Value > 0).Select(p => new ExpenseSplit { CategoryId = p.Key, Amount = p.Value.Value }).ToList();
+                    try {
+                        // Keep booked split order when editing, including which share receives a rounding cent.
+                        var categoryIds = initial.Select(part => part.CategoryId).Concat(Data.Categories.Select(c => c.Id)).Distinct();
+                        var parts = categoryIds.Where(id => amounts[id].Value > 0)
+                            .Select(id => new ExpenseSplit { CategoryId = id, Amount = amounts[id].Value }).ToList();
                         Ledger.ValidateExpenseParts(Data, parts, total); result = parts; f.DialogResult = DialogResult.OK; f.Close();
                     }
                     catch (BudgetException ex) { MessageBox.Show(f, ex.Message, "Check split amounts", MessageBoxButtons.OK, MessageBoxIcon.Information); }
@@ -903,15 +938,16 @@ namespace BudgetDesk
             using (Editor f = new Editor(existing == null ? "New future expense" : "Edit planned expense", "A one-off plan does not change your balance or paid spending. It stays in Future / planned until you record it as paid, even after its due date."))
             {
                 TextBox description = Theme.Text(existing == null ? "" : existing.Description); description.Name = "PlanDescription";
-                DateTimePicker date = DatePicker(existing == null ? DateTime.Today.AddDays(20) : Ledger.Day(existing.DueDate)); date.Name = "PlanDueDate";
+                PaymentMoment date = new PaymentMoment(DateTime.Now.AddDays(20), existing == null ? null : existing.DueDate, existing == null ? null : existing.DueTime, false, "PlanDueDate");
                 ComboBox account = AccountChoices(existing == null ? accountFilter : existing.AccountId, false), category = CategoryChoices(existing == null ? categoryFilter : existing.CategoryId, false);
                 account.Name = "PlanAccount"; category.Name = "PlanCategory";
                 NumericUpDown amount = Theme.Money(existing == null ? 0 : existing.Amount); amount.Minimum = 0; amount.Name = "PlanAmount";
-                f.Field("Description", description); f.Field("Due date", date); f.Field("Pay from account", account); f.Field("Amount (account currency)", amount); f.Field("Expense category", category);
+                PurchaseFields price = new PurchaseFields(Data, account, amount, existing == null ? null : existing.PurchaseCurrency, existing == null ? 0 : existing.ExchangeRate);
+                f.Field("Description", description); f.Field("Due date / time", date.Control); f.Field("Pay from account", account); f.Field("Amount / currency", price.AmountRow); f.Field("Conversion", price.RateRow); f.Field("Expense category", category);
                 f.Finish(delegate {
                     Commit(d => {
                         PlannedExpense p = existing == null ? new PlannedExpense { Id = Ledger.NewId() } : d.PlannedExpenses.First(x => x.Id == existing.Id);
-                        p.Description = description.Text.Trim(); p.DueDate = Ledger.Iso(date.Value); p.AccountId = Icons.Selected(account); p.CategoryId = Icons.Selected(category); p.Amount = amount.Value;
+                        p.Description = description.Text.Trim(); p.DueDate = Ledger.Iso(date.Value); p.DueTime = date.ClockValue; p.PurchaseCurrency = price.ForeignCurrency; p.ExchangeRate = price.Quote; p.AccountId = Icons.Selected(account); p.CategoryId = Icons.Selected(category); p.Amount = amount.Value;
                         if (existing == null) d.PlannedExpenses.Add(p);
                     });
                     if (existing == null) { accountFilter = categoryFilter = searchText = ""; planWhen = "All dates"; plansPageIndex = 0; }
@@ -924,12 +960,19 @@ namespace BudgetDesk
             using (Editor f = new Editor("Record planned expense as paid", "Record this only after payment. Saving adds one actual expense and removes the plan. Choose the date you paid; an overdue plan is not backdated automatically."))
             {
                 Account account = Data.Accounts.First(a => a.Id == plan.AccountId);
-                DateTimePicker date = DatePicker(DateTime.Today); date.MaxDate = DateTime.Today; date.Name = "ActualPaymentDate";
+                DateTime clicked = DateTime.Now;
+                PaymentMoment date = new PaymentMoment(clicked, null, null, true, "ActualPaymentDate");
                 f.Field("Description", Theme.Label(plan.Description, 10, false, Theme.Ink));
                 f.Field("Account", Theme.Label(account.Name, 10, false, Theme.Ink));
-                f.Field("Amount", Theme.Label(Theme.MoneyText(plan.Amount, account.Currency), 12, true, Theme.Ink));
-                f.Field("Paid on", date);
-                f.Finish(delegate { Commit(d => Ledger.RecordPlanned(d, plan.Id, date.Value, DateTime.Today)); status.Text = "One-off expense recorded on " + date.Value.ToString("d MMM yyyy") + ". View it in Recorded entries."; });
+                f.Field("Amount", Theme.Label(Theme.MoneyText(plan.Amount, plan.PurchaseCurrency ?? account.Currency), 12, true, Theme.Ink));
+                f.Field("Paid on / time", date.Control);
+                f.Finish(delegate {
+                    DateTime now = DateTime.Now;
+                    DateTime paid = date.Value.Date == clicked.Date && date.ClockValue == Ledger.Clock(clicked) ? now : date.Value;
+                    Ledger.Require(paid <= now, "Choose the time you paid, up to the current time.");
+                    Commit(d => Ledger.RecordPlanned(d, plan.Id, paid, now));
+                    status.Text = "One-off expense recorded on " + paid.ToString("d MMM yyyy HH:mm:ss") + ". View it in Recorded entries.";
+                });
                 f.Save.Text = "Record paid"; f.Save.Width = 125; f.ShowDialog(this);
             }
         }
@@ -977,14 +1020,16 @@ namespace BudgetDesk
             {
                 ComboBox kind = Strings(new[] { "Expense", "Income", "Transfer" }, seed == null ? initialKind : seed.Kind);
                 if (existing != null && !String.IsNullOrEmpty(existing.PlanId)) kind.Enabled = false;
-                DateTimePicker date = DatePicker(existing == null ? DateTime.Today : Ledger.Day(existing.Date)); date.MaxDate = DateTime.Today;
+                PaymentMoment date = new PaymentMoment(DateTime.Now, existing == null ? null : existing.Date, existing == null ? null : existing.Time, true, "EntryDate");
                 TextBox description = Theme.Text(seed == null ? "" : seed.Description);
                 ComboBox payee = PayeeBox(seed == null ? "" : seed.Payee); payee.Name = "EntryPayee";
                 ComboBox account = AccountChoices(seed == null ? accountFilter : seed.AccountId, false);
                 ComboBox category = CategoryChoices(seed == null ? categoryFilter : seed.CategoryId, false);
                 ComboBox destination = AccountChoices(existing == null ? "" : existing.ToAccountId, false);
-                if (existing == null && destination.Items.Count > 1) destination.SelectedIndex = 1;
+                if (existing == null && destination.Items.Count > 1) Icons.Choose(destination, Data.Accounts.First(a => a.Id != Icons.Selected(account)).Id);
                 NumericUpDown amount = Theme.Money(seed == null ? 0 : seed.Amount); amount.Minimum = 0;
+                amount.Name = "EntryAmount";
+                PurchaseFields price = new PurchaseFields(Data, account, amount, seed == null ? null : seed.PurchaseCurrency, existing == null ? 0 : existing.ExchangeRate);
                 NumericUpDown received = Theme.Money(existing == null ? 0 : existing.ReceivedAmount); received.Minimum = 0;
                 List<ExpenseSplit> parts = seed != null && Ledger.HasSplits(seed) ? seed.Splits.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() : new List<ExpenseSplit>();
                 FlowLayoutPanel splitControls = new FlowLayoutPanel { Dock = DockStyle.Fill, Margin = new Padding(0), WrapContents = false, Padding = new Padding(0, 4, 0, 0) };
@@ -993,6 +1038,7 @@ namespace BudgetDesk
                 bool initializing = true, accountTouched = false, categoryTouched = false, applyingDefaults = false;
                 Action configure = delegate {
                     bool isTransfer = Icons.Selected(kind) == "Transfer";
+                    price.SetTransfer(isTransfer);
                     bool isExpense = Icons.Selected(kind) == "Expense"; payee.Enabled = !isTransfer;
                     category.Enabled = isExpense && parts.Count == 0; destination.Enabled = isTransfer;
                     split.Enabled = isExpense; single.Visible = isExpense && parts.Count > 0; split.Text = parts.Count > 0 ? "Edit split (" + parts.Count + ")" : "Split purchase…";
@@ -1007,9 +1053,9 @@ namespace BudgetDesk
                 split.Click += delegate {
                     try {
                         Ledger.Require(amount.Value > 0, "Enter the full purchase amount before splitting it.");
-                        Account selected = Data.Accounts.First(a => a.Id == Icons.Selected(account));
+
                         List<ExpenseSplit> initial = parts.Count > 0 ? parts : new List<ExpenseSplit> { new ExpenseSplit { CategoryId = Icons.Selected(category), Amount = amount.Value } };
-                        List<ExpenseSplit> edited = SplitExpenseEditor(amount.Value, selected.Currency, initial, f); if (edited != null) parts = edited; configure();
+                        List<ExpenseSplit> edited = SplitExpenseEditor(amount.Value, price.Code, initial, f); if (edited != null) parts = edited; configure();
                     }
                     catch (BudgetException ex) { MessageBox.Show(f, ex.Message, "Split purchase", MessageBoxButtons.OK, MessageBoxIcon.Information); }
                 };
@@ -1026,14 +1072,14 @@ namespace BudgetDesk
                         if (!categoryTouched && parts.Count == 0 && Icons.Selected(kind) == "Expense" && !String.IsNullOrEmpty(profile.DefaultCategoryId)) Icons.Choose(category, profile.DefaultCategoryId); }
                     finally { applyingDefaults = false; }
                 };
-                f.Field("Type", kind); f.Field("Date", date); f.Field("Payee / shop", payee); f.Field("Description", description); f.Field("Account / send from", account);
-                f.Field("Amount (account currency)", amount); f.Field("Expense category", category); f.Field("Split purchase", splitControls); f.Field("Transfer to", destination); f.Field("Received (target currency)", received);
+                f.Field("Type", kind); f.Field("Date / time", date.Control); f.Field("Payee / shop", payee); f.Field("Description", description); f.Field("Account / send from", account);
+                f.Field("Amount / currency", price.AmountRow); f.Field("Conversion", price.RateRow); f.Field("Expense category", category); f.Field("Split purchase", splitControls); f.Field("Transfer to", destination); f.Field("Received (target currency)", received);
                 f.Finish(delegate {
                     Commit(d => {
                         Entry e = existing == null ? new Entry { Id = Ledger.NewId() } : d.Entries.First(x => x.Id == existing.Id);
                         string accountId = Icons.Selected(account);
                         decimal fx = existing != null && existing.AccountId == accountId ? existing.RateToCzk : Ledger.Rate(d, d.Accounts.First(x => x.Id == accountId).Currency);
-                        e.Kind = Icons.Selected(kind); e.Payee = e.Kind == "Transfer" ? null : payee.Text.Trim(); e.Date = Ledger.Iso(date.Value); e.Description = description.Text.Trim(); e.AccountId = accountId;
+                        e.Kind = Icons.Selected(kind); e.Payee = e.Kind == "Transfer" ? null : payee.Text.Trim(); e.Date = Ledger.Iso(date.Value); e.Time = date.ClockValue; e.PurchaseCurrency = price.ForeignCurrency; e.ExchangeRate = price.Quote; e.Description = description.Text.Trim(); e.AccountId = accountId;
                         e.Splits = e.Kind == "Expense" && parts.Count > 0 ? parts.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() : null;
                         e.CategoryId = e.Kind == "Expense" && !Ledger.HasSplits(e) ? Icons.Selected(category) : null; e.Amount = amount.Value;
                         e.ToAccountId = e.Kind == "Transfer" ? Icons.Selected(destination) : null; e.ReceivedAmount = e.Kind == "Transfer" ? received.Value : 0;
@@ -1049,7 +1095,7 @@ namespace BudgetDesk
                 Button saveTemplate = f.AuxiliaryButton("Save as template", delegate {
                     bool isExpense = Icons.Selected(kind) == "Expense";
                     Entry draft = new Entry { Kind = Icons.Selected(kind), Payee = payee.Text.Trim(), Description = description.Text.Trim(), AccountId = Icons.Selected(account),
-                        CategoryId = isExpense && parts.Count == 0 ? Icons.Selected(category) : null, Amount = amount.Value,
+                        CategoryId = isExpense && parts.Count == 0 ? Icons.Selected(category) : null, Amount = amount.Value, PurchaseCurrency = price.ForeignCurrency,
                         Splits = isExpense && parts.Count > 0 ? parts.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() : null };
                     TemplateEditor(null, Ledger.TemplateFromEntry(draft), f);
                 }); saveTemplate.Name = "SaveAsTemplate"; saveTemplate.Enabled = Icons.Selected(kind) != "Transfer";
@@ -1069,16 +1115,17 @@ namespace BudgetDesk
                 ComboBox account = AccountChoices(existing == null ? "" : existing.AccountId, false);
                 Category defaultCategory = Data.Categories.FirstOrDefault(c => c.Name.Equals("Bills", StringComparison.OrdinalIgnoreCase)) ?? Data.Categories.First();
                 ComboBox category = CategoryChoices(existing == null ? defaultCategory.Id : existing.CategoryId, false);
-                NumericUpDown amount = Theme.Money(existing == null ? 0 : existing.Amount); amount.Minimum = 0;
-                DateTimePicker date = DatePicker(existing == null ? DateTime.Today.AddDays(1) : Ledger.DueDate(existing));
+                NumericUpDown amount = Theme.Money(existing == null ? 0 : existing.Amount); amount.Minimum = 0; amount.Name = "EntryAmount";
+                PaymentMoment date = new PaymentMoment(DateTime.Now.AddDays(1), existing == null ? null : Ledger.Iso(Ledger.DueDate(existing)), existing == null ? null : existing.DueTime, false, "BillDueDate");
+                PurchaseFields price = new PurchaseFields(Data, account, amount, existing == null ? null : existing.PurchaseCurrency, existing == null ? 0 : existing.ExchangeRate);
                 FlowLayoutPanel intervalPanel = new FlowLayoutPanel { Dock = DockStyle.Fill, Margin = new Padding(0), WrapContents = false };
                 NumericUpDown interval = Theme.Money(existing == null ? 1 : existing.Interval); interval.DecimalPlaces = 0; interval.Minimum = 1; interval.Maximum = 120; interval.Dock = DockStyle.None; interval.Width = 80;
                 ComboBox unit = Strings(Ledger.Units, existing == null ? "Months" : existing.Unit); unit.Dock = DockStyle.None; unit.Width = 175;
                 intervalPanel.Controls.Add(interval); intervalPanel.Controls.Add(unit);
                 CheckBox automatic = new CheckBox { Text = "Record automatically when due", Checked = existing == null || existing.AutoRecord, Dock = DockStyle.Fill };
                 CheckBox active = new CheckBox { Text = "Schedule is active", Checked = existing == null || existing.Enabled, Dock = DockStyle.Fill };
-                f.Field("Payment name", name); f.Field("Icon", icon); f.Field("Pay from", account); f.Field("Category", category); f.Field("Amount (account currency)", amount);
-                f.Field("Next unpaid date", date); f.Field("Repeat every", intervalPanel); f.Field("Automatic recording", automatic); f.Field("Status", active);
+                f.Field("Payment name", name); f.Field("Icon", icon); f.Field("Pay from", account); f.Field("Category", category); f.Field("Amount / currency", price.AmountRow); f.Field("Conversion", price.RateRow);
+                f.Field("Next due date / time", date.Control); f.Field("Repeat every", intervalPanel); f.Field("Automatic recording", automatic); f.Field("Status", active);
                 if (existing != null) f.ExtraButton("Delete schedule", delegate {
                     if (!Confirm("Delete this schedule? Previously recorded expenses will remain.")) throw new BudgetException("Schedule kept.");
                     Commit(d => d.Bills.RemoveAll(x => x.Id == existing.Id));
@@ -1088,11 +1135,11 @@ namespace BudgetDesk
                         RecurringBill b = existing == null ? new RecurringBill { Id = Ledger.NewId() } : d.Bills.First(x => x.Id == existing.Id);
                         string next = Ledger.Iso(date.Value);
                         bool scheduleChanged = existing == null || next != Ledger.Iso(Ledger.DueDate(b)) || b.Interval != (int)interval.Value || b.Unit != Icons.Selected(unit);
-                        b.Name = name.Text.Trim(); b.Icon = Icons.Selected(icon); b.AccountId = Icons.Selected(account); b.CategoryId = Icons.Selected(category); b.Amount = amount.Value;
+                        b.Name = name.Text.Trim(); b.Icon = Icons.Selected(icon); b.AccountId = Icons.Selected(account); b.CategoryId = Icons.Selected(category); b.Amount = amount.Value; b.DueTime = date.ClockValue; b.PurchaseCurrency = price.ForeignCurrency; b.ExchangeRate = price.Quote;
                         if (scheduleChanged) { b.AnchorDate = next; b.NextIndex = 0; }
                         b.Interval = (int)interval.Value; b.Unit = Icons.Selected(unit); b.AutoRecord = automatic.Checked; b.Enabled = active.Checked;
                         if (existing == null) Ledger.AddBill(d, b);
-                        Ledger.Validate(d); Ledger.PostDue(d, DateTime.Today);
+                        Ledger.Validate(d); Ledger.PostDue(d, DateTime.Now);
                     });
                 }); f.ShowDialog(this);
             }
@@ -1108,7 +1155,7 @@ namespace BudgetDesk
                 t.Controls.Add(Theme.Label("Up to 20 categories. Optional budgets apply to each month.", 11, true, Theme.Ink), 0, 0);
                 PagedGridPanel categoryPager = new PagedGridPanel("CategoryPager"); DataGridView g = categoryPager.Grid; Theme.Column(g, "name", "CATEGORY", 55); Theme.Column(g, "budget", "MONTHLY BUDGET", 45); t.Controls.Add(categoryPager, 0, 1);
                 Action fill = delegate {
-                    categoryPager.SetRows(Data.Categories.Select(c => new GridItem(c.Id, Icons.Glyph(c.Icon) + "  " + c.Name, c.MonthlyBudgetCzk > 0 ? Theme.MoneyText(c.MonthlyBudgetCzk / Ledger.Rate(Data, Data.BaseCurrency), Data.BaseCurrency) : "No budget set")), false);
+                    categoryPager.SetRows(Data.Categories.OrderBy(c => c.Name, StringComparer.CurrentCultureIgnoreCase).Select(c => new GridItem(c.Id, Icons.Named(c.Name, c.Icon), c.MonthlyBudgetCzk > 0 ? Theme.MoneyText(c.MonthlyBudgetCzk / Ledger.Rate(Data, Data.BaseCurrency), Data.BaseCurrency) : "No budget set") { SortKeys = new object[] { c.Name, c.MonthlyBudgetCzk } }), false);
                 }; fill();
                 FlowLayoutPanel buttons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(0, 9, 0, 0) };
                 Button add = Theme.Button("+ Category", true), edit = Theme.Button("Edit selected", false), close = Theme.Button("Close", false);

@@ -89,8 +89,8 @@ internal static class OrderCategoryTests
                 Check(custom.Icon == "Education" && custom.MonthlyBudgetCzk == 750 && store.Load().Categories.Any(x => x.Id == custom.Id), "the visible Add category button saves a custom name, icon and optional budget");
                 Dialog(main, delegate { Tree(main).OfType<Button>().Single(x => x.Text == "+ Expense").PerformClick(); }, delegate(Form editor) {
                     ComboBox accounts = (ComboBox)Field(editor, "Account / send from");
-                    Check(accounts.Items.Cast<Pick>().Select(x => x.Id).SequenceEqual(savedOrder), "account selectors follow the saved bank order");
-                    Field(editor, "Description").Text = "Custom-category purchase"; ((NumericUpDown)Field(editor, "Amount (account currency)")).Value = 12;
+                    Check(accounts.Items.Cast<Pick>().Select(x => x.Id).SequenceEqual(main.Data.Accounts.OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase).Select(a => a.Id)), "account selectors show names alphabetically while the dashboard keeps its saved order");
+                    Field(editor, "Description").Text = "Custom-category purchase"; ((NumericUpDown)editor.Controls.Find("EntryAmount", true).Single()).Value = 12;
                     Icons.Choose((ComboBox)Field(editor, "Expense category"), custom.Id);
                 }, true);
                 Check(main.Data.Entries.Any(x => x.Description == "Custom-category purchase" && x.CategoryId == custom.Id), "custom categories are available immediately when recording an expense");
