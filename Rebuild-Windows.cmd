@@ -12,7 +12,7 @@ echo Building Budget Desk with the Microsoft Windows C# compiler...
 if errorlevel 1 goto build_failed
 move /y "BudgetDesk.rebuilt.exe" "%BUDGET_OUTPUT%" >nul
 if errorlevel 1 goto replace_failed
-echo Budget Desk 1.1.0 built successfully.
+echo Budget Desk 1.1.1 built successfully.
 if /i not "%~1"=="/quiet" pause
 exit /b 0
 

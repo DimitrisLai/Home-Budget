@@ -72,6 +72,39 @@ namespace BudgetDesk
         protected override void OnLayout(LayoutEventArgs e) { base.OnLayout(e); Reflow(); }
     }
 
+    internal sealed class RecurringCardPanel : Panel
+    {
+        private readonly bool paused;
+        private Color border;
+
+        internal RecurringCardPanel(bool paused)
+        {
+            this.paused = paused;
+        }
+
+        internal void SetSelected(bool selected)
+        {
+            if (paused)
+            {
+                BackColor = selected ? Theme.DarkRed : Theme.Red;
+                border = selected ? Color.White : Theme.DarkRed;
+            }
+            else
+            {
+                BackColor = selected ? Theme.Pale : Color.White;
+                border = selected ? Theme.Teal : Theme.Line;
+            }
+            Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            using (Pen pen = new Pen(border))
+                e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+        }
+    }
+
     internal sealed class GridItem
     {
         internal object[] Cells;

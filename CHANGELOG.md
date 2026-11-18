@@ -1,5 +1,9 @@
 # Budget Desk version history
 
+## 1.1.1 — 18 November 2026
+
+- Paused recurring payments now have a red card with white text and a bold leading Paused label. Selecting another payment or reopening the budget keeps the card red. Resume restores the active card colors.
+
 ## 1.1.0 — 18 November 2026
 
 - Added local times to ledger entries, future expenses and recurring schedules. Paid and scheduled times are stored separately.

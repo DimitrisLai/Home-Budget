@@ -28,6 +28,27 @@ internal static class UiSmokeTests
     }
     static void Check(bool condition, string text)
     { if (!condition) throw new Exception(text); passed++; Console.WriteLine("PASS  " + text); }
+    static Control PaymentCard(MainForm form, string id)
+    {
+        return Tree(form).Single(c => c.Name == "RecurringCard" && (string)c.Tag == id);
+    }
+    static void SelectPayment(MainForm form, string id)
+    {
+        Control title = Tree(PaymentCard(form, id)).OfType<Label>().First();
+        typeof(Control).GetMethod("OnClick", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(title, new object[] { EventArgs.Empty });
+    }
+    static void TogglePayment(MainForm form)
+    {
+        Tree(form).OfType<Button>().Single(b => b.Text == "Pause / resume").PerformClick();
+    }
+    static bool ShowsPaused(Control card)
+    {
+        Color fill = card.BackColor;
+        var labels = Tree(card).OfType<Label>().ToList();
+        return fill.R > 2 * fill.G && fill.R > 2 * fill.B && labels.Count > 0
+            && labels.All(l => l.ForeColor == Color.White)
+            && labels.Any(l => l.Text.StartsWith("Paused") && l.Font.Bold);
+    }
     static void Capture(Form f, string name)
     {
         f.Refresh(); Application.DoEvents();
@@ -67,6 +88,7 @@ internal static class UiSmokeTests
         images = args.Length > 0 ? args[0] : Path.Combine(folder, "images"); Directory.CreateDirectory(images);
         try
         {
+            string pausedId;
             using (main = new MainForm(new BudgetStore(folder), BudgetData.Empty(), false))
             {
                 main.Show(); Application.DoEvents(); Capture(main, "empty-state");
@@ -133,6 +155,30 @@ internal static class UiSmokeTests
                 Panel cards = Tree(main).OfType<Panel>().Single(x => x.Name == "AccountCards");
                 Panel bills = Tree(main).OfType<Panel>().Single(x => x.Name == "RecurringCards");
                 Check(bills.Controls.Count == 20 && cards.Controls.Count == 20 && !cards.AutoScroll && !bills.AutoScroll && cards.Controls.Cast<Control>().All(x => cards.ClientRectangle.Contains(x.Bounds)) && bills.Controls.Cast<Control>().All(x => bills.ClientRectangle.Contains(x.Bounds)), "all twenty accounts and twenty recurring payments fit without scrolling");
+                var manualIds = main.Data.Bills.Where(b => !b.AutoRecord && b.Name.StartsWith("Payment ")).Select(b => b.Id).Take(2).ToArray();
+                pausedId = manualIds[0];
+                SelectPayment(main, pausedId);
+                TogglePayment(main);
+                var paused = PaymentCard(main, pausedId);
+                Check(!main.Data.Bills.Single(b => b.Id == pausedId).Enabled && ShowsPaused(paused), "Pause immediately shows a red card with white text and a leading Paused label");
+                Color selectedRed = paused.BackColor;
+                SelectPayment(main, manualIds[1]);
+                Check(ShowsPaused(paused) && paused.BackColor != selectedRed && PaymentCard(main, manualIds[1]).BackColor == Theme.Pale, "selecting another payment keeps the paused card red and highlights the active card");
+                Capture(main, "paused-recurring-payment");
+                main.Close();
+            }
+            var store = new BudgetStore(folder);
+            using (main = new MainForm(store, store.Load(), false))
+            {
+                main.Show(); Application.DoEvents();
+                Check(ShowsPaused(PaymentCard(main, pausedId)), "reopening the saved budget keeps a paused payment red");
+                SelectPayment(main, pausedId);
+                int entries = main.Data.Entries.Count;
+                TogglePayment(main);
+                var resumed = PaymentCard(main, pausedId);
+                Check(resumed.BackColor == Theme.Pale && Tree(resumed).OfType<Label>().Any(l => l.Text.EndsWith("Manual"))
+                    && store.Load().Bills.Single(b => b.Id == pausedId).Enabled && main.Data.Entries.Count == entries,
+                    "Resume restores the active appearance and saves the manual schedule without posting a payment");
                 main.Close();
             }
             Console.WriteLine("\n" + passed + " UI checks passed.");
