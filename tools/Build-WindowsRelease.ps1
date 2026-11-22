@@ -130,7 +130,7 @@ $ledger = Build-Test -Name 'LedgerTests' -TestSources @($sources + 'Tests/Ledger
 Run-CheckedProcess -Executable $ledger -Arguments @() -Name 'accounting'
 $compatibility = Build-Test -Name 'FrameworkCompatibilityTests' -TestSources @('Tests/FrameworkCompatibilityTests.cs')
 Run-CheckedProcess -Executable $compatibility -Arguments @('"' + $executable + '"') -Name 'compatibility'
-foreach ($name in @('UiSmokeTests', 'QuickEntryTests', 'AccountLayoutTests', 'AccountRefreshTests', 'ScrollFreeTests', 'OrderCategoryTests', 'YearPlanTests', 'GoalSplitTests', 'Release110Tests')) {
+foreach ($name in @('UiSmokeTests', 'QuickEntryTests', 'AccountLayoutTests', 'AccountRefreshTests', 'ScrollFreeTests', 'OrderCategoryTests', 'YearPlanTests', 'GoalSplitTests', 'Release110Tests', 'Release120Tests')) {
     $test = Build-Test -Name $name -TestSources @($sources + "Tests/$name.cs")
     $images = Join-Path $checks "$name-images"
     Run-CheckedProcess -Executable $test -Arguments @('"' + $images + '"') -Name $name
@@ -156,6 +156,17 @@ $support = Join-Path $package 'Support'
 New-Item -ItemType Directory -Path $support | Out-Null
 Get-ChildItem -LiteralPath $package -Force | Where-Object { $_.Name -notin @('BudgetDesk.exe', 'BudgetDesk.exe.config', 'Manuals', 'Support') } | ForEach-Object {
     Move-Item -LiteralPath $_.FullName -Destination $support
+}
+foreach ($language in @('English', 'Cesky', 'Ellinika')) {
+    foreach ($extension in @('html', 'pdf')) {
+        $relative = "Manuals/$language.$extension"
+        if ((Get-FileHash -LiteralPath (Join-Path $package $relative)).Hash -ne (Get-FileHash -LiteralPath (Join-Path $root $relative)).Hash) {
+            throw "Manual differs from the release source: $relative"
+        }
+    }
+}
+if ((Get-FileHash -LiteralPath (Join-Path $support 'IDEAS.md')).Hash -ne (Get-FileHash -LiteralPath (Join-Path $root 'IDEAS.md')).Hash) {
+    throw 'The packaged future ideas differ from the release source.'
 }
 $manifestLines = @(Get-ChildItem -LiteralPath $package -Recurse -File -Force | Sort-Object FullName | ForEach-Object {
     $relative = [IO.Path]::GetRelativePath($package, $_.FullName).Replace('\', '/')

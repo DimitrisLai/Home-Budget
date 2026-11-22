@@ -1,16 +1,21 @@
-BUDGET DESK 1.1.1 — WINDOWS
+BUDGET DESK 1.2.0 — WINDOWS
 
 Updating? First export a JSON backup in the old app under Settings & backup,
 then close it. Extract the entire new ZIP to a new folder.
 Open BudgetDesk.exe in the BudgetDesk folder. Keep its .config file beside it.
 
-Manuals/English.html       English user manual
-Manuals/Cesky.html         Česká uživatelská příručka
-Manuals/Ellinika.html      Ελληνικό εγχειρίδιο χρήσης
+Manuals/English.pdf or .html       English user manual
+Manuals/Cesky.pdf or .html         Česká uživatelská příručka
+Manuals/Ellinika.pdf or .html      Ελληνικό εγχειρίδιο χρήσης
 
 Support/Test-Sandbox.cmd   Separate, initially empty budget for testing
 Support/Try-Demo.cmd       Separate budget with sample data
 Support/Start-BudgetDesk.cmd  Starts the app with diagnostics if needed
+
+Open Settings & backup to select the interface language and Light or Dark.
+New automatic one-off expenses post at the scheduled time. Existing plans
+keep their manual setting until you edit them.
+Support/IDEAS.md lists ideas for future versions.
 
 In the source checkout the commands and supporting documents are at the root.
 The Windows ZIP keeps them together in Support.

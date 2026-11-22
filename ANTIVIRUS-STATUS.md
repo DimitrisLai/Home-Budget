@@ -2,7 +2,11 @@
 
 **Status: 11 November 2026 — the owner authorized release of the complete 1.0.1 application after reporting clean antivirus retests.**
 
-## Resolution
+## Later Bitdefender report
+
+A Bitdefender Advanced Threat Defense alert occurred during a second-launch test with a previous download. The exact local build is unconfirmed. A vendor review was requested. The historical scan below concerns the earlier build.
+
+## Resolution for 1.0.1
 
 - On 10 November, Malwarebytes Support reported that its research team had released a database fix for the submitted detections.
 - A local Custom Scan on 11 November at 22:07 Czech time completed with 5 objects scanned, 0 threats detected and 0 quarantined. Malwarebytes version: 5.7.3.376; components: 167.0.5780; update package: 1.0.116845. Heuristics were enabled and PUP/PUM were set to Detect.
@@ -25,4 +29,4 @@ The final release ZIP has updated documentation and manual-test files, so its ar
 
 The original 1.0.0 and candidate 1.0.1 executables were reported by Malwarebytes, SecureAge and Trapmine in early November. Removing the developer screenshot helper did not by itself remove those reports. All five diagnostic controls were also reported locally, including a minimal window without the budgeting modules. Malwarebytes was supplied exact sample hashes, VirusTotal links, the original local report and a diagnostic manifest.
 
-The original 1.0.0 release and its source history are retained as historical records. The current full download is 1.0.1. See SECURITY-REVIEW.md for the source cleanup and VALIDATION.md for functional test scope. Private support logs and device details are not included in this repository.
+The original 1.0.0 release and its source history are retained as historical records. Release downloads are listed on the project’s GitHub Releases page. See SECURITY-REVIEW.md for the source cleanup and VALIDATION.md for functional test scope. Private support logs and device details are not included in this repository.

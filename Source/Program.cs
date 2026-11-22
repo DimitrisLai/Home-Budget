@@ -12,8 +12,8 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("Offline personal accounts, recurring payments and daily expenses")]
 [assembly: AssemblyCompany("Dimitris L.")]
 [assembly: AssemblyProduct("Budget Desk")]
-[assembly: AssemblyVersion("1.1.1.0")]
-[assembly: AssemblyFileVersion("1.1.1.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.5", FrameworkDisplayName = ".NET Framework 4.5")]
 
 namespace BudgetDesk
@@ -52,6 +52,8 @@ namespace BudgetDesk
                 StartupDiagnostics.Fail(e.Exception, true);
                 Application.Exit();
             };
+            string systemLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            UiText.Language = systemLanguage == "el" || systemLanguage == "cs" ? systemLanguage : "en";
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             bool demo = args.Contains("--demo");
@@ -69,7 +71,7 @@ namespace BudgetDesk
             {
                 if (!acquired) {
                     StartupDiagnostics.Stage("Budget is already open in another process");
-                    MessageBox.Show("Budget Desk is already open. Switch to its existing window.", "Budget Desk"); return 0;
+                    MessageBox.Show(UiText.Get("Budget Desk is already open. Switch to its existing window."), "Budget Desk"); return 0;
                 }
                 try
                 {
@@ -81,8 +83,8 @@ namespace BudgetDesk
                         try { data = store.Load(); }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("Your data file could not be opened. It has been left untouched.\n\n" + ex.Message + "\n\nSelect a JSON backup in the next window, or Cancel to exit.\nAutomatic backups are in:\n" + Path.Combine(folder, "Backups"), "Budget Desk recovery", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            using (OpenFileDialog dialog = new OpenFileDialog { Title = "Choose a Budget Desk backup", Filter = "Budget Desk backup (*.json)|*.json", InitialDirectory = Path.Combine(folder, "Backups") })
+                            MessageBox.Show("Your data file could not be opened. It has been left untouched.\n\n" + ex.Message + "\n\nSelect a JSON backup in the next window, or Cancel to exit.\nAutomatic backups are in:\n" + Path.Combine(folder, "Backups"), UiText.Get("Budget Desk recovery"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            using (OpenFileDialog dialog = new OpenFileDialog { Title = UiText.Get("Choose a Budget Desk backup"), Filter = UiText.Get("Budget Desk backup (*.json)|*.json"), InitialDirectory = Path.Combine(folder, "Backups") })
                             {
                                 if (dialog.ShowDialog() != DialogResult.OK) return 1;
                                 data = BudgetStore.ReadBackup(dialog.FileName);
