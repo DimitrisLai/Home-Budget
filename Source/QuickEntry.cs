@@ -77,7 +77,7 @@ namespace BudgetDesk
                 PagedGridPanel pager = new PagedGridPanel("TemplatesPager"); DataGridView grid = pager.Grid;
                 Theme.Column(grid, "name", UiText.Get("TEMPLATE"), 27); Theme.Column(grid, "type", UiText.Get("TYPE"), 12); Theme.Column(grid, "payee", UiText.Get("PAYEE"), 20); Theme.Column(grid, "account", UiText.Get("ACCOUNT"), 21); Theme.Column(grid, "amount", UiText.Get("AMOUNT"), 20);
                 Action fill = delegate { pager.SetRows(Data.Templates.OrderBy(t => t.Name).Select(t => new GridItem(t.Id, t.Name, UiText.Get(t.Kind), t.Payee ?? "", Data.Accounts.First(a => a.Id == t.AccountId).Name,
-                    t.Amount.HasValue ? Theme.MoneyText(t.Amount.Value, t.PurchaseCurrency ?? Data.Accounts.First(a => a.Id == t.AccountId).Currency) : UiText.Get("Enter amount")) { SortKeys = new object[] { t.Name, UiText.Get(t.Kind), t.Payee ?? "", Data.Accounts.First(a => a.Id == t.AccountId).Name, t.Amount } }), false); }; fill(); shell.Controls.Add(pager, 0, 1);
+                    t.Amount.HasValue ? Theme.MoneyText(t.Amount.Value, t.PurchaseCurrency ?? Data.Accounts.First(a => a.Id == t.AccountId).Currency) : UiText.Get("Enter amount")) { ColorIndex = t.ColorIndex, SortKeys = new object[] { t.Name, UiText.Get(t.Kind), t.Payee ?? "", Data.Accounts.First(a => a.Id == t.AccountId).Name, t.Amount } }), false); }; fill(); shell.Controls.Add(pager, 0, 1);
                 FlowLayoutPanel buttons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(0, 9, 0, 0) };
                 Button use = Theme.Button(UiText.Get("Use template"), true), add = Theme.Button(UiText.Get("+ New"), false), edit = Theme.Button(UiText.Get("Edit"), false), delete = Theme.Button(UiText.Get("Delete"), false), close = Theme.Button(UiText.Get("Close"), false);
                 use.Name = "UseQuickTemplate"; add.Name = "NewQuickTemplate"; edit.Name = "EditQuickTemplate"; delete.Name = "DeleteQuickTemplate";
@@ -123,10 +123,12 @@ namespace BudgetDesk
                     List<ExpenseSplit> edited = SplitExpenseEditor(amount.Value, price.Code, initial, f); if (edited != null) { parts = edited; remember.Checked = true; configure(); }
                 } catch (BudgetException ex) { MessageBox.Show(f, ex.Message, UiText.Get("Template split"), MessageBoxButtons.OK, MessageBoxIcon.Information); } };
                 single.Click += delegate { parts = new List<ExpenseSplit>(); configure(); };
-                f.Field(UiText.Get("Template name"), name); f.Field(UiText.Get("Type"), kind); f.Field(UiText.Get("Payee / shop"), payee); f.Field(UiText.Get("Description"), description); f.Field(UiText.Get("Account"), account); f.Field(UiText.Get("Expense category"), category); f.Field(UiText.Get("Default amount"), remember); f.Field(UiText.Get("Amount / currency"), price.AmountRow); f.Field(UiText.Get("Split purchase"), splits);
+                f.Field(UiText.Get("Template name"), name); f.Field(UiText.Get("Type"), kind); f.Field(UiText.Get("Payee / shop"), payee); f.Field(UiText.Get("Description"), description);
+                var color = f.ColorField(seed == null ? 0 : seed.ColorIndex);
+                f.Field(UiText.Get("Account"), account); f.Field(UiText.Get("Expense category"), category); f.Field(UiText.Get("Default amount"), remember); f.Field(UiText.Get("Amount / currency"), price.AmountRow); f.Field(UiText.Get("Split purchase"), splits);
                 f.Finish(delegate { Commit(d => {
                     QuickEntryTemplate t = existing == null ? new QuickEntryTemplate { Id = Ledger.NewId() } : d.Templates.First(x => x.Id == existing.Id);
-                    t.Name = name.Text.Trim(); t.Kind = Icons.Selected(kind); t.Payee = payee.Text.Trim(); t.Description = description.Text.Trim(); t.AccountId = Icons.Selected(account); t.PurchaseCurrency = price.ForeignCurrency;
+                    t.ColorIndex = color.Index; t.Name = name.Text.Trim(); t.Kind = Icons.Selected(kind); t.Payee = payee.Text.Trim(); t.Description = description.Text.Trim(); t.AccountId = Icons.Selected(account); t.PurchaseCurrency = price.ForeignCurrency;
                     t.Splits = t.Kind == "Expense" && parts.Count > 0 ? parts.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() : null;
                     t.CategoryId = t.Kind == "Expense" && (t.Splits == null || t.Splits.Count == 0) ? Icons.Selected(category) : null; t.Amount = remember.Checked ? (decimal?)amount.Value : null;
                     if (existing == null) d.Templates.Add(t); Ledger.RememberPayee(d, t.Payee, t.AccountId, t.CategoryId);

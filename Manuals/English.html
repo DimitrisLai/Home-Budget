@@ -1,13 +1,202 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Budget Desk 1.2.0 · User manual</title><link rel="stylesheet" href="guide.css"></head><body><header><div class="inner"><nav><strong>English</strong> · <a lang="cs" href="Cesky.html">Česky</a> · <a lang="el" href="Ellinika.html">Ελληνικά</a> · <a href="English.pdf">PDF</a></nav><p class="product">Budget Desk 1.2.0</p><h1>User manual</h1></div></header><main><nav id="contents"><h2>Contents</h2><ol><li><a href="#start">Start here</a></li><li><a href="#appearance">Language and appearance</a></li><li><a href="#accounts">Accounts, categories and navigation</a></li><li><a href="#entries">Record, edit and split a payment</a></li><li><a href="#currency">An EUR receipt paid from a CZK account</a></li><li><a href="#planned">One-off future payments and their status</a></li><li><a href="#recurring">Recurring schedules, Auto, Manual and Paused</a></li><li><a href="#shortcuts">Templates and payees</a></li><li><a href="#reports">Reports, search and CSV</a></li><li><a href="#goals">Savings goals</a></li><li><a href="#backup">Save, restore and troubleshoot</a></li></ol></nav><section id="start"><h2>Start here</h2><p>Before updating, open your previous version and choose <strong>Settings &amp; backup → Export backup</strong>. Keep that JSON, close the app, and extract the entire new ZIP to a new folder. Open <strong>BudgetDesk.exe</strong> inside BudgetDesk. Leave its configuration file next to it. Your existing budget opens from the same Windows data folder. Old entries keep their dates. A missing historical time stays blank unless you choose to add one.</p><p>The five tabs are <strong>Accounts &amp; bills</strong>, <strong>Daily expenses</strong>, <strong>Monthly overview</strong>, <strong>Yearly overview</strong> and <strong>Savings goals</strong>. For practice, run <strong>Support/Test-Sandbox.cmd</strong>. It creates a separate, initially empty budget and keeps it between sessions. <strong>Support/Try-Demo.cmd</strong> opens a third budget with sample data.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="appearance"><h2>Language and appearance</h2><p>Open <strong>Settings &amp; backup</strong>. Under <strong>Language</strong> choose <strong>English</strong>, <strong>Ελληνικά</strong> or <strong>Čeština</strong>. Under <strong>Appearance</strong> choose <strong>Light</strong> or <strong>Dark</strong>, then select <strong>Save</strong>. The open budget changes immediately. Your choices are saved with this budget and included in its JSON backup.</p><p>You can switch back from the same two fields at the top of Settings. Your account names, payees, descriptions and amounts stay as entered. A paused recurring payment keeps its red card in both themes.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="accounts"><h2>Accounts, categories and navigation</h2><p>Under <strong>Accounts &amp; bills → + Add account</strong>, enter a name, icon, currency and opening balance. Use the balance at the start of the selected day, before that day's entries. The opening balance contributes to the account total. The income report starts with recorded income. Click a card to edit it. Drag cards or change <strong>Display position</strong> to arrange the dashboard.</p><p>Under <strong>Daily expenses → Categories</strong>, add or rename a spending category and optionally give it a monthly budget. Zero leaves the budget unset. You can have 20 accounts, 20 categories and 20 recurring schedules. Names in account, category and icon pickers are alphabetical. The symbol follows its name. Focus a picker and press a letter to jump to the first matching name.</p><p>Click a table heading once for ascending order, again for descending order and a third time to return to the original order. Dates and amounts sort chronologically and numerically. Sorting covers all pages. <strong>Previous / Next</strong> changes the displayed page.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="entries"><h2>Record, edit and split a payment</h2><p>Go to <strong>Daily expenses → + Expense</strong>. Choose the local date and time, payee or description, account, amount and category. Press <strong>Save</strong>. <strong>+ Income</strong> adds money to the selected account. For <strong>Transfer</strong>, choose the sending and receiving accounts. For different currencies, enter the amount actually received in the destination currency. A transfer moves money between accounts and is excluded from income and spending totals.</p><p>For a receipt covering two categories, enter the full price, open <strong>Split purchase</strong>, assign each part and choose <strong>Use split</strong>. The category amounts must add up to the full receipt in its original currency. Saving creates one charge. Use <strong>Edit selected</strong> to correct the same transaction. <strong>Delete</strong> removes it and recalculates balances.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="currency"><h2>An EUR receipt paid from a CZK account</h2><p>In <strong>+ Expense</strong>, select your CZK bank. The selector beside <strong>Amount / currency</strong> starts at CZK. For a €20 receipt, enter <strong>20</strong> and choose <strong>EUR</strong>. Under <strong>Conversion</strong>, enter <strong>25</strong> if your bank charged 25 CZK for €1. The preview shows <strong>500.00 CZK</strong>. Save once. A bank balance of 10,000 CZK becomes 9,500 CZK. The receipt is still recorded as 20 EUR.</p><p>The rate means units of account currency for one unit of receipt currency. You can use a suggested rate or enter the rate on your statement. With no rate available, enter one before saving. <strong>Settings &amp; backup</strong> accepts CZK values for EUR, USD, GBP, CHF and PLN. Reporting currency changes the display. Account balances use current valuations. The transaction keeps its booked conversion and CZK value when rates change. The same receipt-currency choice is available for income, plans and recurring charges.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="planned"><h2>One-off future payments and their status</h2><p>Choose <strong>Daily expenses → + Future expense</strong>. Enter the amount, currency, account, category and local due date and time. <strong>Record automatically when due</strong> starts enabled for new plans. The plan remains under <strong>Future / planned</strong> until it is booked. Its status shows Auto or Manual.</p><p>For example, at <strong>21:14</strong> schedule an expense for <strong>21:15:00</strong>. At 21:15, an open BudgetDesk records one expense and removes the outstanding plan. If the app was closed or the computer was asleep, it catches up when the budget opens or resumes. At <strong>21:16</strong> the recorded payment still shows <strong>21:15</strong>. The app records the expense in your budget. Any bank payment is separate.</p><p>Turn automatic recording off to keep a manual reminder. Plans saved by earlier versions keep their manual status. To automate one, edit it, select its due time and enable automatic recording. Saving a past-due automatic plan books it immediately.</p><p>For a manual reminder, <strong>Due today</strong> becomes <strong>Overdue today</strong> once the time has passed. A date-only reminder stays due all day. After paying, use <strong>Record paid</strong>. Confirm to use the current time or select the actual payment time. <strong>Export plans CSV</strong> exports all outstanding plans, including their status.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="recurring"><h2>Recurring schedules, Auto, Manual and Paused</h2><p>Under <strong>Accounts &amp; bills → + Recurring payment</strong>, choose the account, category, amount, next unpaid date and time, and interval. For a quarterly bill, choose <strong>3 Months</strong>. A monthly schedule anchored on the 31st uses the last day in shorter months and returns to its anchor when possible.</p><p><strong>Status</strong> controls whether the schedule is active. An active <strong>Manual</strong> schedule waits for <strong>Record payment</strong>. Confirming records one expense at the actual payment time and advances the next occurrence. <strong>Automatic recording</strong> makes an active schedule <strong>Auto</strong>. Due occurrences are checked when the budget opens and the app schedules its next check for the next payment deadline. After time away, missed occurrences are booked at their scheduled times. Reopening the app does not post an occurrence twice.</p><p><strong>Pause / resume</strong> suspends the schedule. Its card turns red with white text and a bold <strong>Paused</strong> label. It stays red when another payment is selected and after reopening the budget. Resume restores the active colors. Resuming an overdue automatic schedule asks before catching up. To skip dates intentionally, edit the next unpaid date before resuming. Changes to a schedule apply to future occurrences. Hover over its card for the full name, account, interval, status and due time.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="shortcuts"><h2>Templates and payees</h2><p>Open <strong>Daily expenses → Templates → + New</strong>. Choose expense or income, name the shortcut and fill in reusable details. With <strong>Remember amount</strong> off, enter a fresh price each time. A split template keeps its fixed total and category allocation. A foreign-currency template remembers the receipt currency. Review the proposed rate each time you use it.</p><p><strong>Use template</strong> opens a new draft with the current date and time. <strong>Save</strong> posts one transaction. <strong>Cancel</strong> closes the draft. <strong>Save as template</strong> inside a draft saves the shortcut separately, so it survives cancelling the transaction.</p><p>Type a new name in <strong>Payee / shop</strong> and save. Next time, choosing it in a blank entry suggests its remembered account and category. Your explicit choices and template presets take precedence. In <strong>Payees</strong> you can edit defaults, rename or delete a profile. Old purchases keep the payee text that was actually recorded.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="reports"><h2>Reports, search and CSV</h2><p><strong>Monthly overview</strong> shows the selected month's recorded income, expenses, net and category spending against optional budgets. Net is income minus expenses. <strong>Yearly overview</strong> shows twelve months. Double-click a month to open its detail. Month and year CSVs include every recorded transaction in the period, including transfers as their own type. Unpaid plans stay in their own export.</p><p>In <strong>Daily expenses → Search all history</strong>, combine text, account, category, type, inclusive date range and full amount. The amount filter uses the full number on the receipt in its original currency. A category filter counts only that category's share of a split. <strong>Reset filters</strong> restores all history. Edit the selected result or use <strong>Export results CSV</strong> for every match across all pages. Exports distinguish receipt amount, account amount, currency, rate, recorded time and scheduled time where applicable.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="goals"><h2>Savings goals</h2><p>Under <strong>Savings goals → + New goal</strong>, enter the target, currency, amount already saved and optional deadline. <strong>Add savings</strong> updates progress. For a goal of 10,000 CZK, recording 1,000 shows 10% and 9,000 CZK remaining. If you also move money between bank accounts, record that separately using <strong>Transfer</strong>.</p><a class="back" href="#contents">Back to contents ↑</a></section>
-<section id="backup"><h2>Save, restore and troubleshoot</h2><p>Changes are saved on this PC. <strong>Settings &amp; backup → Open data folder</strong> opens the current budget folder. The usual budget is in %LOCALAPPDATA%\BudgetDesk\Data. Its Backups folder keeps up to 20 earlier saves. <strong>Export backup</strong> produces a full JSON copy, including accounts, transactions, schedules, templates, payees and goals. CSV is for reading or analysis.</p><p><strong>Restore backup</strong> validates the selected JSON and asks before replacing the open budget. Later entries are rolled back. Restore a test backup in the sandbox window if you want to rehearse. Two windows cannot open the same budget at once. If startup fails, close any other copy and try <strong>Support/Start-BudgetDesk.cmd</strong> for diagnostics. If the data file cannot be read, the recovery dialog can open an earlier JSON backup.</p><a class="back" href="#contents">Back to contents ↑</a></section>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Budget Desk 1.3.0 · User manual</title><link rel="stylesheet" href="guide.css"></head><body><header><div class="inner"><nav><strong>English</strong> · <a lang="cs" href="Cesky.html">Česky</a> · <a lang="el" href="Ellinika.html">Ελληνικά</a> · <a href="English.pdf">PDF</a></nav><p class="product">Budget Desk 1.3.0</p><h1>User manual</h1><p class="intro">From your first account to a monthly review. Each chapter pairs the controls in the app with an example you can try in the sandbox.</p></div></header><main>
+<nav id="contents"><h2>Contents</h2><ol><li><a href="#start">Setting up a budget</a></li><li><a href="#appearance">Set your language and theme</a></li><li><a href="#colors">Choose a color for each item</a></li><li><a href="#accounts">Set up accounts and categories</a></li><li><a href="#entries">Record everyday transactions</a></li><li><a href="#currency">Pay in a different currency</a></li><li><a href="#planned">Schedule a one-off expense</a></li><li><a href="#recurring">Manage recurring payments</a></li><li><a href="#shortcuts">Use templates and payees</a></li><li><a href="#reports">Read reports and search history</a></li><li><a href="#goals">Track a savings goal</a></li><li><a href="#backup">Back up, restore and troubleshoot</a></li></ol></nav>
+<aside class="jump"><h2>Start with a task</h2><a href="#start">Set up a budget</a><a href="#colors">Color an item</a><a href="#planned">Check a payment</a></aside>
+<section id="start">
+<h2>Setting up a budget</h2>
+<h3 class="action">Start or update the app</h3>
+<p>Before updating, open your previous version and choose <strong>Settings &amp; backup → Export backup</strong>. Keep that JSON, close the app, and extract the entire new ZIP to a new folder. Open <strong>BudgetDesk.exe</strong> inside BudgetDesk. Leave its configuration file next to it. Your existing budget opens from the same Windows data folder. Old entries keep their dates. A missing historical time stays blank unless you choose to add one.</p>
+<p>The five tabs are <strong>Accounts &amp; bills</strong>, <strong>Daily expenses</strong>, <strong>Monthly overview</strong>, <strong>Yearly overview</strong> and <strong>Savings goals</strong>. For practice, run <strong>Support/Test-Sandbox.cmd</strong>. It creates a separate, initially empty budget and keeps it between sessions. <strong>Support/Try-Demo.cmd</strong> opens a third budget with sample data.</p>
+<h3 class="example">Choose the right window</h3>
+<table><thead><tr><th>What you open</th><th>What you will see</th></tr></thead><tbody>
+<tr><td>BudgetDesk.exe</td><td>Your normal budget. Upgrading in a new program folder reuses your existing data folder.</td></tr>
+<tr><td>Support/Test-Sandbox.cmd</td><td>A separate budget for practising. It keeps your practice entries between sessions.</td></tr>
+<tr><td>Support/Try-Demo.cmd</td><td>A separate set of sample figures for exploring the five tabs.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Test the full workflow</h3><p>In the sandbox, add a bank account with 10,000 CZK. Record a 300 CZK expense and check for 9,700 CZK. Close and reopen the sandbox to find the same purchase. This also confirms you are using the same budget folder.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="appearance">
+<h2>Set your language and theme</h2>
+<h3 class="action">Choose your preferences</h3>
+<p>Open <strong>Settings &amp; backup</strong>. Under <strong>Language</strong> choose <strong>English</strong>, <strong>Ελληνικά</strong> or <strong>Čeština</strong>. Under <strong>Appearance</strong> choose <strong>Light</strong> or <strong>Dark</strong>, then select <strong>Save</strong>. The open budget changes immediately. Your choices are saved with this budget and included in its JSON backup.</p>
+<p>You can switch back from the same two fields at the top of Settings. Your account names, payees, descriptions and amounts stay as entered. A paused recurring payment keeps its red card in both themes.</p>
+<h3 class="example">What changes when you press Save</h3>
+<table><thead><tr><th>Setting</th><th>Result</th></tr></thead><tbody>
+<tr><td>Language</td><td>Menus, buttons, statuses and palette names switch immediately. Names and descriptions you typed keep their spelling.</td></tr>
+<tr><td>Light or Dark</td><td>All five tabs switch together. Selected item colors remain recognizable against the new background.</td></tr>
+<tr><td>Separate budgets</td><td>Set your test budget to a different language or theme to make its window easier to recognize.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Finding your way back</h3><p>After switching to Greek, the settings button reads “Ρυθμίσεις &amp; αντίγραφα”. In Czech, look for “Nastavení a zálohy”. The language list always shows English, Ελληνικά and Čeština in their own scripts.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="colors">
+<h2>Choose a color for each item</h2>
+<h3 class="action">Choose a color while creating or editing</h3>
+<p>Open a new or existing account, recurring payment, transaction, future expense, savings goal or template. On the <strong>Item color</strong> row, select the button showing the current color.</p>
+<p>Choose one of the 32 swatches. Hover or use the arrow keys to read its name. The check mark shows the current choice. The palette closes after you choose. Select <strong>Save</strong> in the item form to keep the change.</p>
+<h3 class="example">How colors follow an item</h3>
+<table><thead><tr><th>Item</th><th>What happens</th></tr></thead><tbody>
+<tr><td>Account or recurring payment</td><td>The card takes a tint and a narrow stripe in the exact color. A paused bill is red. Resume brings back the chosen color.</td></tr>
+<tr><td>Transaction or future expense</td><td>The individual row is tinted. A scheduled payment passes its color to the recorded expense. Editing a schedule affects later payments.</td></tr>
+<tr><td>Goal or template</td><td>Each goal has its own row color. A template suggests its saved color for each new draft, where you can change it.</td></tr>
+</tbody></table>
+<div class="palette"><h3>The 32 available colors</h3><ul>
+<li><span style="background-color:#87263F"></span>Burgundy</li>
+<li><span style="background-color:#C73842"></span>Red</li>
+<li><span style="background-color:#E76E61"></span>Coral</li>
+<li><span style="background-color:#ED97B4"></span>Pink</li>
+<li><span style="background-color:#B52D82"></span>Magenta</li>
+<li><span style="background-color:#82416F"></span>Plum</li>
+<li><span style="background-color:#794EAF"></span>Violet</li>
+<li><span style="background-color:#BCA5DB"></span>Lavender</li>
+<li><span style="background-color:#855536"></span>Brown</li>
+<li><span style="background-color:#B2532A"></span>Rust</li>
+<li><span style="background-color:#EB812A"></span>Orange</li>
+<li><span style="background-color:#F3B38C"></span>Peach</li>
+<li><span style="background-color:#D79924"></span>Amber</li>
+<li><span style="background-color:#F2D53F"></span>Yellow</li>
+<li><span style="background-color:#7E842D"></span>Olive</li>
+<li><span style="background-color:#A7C944"></span>Lime</li>
+<li><span style="background-color:#276441"></span>Forest</li>
+<li><span style="background-color:#39854E"></span>Green</li>
+<li><span style="background-color:#91D8B0"></span>Mint</li>
+<li><span style="background-color:#147A78"></span>Teal</li>
+<li><span style="background-color:#39BDB0"></span>Turquoise</li>
+<li><span style="background-color:#50CBDF"></span>Cyan</li>
+<li><span style="background-color:#89BFE9"></span>Sky blue</li>
+<li><span style="background-color:#3475CC"></span>Blue</li>
+<li><span style="background-color:#294573"></span>Navy</li>
+<li><span style="background-color:#54529C"></span>Indigo</li>
+<li><span style="background-color:#D8BE95"></span>Sand</li>
+<li><span style="background-color:#FFFFFF"></span>White</li>
+<li><span style="background-color:#BAC4CC"></span>Silver</li>
+<li><span style="background-color:#858A90"></span>Gray</li>
+<li><span style="background-color:#526578"></span>Slate</li>
+<li><span style="background-color:#212329"></span>Black</li>
+</ul></div>
+<aside class="tip"><h3>Try two accounts</h3><p>Give Bank the Blue swatch and Cash the Orange swatch. Open Bank again and pick Violet, then cancel the editor. Bank stays Blue and Cash stays Orange. Choose Default color and save whenever you want the usual theme styling back.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="accounts">
+<h2>Set up accounts and categories</h2>
+<h3 class="action">Organize the dashboard</h3>
+<p>Under <strong>Accounts &amp; bills → + Add account</strong>, enter a name, icon, currency and opening balance. Use the balance at the start of the selected day, before that day's entries. The opening balance contributes to the account total. The income report starts with recorded income. Click a card to edit it. Drag cards or change <strong>Display position</strong> to arrange the dashboard.</p>
+<p>Under <strong>Daily expenses → Categories</strong>, add or rename a spending category and optionally give it a monthly budget. Zero leaves the budget unset. You can have 20 accounts, 20 categories and 20 recurring schedules. Names in account, category and icon pickers are alphabetical. The symbol follows its name. Focus a picker and press a letter to jump to the first matching name.</p>
+<p>Click a table heading once for ascending order, again for descending order and a third time to return to the original order. Dates and amounts sort chronologically and numerically. Sorting covers all pages. <strong>Previous / Next</strong> changes the displayed page.</p>
+<figure><img src="images/en-accounts.png" alt="Two accounts with separate colors and opening balances."><figcaption>Two accounts with separate colors and opening balances.</figcaption></figure>
+<h3 class="example">Check a starting balance</h3>
+<table><thead><tr><th>Example</th><th>Effect on the account and reports</th></tr></thead><tbody>
+<tr><td>10,000 CZK at the start of today</td><td>The account opens at 10,000 CZK. Recorded income for today is zero.</td></tr>
+<tr><td>A 300 CZK purchase today</td><td>The balance becomes 9,700 CZK and the category shows 300 CZK of spending.</td></tr>
+<tr><td>A 2,000 CZK salary today</td><td>The balance becomes 11,700 CZK. The income report shows 2,000 CZK.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Choosing the opening date</h3><p>Use the account balance just before the first transaction you intend to enter. If you took the balance from the end of yesterday, use today as the starting date. That prevents counting yesterday’s activity again.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="entries">
+<h2>Record everyday transactions</h2>
+<h3 class="action">From receipt to history</h3>
+<p>Go to <strong>Daily expenses → + Expense</strong>. Choose the local date and time, payee or description, account, amount and category. Press <strong>Save</strong>. <strong>+ Income</strong> adds money to the selected account. For <strong>Transfer</strong>, choose the sending and receiving accounts. For different currencies, enter the amount actually received in the destination currency. A transfer moves money between accounts and is excluded from income and spending totals.</p>
+<p>For a receipt covering two categories, enter the full price, open <strong>Split purchase</strong>, assign each part and choose <strong>Use split</strong>. The category amounts must add up to the full receipt in its original currency. Saving creates one charge. Use <strong>Edit selected</strong> to correct the same transaction. <strong>Delete</strong> removes it and recalculates balances.</p>
+<figure><img src="images/en-entries.png" alt="Two expense rows with independent colors. Their amounts keep the expense indicator."><figcaption>Two expense rows with independent colors. Their amounts keep the expense indicator.</figcaption></figure>
+<h3 class="example">One purchase, two categories</h3>
+<table><thead><tr><th>Action</th><th>What to check</th></tr></thead><tbody>
+<tr><td>Start with 1,500 CZK in Cash</td><td>Add an expense for the entire receipt, 1,000 CZK. Choose Cash as the paying account.</td></tr>
+<tr><td>Assign 600 and 400 CZK</td><td>Choose two categories in Split purchase. The parts add to the full 1,000 before you save.</td></tr>
+<tr><td>Open Recorded entries</td><td>Cash now holds 500 CZK. There is one expense. The monthly category totals show 600 and 400.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Correcting a mistake</h3><p>Find the original row and use Edit selected. For example, changing a 300 CZK payment to 350 CZK reduces the account by another 50 CZK. Deleting the corrected row removes its full 350 CZK effect.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="currency">
+<h2>Pay in a different currency</h2>
+<h3 class="action">Read the receipt and the account charge</h3>
+<p>In <strong>+ Expense</strong>, select your CZK bank. The selector beside <strong>Amount / currency</strong> starts at CZK. For a €20 receipt, enter <strong>20</strong> and choose <strong>EUR</strong>. Under <strong>Conversion</strong>, enter <strong>25</strong> if your bank charged 25 CZK for €1. The preview shows <strong>500.00 CZK</strong>. Save once. A bank balance of 10,000 CZK becomes 9,500 CZK. The receipt is still recorded as 20 EUR.</p>
+<p>The rate means units of account currency for one unit of receipt currency. You can use a suggested rate or enter the rate on your statement. With no rate available, enter one before saving. <strong>Settings &amp; backup</strong> accepts CZK values for EUR, USD, GBP, CHF and PLN. Reporting currency changes the display. Account balances use current valuations. The transaction keeps its booked conversion and CZK value when rates change. The same receipt-currency choice is available for income, plans and recurring charges.</p>
+<h3 class="example">Two figures to keep apart</h3>
+<table><thead><tr><th>When</th><th>What Budget Desk records</th></tr></thead><tbody>
+<tr><td>A 100 EUR account at 25 CZK per EUR</td><td>The combined balance includes 2,500 CZK for that account.</td></tr>
+<tr><td>Spend 10 EUR at that rate</td><td>The account has 90 EUR left. This expense contributes 250 CZK to the CZK spending report.</td></tr>
+<tr><td>Later set the rate to 26</td><td>The same 90 EUR now contributes 2,340 CZK to the combined balance. The earlier expense still contributes 250 CZK.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Cross-check the quote</h3><p>For a EUR purchase paid by a CZK card, divide the CZK charge on your statement by the EUR receipt amount. A charge of 500 CZK for 20 EUR gives a quote of 25. Compare the account-amount preview with the statement before saving.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="planned">
+<h2>Schedule a one-off expense</h2>
+<h3 class="action">Book a payment at its due time</h3>
+<p>Choose <strong>Daily expenses → + Future expense</strong>. Enter the amount, currency, account, category and local due date and time. <strong>Record automatically when due</strong> starts enabled for new plans. The plan remains under <strong>Future / planned</strong> until it is booked. Its status shows Auto or Manual.</p>
+<p>The app catches up after the computer wakes or the budget reopens. A budget entry records your payment locally. The bank transfer itself is separate.</p>
+<p>Turn automatic recording off to keep a manual reminder. Plans created before version 1.2 keep their manual status. To automate one, edit it, select its due time and enable automatic recording. Saving a past-due automatic plan books it immediately.</p>
+<p>For a manual reminder, <strong>Due today</strong> becomes <strong>Overdue today</strong> once the time has passed. A date-only reminder stays due all day. After paying, use <strong>Record paid</strong>. Confirm to use the current time or select the actual payment time. <strong>Export plans CSV</strong> exports all outstanding plans, including their status.</p>
+<h3 class="example">At 21:14, schedule 900 CZK for 21:15</h3>
+<table><thead><tr><th>When</th><th>What you should see</th></tr></thead><tbody>
+<tr><td>21:14</td><td>Future / planned shows the 900 CZK item. The booked balance and actual monthly spending have not changed.</td></tr>
+<tr><td>21:15 with Auto enabled</td><td>The plan leaves the list, one 900 CZK expense appears, and the account is debited once.</td></tr>
+<tr><td>21:16 after reopening</td><td>The automatic expense is present with 21:15 as its time. A further reopening leaves one expense.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Prefer a reminder?</h3><p>Clear automatic recording. After the deadline you will still see an outstanding plan. If you pay at 21:18, use Record paid then. The expense records 21:18 and keeps 21:15 as the original due time.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="recurring">
+<h2>Manage recurring payments</h2>
+<h3 class="action">Set the next unpaid occurrence</h3>
+<p>Under <strong>Accounts &amp; bills → + Recurring payment</strong>, choose the account, category, amount, next unpaid date and time, and interval. For a quarterly bill, choose <strong>3 Months</strong>. A monthly schedule anchored on the 31st uses the last day in shorter months and returns to its anchor when possible.</p>
+<p><strong>Status</strong> controls whether the schedule is active. An active <strong>Manual</strong> schedule waits for <strong>Record payment</strong>. Confirming records one expense at the actual payment time and advances the next occurrence. <strong>Automatic recording</strong> makes an active schedule <strong>Auto</strong>. Due occurrences are checked when the budget opens and the app schedules its next check for the next payment deadline. After time away, missed occurrences are booked at their scheduled times. Reopening the app does not post an occurrence twice.</p>
+<p><strong>Pause / resume</strong> suspends the schedule. Its card turns red with white text and a bold <strong>Paused</strong> label. It stays red when another payment is selected and after reopening the budget. Resume restores the active colors. Resuming an overdue automatic schedule asks before catching up. To skip dates intentionally, edit the next unpaid date before resuming. Changes to a schedule apply to future occurrences. Hover over its card for the full name, account, interval, status and due time.</p>
+<h3 class="example">Read the status on the card</h3>
+<table><thead><tr><th>Status</th><th>What moves the schedule forward</th></tr></thead><tbody>
+<tr><td>Auto</td><td>An active schedule records each due occurrence and advances. Unpaid occurrences missed while closed are processed on return.</td></tr>
+<tr><td>Manual</td><td>Record payment after paying. Confirming posts one expense and advances the schedule one occurrence.</td></tr>
+<tr><td>Paused</td><td>The card is red and automatic recording is suspended. Resume restores its own color. Review the next unpaid date before resuming.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Changing a subscription</h3><p>For a quarterly fee, select 3 Months. After recording a 200 CZK payment, edit the schedule to 250 CZK for the next bill. The already recorded 200 CZK belongs to history and keeps its original amount and color.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="shortcuts">
+<h2>Use templates and payees</h2>
+<h3 class="action">Prepare reusable details</h3>
+<p>Open <strong>Daily expenses → Templates → + New</strong>. Choose expense or income, name the shortcut and fill in reusable details. With <strong>Remember amount</strong> off, enter a fresh price each time. A split template keeps its fixed total and category allocation. A foreign-currency template remembers the receipt currency. Review the proposed rate each time you use it.</p>
+<p><strong>Use template</strong> opens a new draft with the current date and time. <strong>Save</strong> posts one transaction. <strong>Cancel</strong> closes the draft. <strong>Save as template</strong> inside a draft saves the shortcut separately, so it survives cancelling the transaction.</p>
+<p>Type a new name in <strong>Payee / shop</strong> and save. Next time, choosing it in a blank entry suggests its remembered account and category. Your explicit choices and template presets take precedence. In <strong>Payees</strong> you can edit defaults, rename or delete a profile. Old purchases keep the payee text that was actually recorded.</p>
+<h3 class="example">Pick the shortcut for the job</h3>
+<table><thead><tr><th>Situation</th><th>Suggested setup</th></tr></thead><tbody>
+<tr><td>Same shop, variable total</td><td>Save a template with Remember amount cleared. Enter the receipt amount each time you use it.</td></tr>
+<tr><td>Same two-category purchase</td><td>Give the template a fixed total and split. Review its amounts, account and color in the draft before saving.</td></tr>
+<tr><td>Only the shop is usually the same</td><td>Choose a saved Payee / shop in a blank entry to suggest its account and category. You can change either.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>A safe trial</h3><p>Use a template and cancel the draft. Your balance and entry count stay the same. When you use the template again and save the draft, there is one new entry. Editing a payee profile later leaves previously recorded shop names intact.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="reports">
+<h2>Read reports and search history</h2>
+<h3 class="action">Trace numbers back to entries</h3>
+<p><strong>Monthly overview</strong> shows the selected month's recorded income, expenses, net and category spending against optional budgets. Net is income minus expenses. <strong>Yearly overview</strong> shows twelve months. Double-click a month to open its detail. Month and year CSVs include every recorded transaction in the period, including transfers as their own type. Unpaid plans stay in their own export.</p>
+<p>In <strong>Daily expenses → Search all history</strong>, combine text, account, category, type, inclusive date range and full amount. The amount filter uses the full number on the receipt in its original currency. A category filter counts only that category's share of a split. <strong>Reset filters</strong> restores all history. Edit the selected result or use <strong>Export results CSV</strong> for every match across all pages. Exports distinguish receipt amount, account amount, currency, rate, recorded time and scheduled time where applicable.</p>
+<h3 class="example">What belongs in each report</h3>
+<table><thead><tr><th>Record</th><th>Effect on actual income and expenses</th></tr></thead><tbody>
+<tr><td>Salary of 2,000 CZK and a 1,000 CZK split purchase</td><td>Income 2,000, spending 1,000, net +1,000 CZK. The two category shares together make up the one expense.</td></tr>
+<tr><td>Transfer 500 CZK from Bank to Cash</td><td>Each account balance changes. Income, spending and net keep the same totals.</td></tr>
+<tr><td>A future expense still awaiting payment</td><td>It is visible in the plans view and plans CSV. It enters the actual reports when recorded.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Search a split receipt</h3><p>A receipt for 1,000 CZK split 600 and 400 matches a full-amount search of 1,000. Add the first category filter to see its 600 share. Export results includes every matching page, even when the screen shows only the first few rows.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="goals">
+<h2>Track a savings goal</h2>
+<h3 class="action">Set a target and update progress</h3>
+<p>Under <strong>Savings goals → + New goal</strong>, enter the target, currency, amount already saved and optional deadline. <strong>Add savings</strong> updates progress. For a goal of 10,000 CZK, recording 1,000 shows 10% and 9,000 CZK remaining. If you also move money between bank accounts, record that separately using <strong>Transfer</strong>.</p>
+<figure><img src="images/en-goals.png" alt="A colored goal row shows its target, saved amount and progress."><figcaption>A colored goal row shows its target, saved amount and progress.</figcaption></figure>
+<h3 class="example">An example goal of 10,000 CZK</h3>
+<table><thead><tr><th>Action</th><th>Progress and remaining amount</th></tr></thead><tbody>
+<tr><td>Create a goal with zero saved</td><td>0% saved and 10,000 CZK remaining. Pick a color to find its row.</td></tr>
+<tr><td>Choose Add savings and enter 1,000 CZK</td><td>10% saved and 9,000 CZK remaining. The account balances keep their previous values.</td></tr>
+<tr><td>Raise Saved so far to 2,500 CZK in Edit</td><td>25% saved and 7,500 CZK remaining. Use this field for a correction or withdrawal from the allocation.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Understanding Per month</h3><p>With 9,000 CZK left and three calendar months including this month and the deadline month, the guide amount is 3,000 CZK per month. Set a target date to see it. Record a Transfer separately if actual money also moved.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
+<section id="backup">
+<h2>Back up, restore and troubleshoot</h2>
+<h3 class="action">Keep or recover a budget</h3>
+<p>Changes are saved on this PC. <strong>Settings &amp; backup → Open data folder</strong> opens the current budget folder. The usual budget is in %LOCALAPPDATA%\BudgetDesk\Data. Its Backups folder keeps up to 20 earlier saves. <strong>Export backup</strong> produces a full JSON copy, including accounts, transactions, schedules, templates, payees and goals. CSV is for reading or analysis.</p>
+<p><strong>Restore backup</strong> validates the selected JSON and asks before replacing the open budget. Later entries are rolled back. Restore a test backup in the sandbox window if you want to rehearse. Two windows cannot open the same budget at once. If startup fails, close any other copy and try <strong>Support/Start-BudgetDesk.cmd</strong> for diagnostics. If the data file cannot be read, the recovery dialog can open an earlier JSON backup.</p>
+<h3 class="example">Choose the right file</h3>
+<table><thead><tr><th>You want to…</th><th>Use</th></tr></thead><tbody>
+<tr><td>Restore a full budget later</td><td>Export backup (JSON). It includes the item colors, language, theme, balances, plans, goals, templates and payees.</td></tr>
+<tr><td>Analyze entries in a spreadsheet</td><td>Export a monthly, annual, history or plans CSV. Pick the view covering the entries you need.</td></tr>
+<tr><td>Recover an earlier local save</td><td>Open the active data folder and check its Backups subfolder. Confirm the date and which budget the copy belongs to.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Rehearse a restore</h3><p>Open Test-Sandbox.cmd, export its JSON, add a small purchase and restore that JSON in the same sandbox. The later purchase disappears. Check one known balance, a colored card and an outstanding plan before you close the window.</p></aside>
+<a class="back" href="#contents">Return to contents ↑</a></section>
 </main></body></html>

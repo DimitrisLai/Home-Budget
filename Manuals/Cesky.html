@@ -1,13 +1,202 @@
 <!doctype html>
-<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Budget Desk 1.2.0 · Uživatelská příručka</title><link rel="stylesheet" href="guide.css"></head><body><header><div class="inner"><nav><a lang="en" href="English.html">English</a> · <strong>Česky</strong> · <a lang="el" href="Ellinika.html">Ελληνικά</a> · <a href="Cesky.pdf">PDF</a></nav><p class="product">Budget Desk 1.2.0</p><h1>Uživatelská příručka</h1></div></header><main><nav id="contents"><h2>Obsah</h2><ol><li><a href="#start">První spuštění a aktualizace</a></li><li><a href="#appearance">Jazyk a vzhled</a></li><li><a href="#accounts">Účty, kategorie a ovládání</a></li><li><a href="#entries">Výdaje, příjmy, převody a rozdělení nákupu</a></li><li><a href="#currency">Jak zaplatit v eurech z korunového účtu</a></li><li><a href="#planned">Jednorázový plán a stav splatnosti</a></li><li><a href="#recurring">Pravidelné platby a přepínače Auto, Manual a Paused</a></li><li><a href="#shortcuts">Šablony a obchodníci</a></li><li><a href="#reports">Přehledy, vyhledávání a export CSV</a></li><li><a href="#goals">Cíle spoření</a></li><li><a href="#backup">Uložení a obnova</a></li></ol></nav><section id="start"><h2>První spuštění a aktualizace</h2><p>Před aktualizací otevřete starší verzi a zvolte <strong>Nastavení a zálohy → Vyexportovat zálohu</strong>. Soubor JSON uschovejte, zavřete aplikaci a celý nový ZIP rozbalte do nové složky. Ve složce BudgetDesk spusťte <strong>BudgetDesk.exe</strong>. Konfigurační soubor ponechte vedle něj. Aplikace načte dosavadní rozpočet ze stejného místa. U starších položek, u kterých byl uložen pouze den, zůstane čas prázdný, dokud ho sami nedoplníte.</p><p>Pět hlavních karet se jmenuje <strong>Účty a platby</strong>, <strong>Denní transakce</strong>, <strong>Měsíční přehled</strong>, <strong>Roční přehled</strong> a <strong>Cíle spoření</strong>. Pro vlastní zkoušku spusťte <strong>Support/Test-Sandbox.cmd</strong>. Otevřete tím samostatný, zpočátku prázdný rozpočet, který se uchová i po zavření. <strong>Support/Try-Demo.cmd</strong> otevře oddělená ukázková data.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="appearance"><h2>Jazyk a vzhled</h2><p>Otevřete <strong>Settings &amp; backup</strong>. V poli <strong>Language / Jazyk</strong> vyberte <strong>English</strong>, <strong>Ελληνικά</strong> nebo <strong>Čeština</strong>. V poli <strong>Appearance / Vzhled</strong> vyberte <strong>Světlý</strong> nebo <strong>Tmavý</strong> a potvrďte tlačítkem <strong>Uložit</strong>. Změna se projeví ihned. Volby se uloží s tímto rozpočtem a jsou součástí jeho zálohy JSON.</p><p>Pro návrat k angličtině otevřete Nastavení a zálohy a v prvním poli zvolte English. Vlastní názvy účtů, příjemci, popisy a částky zůstávají zachovány. Pozastavená pravidelná platba má v obou režimech červenou kartu.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="accounts"><h2>Účty, kategorie a ovládání</h2><p>V <strong>Účty a platby → + Přidat účet</strong> zadejte název, ikonu, měnu a počáteční zůstatek. Použijte stav na začátku zvoleného dne před započtením jeho transakcí. Počáteční zůstatek vstupuje do stavu účtu. V přehledu příjmů se objeví až zaúčtované příjmy. Kliknutím na kartu účet upravíte. Pořadí karet změníte přetažením nebo číselnou hodnotou <strong>Pořadí zobrazení</strong>.</p><p>V <strong>Denní transakce → Kategorie</strong> lze přidat či přejmenovat kategorii a nastavit měsíční rozpočet. Nula ponechá kategorii bez limitu. Rozpočet může obsahovat až 20 účtů, 20 kategorií a 20 pravidelných plateb. V nabídkách účtů, kategorií a ikon jsou názvy seřazené abecedně a symbol je až za názvem. Stiskněte písmeno v aktivní nabídce a výběr přeskočí na první odpovídající název.</p><p>První kliknutí na záhlaví sloupce seřadí položky vzestupně, druhé sestupně a třetí obnoví výchozí pořadí. Datum se řadí podle času a částka podle hodnoty. Řazení zahrne všechny stránky. Mezi nimi přecházejte pomocí <strong>Předchozí / Další</strong>.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="entries"><h2>Výdaje, příjmy, převody a rozdělení nákupu</h2><p>V <strong>Denní transakce → + Výdaj</strong> vyberte místní datum a čas, obchodníka nebo popis, účet, částku a kategorii. Klikněte na <strong>Uložit</strong>. Pomocí <strong>+ Příjem</strong> připíšete příjem. U <strong>Převod</strong> vyberte zdrojový i cílový účet. Pokud mají různé měny, zadejte také částku skutečně připsanou v cílové měně. Převod přesune peníze mezi účty a nezapočítá se do příjmů ani výdajů.</p><p>Obsahuje-li účtenka více kategorií, zadejte celou cenu, otevřete <strong>Rozdělení nákupu</strong>, rozepište částky a potvrďte <strong>Použít rozdělení</strong>. Jejich součet musí odpovídat ceně na účtence v původní měně. Z účtu se odečte jediná platba. <strong>Upravit výběr</strong> opraví vybranou transakci. <strong>Smazat</strong> ji odstraní a zůstatky se přepočítají.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="currency"><h2>Jak zaplatit v eurech z korunového účtu</h2><p>V <strong>+ Výdaj</strong> vyberte korunový účet. U pole <strong>Částka / měna</strong> se nejdříve zobrazí CZK. Jestliže je účtenka na 20 eur, zadejte <strong>20</strong> a vedle vyberte <strong>EUR</strong>. Při kurzu 25 Kč za euro zadejte v části <strong>Přepočet</strong> hodnotu <strong>25</strong>. Náhled ukáže zatížení účtu <strong>500 CZK</strong>. Po uložení klesne zůstatek z 10 000 na 9 500 Kč a na transakci zůstane částka 20 EUR.</p><p>Kurz udává počet jednotek měny účtu za jednu jednotku měny nákupu. Můžete upravit navržený kurz podle výpisu z banky. Pokud kurz chybí, doplňte jej před uložením. V <strong>Nastavení a zálohy</strong> se zadávají kurzy vůči CZK pro EUR, USD, GBP, CHF a PLN. Měna přehledu určuje, v čem se zobrazují souhrny. Zůstatky se oceňují aktuálním kurzem. Zaúčtovaná částka a její původní korunová hodnota se po změně kurzu zachovají. Měnu lze stejně vybrat u příjmů, plánů i pravidelných plateb.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="planned"><h2>Jednorázový plán a stav splatnosti</h2><p>Otevřete <strong>Denní transakce → + Budoucí výdaj</strong>. Zadejte částku, měnu, účet, kategorii a místní datum a čas splatnosti. Nový plán má zapnutou volbu <strong>Zapsat automaticky v termínu</strong>. Do zaúčtování ho najdete v části <strong>Budoucí / plány</strong> s označením Auto nebo Ručně.</p><p>Pokud ve <strong>21:14</strong> naplánujete výdaj na <strong>21:15:00</strong>, otevřená aplikace ho ve 21:15 jednou zaúčtuje a odebere z čekajících plánů. Pokud byl rozpočet zavřený nebo počítač spal, doplní se platba po otevření či probuzení. Vrátíte-li se ve <strong>21:16</strong>, záznam stále uvádí <strong>21:15</strong>. Jde o zápis v rozpočtu. Případný převod v bance provedete zvlášť.</p><p>Pro pouhou připomínku automatický zápis vypněte. Plány z předchozích verzí zůstávají ruční. Chcete-li takový plán automatizovat, otevřete ho, zvolte čas splatnosti, zapněte automatický zápis a uložte. Je-li již po termínu, výdaj se zaúčtuje ihned.</p><p>U ruční připomínky se po uplynutí času změní „Splatné dnes“ na „Dnes po termínu“. Připomínka bez času je splatná celý den. Po zaplacení zvolte <strong>Zapsat úhradu</strong>. Potvrzením se použije aktuální čas nebo čas, který zadáte. <strong>CSV plánů</strong> obsahuje všechny čekající plány včetně jejich stavu.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="recurring"><h2>Pravidelné platby a přepínače Auto, Manual a Paused</h2><p>V <strong>Účty a platby → + Pravidelná platba</strong> zadejte účet, kategorii, částku, datum a čas příští nezaplacené splátky a interval. Pro čtvrtletní platbu nastavte <strong>3 Měsíce</strong>. Má-li měsíční platba termín 31. dne, v kratším měsíci připadne na jeho poslední den. Jakmile to kalendář dovolí, vrátí se na 31.</p><p>Přepínač <strong>Stav</strong> určuje, zda je plán aktivní. Aktivní <strong>Ručně</strong> čeká na <strong>Zapsat platbu</strong>. Po potvrzení se zaúčtuje jedna úhrada s aktuálním časem a posune se další termín. S volbou <strong>Automatický zápis</strong> se zobrazí <strong>Auto</strong>. Aplikace zkontroluje splatné platby při otevření rozpočtu a nastaví další kontrolu na čas nejbližší platby. Po delší přestávce doplní zmeškané splátky s jejich plánovanými časy. Opětovné spuštění stejnou splátku nezdvojí.</p><p><strong>Pozastavit / obnovit</strong> plán pozastaví nebo obnoví. Karta pozastavené platby zčervená. Má bílý text a tučné označení <strong>Pozastaveno</strong>. Červená zůstane i po výběru jiné platby nebo opětovném otevření rozpočtu. Po obnovení se vrátí původní barvy. Při obnovení automatického plánu po splatnosti aplikace požádá o potvrzení doplnění plateb. Chcete-li některé vynechat, před obnovením upravte příští nezaplacený termín. Změny částky se použijí na další splátky. Po najetí myší na kartu uvidíte celé údaje včetně termínu a režimu.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="shortcuts"><h2>Šablony a obchodníci</h2><p>V <strong>Denní transakce → Šablony → + Nová</strong> pojmenujte šablonu, zvolte výdaj či příjem a doplňte opakující se údaje. Když ponecháte <strong>Zapamatovat částku</strong> vypnuté, částku zadáte při každém použití. Šablona rozdělené platby si uchová pevnou celkovou částku a její rozpis. Cizoměnová šablona si pamatuje měnu účtenky. Kurz zkontrolujte při použití.</p><p><strong>Použít šablonu</strong> otevře nový rozepsaný záznam s dnešním datem a časem. <strong>Uložit</strong> zaúčtuje jednu transakci, <strong>Zrušit</strong> ji zruší. Pomocí <strong>Uložit jako šablonu</strong> lze rozepsaný záznam uložit jako šablonu. Ta zůstane i po zrušení samotného záznamu.</p><p>Do <strong>Příjemce / obchod</strong> napište název obchodu a výdaj uložte. Výběr známého obchodu v novém prázdném záznamu nabídne zapamatovaný účet a kategorii. Ruční výběr i údaje ze šablony mají přednost. V <strong>Příjemci</strong> lze změnit výchozí údaje, profil přejmenovat nebo smazat. Název na dříve uložených nákupech se zachová.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="reports"><h2>Přehledy, vyhledávání a export CSV</h2><p><strong>Měsíční přehled</strong> ukazuje skutečné příjmy, výdaje, jejich rozdíl a čerpání rozpočtů kategorií za vybraný měsíc. <strong>Roční přehled</strong> zobrazí všech dvanáct měsíců. Dvojklik na měsíc otevře jeho podrobnosti. Měsíční či roční CSV zahrne všechny zaúčtované transakce za dané období, včetně převodů jako samostatného typu. Neuhrazené plány mají vlastní export.</p><p>V <strong>Denní transakce → Celá historie</strong> kombinujte text, účet, kategorii, typ, datum od/do včetně krajních dnů a celou částku. Filtr částky pracuje s celkovou částkou z účtenky v její původní měně. Při filtrování podle kategorie se v součtu použije jen její část rozděleného nákupu. <strong>Zrušit filtry</strong> obnoví celou historii. Výsledek lze upravit nebo přes <strong>CSV výsledků</strong> vyvézt všechny odpovídající záznamy ze všech stránek. CSV rozlišuje částku nákupu, částku na účtu, měny, kurz a příslušné časy.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="goals"><h2>Cíle spoření</h2><p>V <strong>Cíle spoření → + Nový cíl</strong> zadejte cílovou částku, měnu, dosavadní úsporu a volitelně termín. <strong>Přidat úspory</strong> zvýší evidovanou úsporu. Při cíli 10 000 Kč bude po uložení 1 000 Kč splněno 10 % a bude zbývat 9 000 Kč. Skutečný pohyb peněz mezi účty zaznamenejte zvlášť pomocí <strong>Převod</strong>.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
-<section id="backup"><h2>Uložení a obnova</h2><p>Změny se ukládají na tomto počítači. <strong>Nastavení a zálohy → Otevřít složku dat</strong> otevře složku právě používaného rozpočtu. Běžný rozpočet je v %LOCALAPPDATA%\BudgetDesk\Data. Podsložka Backups uchovává až 20 předchozích uložených stavů. <strong>Vyexportovat zálohu</strong> vytvoří úplnou zálohu JSON včetně účtů, pohybů, plánů, šablon, obchodníků a cílů. CSV slouží k prohlížení či dalšímu zpracování.</p><p><strong>Obnovit zálohu</strong> ověří vybraný JSON a před nahrazením rozpočtu vyžádá potvrzení. Později přidané záznamy se vrátí do stavu ze zálohy. Obnovu si můžete vyzkoušet v testovacím okně. Stejný rozpočet nelze otevřít dvakrát současně. Při problémech se spuštěním zavřete další kopie a zkuste diagnostiku přes <strong>Support/Start-BudgetDesk.cmd</strong>. Pokud soubor s daty nejde načíst, dialog obnovy umožní vybrat starší zálohu JSON.</p><a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Budget Desk 1.3.0 · Uživatelská příručka</title><link rel="stylesheet" href="guide.css"></head><body><header><div class="inner"><nav><a lang="en" href="English.html">English</a> · <strong>Česky</strong> · <a lang="el" href="Ellinika.html">Ελληνικά</a> · <a href="Cesky.pdf">PDF</a></nav><p class="product">Budget Desk 1.3.0</p><h1>Uživatelská příručka</h1><p class="intro">Od prvního účtu po měsíční kontrolu. V každé kapitole najdete ovládací prvky aplikace a příklad k vyzkoušení ve zkušebním rozpočtu.</p></div></header><main>
+<nav id="contents"><h2>Obsah</h2><ol><li><a href="#start">První spuštění a aktualizace</a></li><li><a href="#appearance">Jazyk a vzhled</a></li><li><a href="#colors">Barva jednotlivých položek</a></li><li><a href="#accounts">Účty a kategorie</a></li><li><a href="#entries">Každodenní transakce</a></li><li><a href="#currency">Platba v jiné měně</a></li><li><a href="#planned">Jednorázový plánovaný výdaj</a></li><li><a href="#recurring">Pravidelné platby</a></li><li><a href="#shortcuts">Šablony a obchodníci</a></li><li><a href="#reports">Přehledy a hledání v historii</a></li><li><a href="#goals">Cíle spoření</a></li><li><a href="#backup">Zálohy a obnova rozpočtu</a></li></ol></nav>
+<aside class="jump"><h2>Kde začít</h2><a href="#start">Založení rozpočtu</a><a href="#colors">Barva položky</a><a href="#planned">Čas platby</a></aside>
+<section id="start">
+<h2>První spuštění a aktualizace</h2>
+<h3 class="action">Otevření správného rozpočtu</h3>
+<p>Před aktualizací otevřete starší verzi a zvolte <strong>Nastavení a zálohy → Vyexportovat zálohu</strong>. Soubor JSON uschovejte, zavřete aplikaci a celý nový ZIP rozbalte do nové složky. Ve složce BudgetDesk spusťte <strong>BudgetDesk.exe</strong>. Konfigurační soubor ponechte vedle něj. Aplikace načte dosavadní rozpočet ze stejného místa. U starších položek, u kterých byl uložen pouze den, zůstane čas prázdný, dokud ho sami nedoplníte.</p>
+<p>Pět hlavních karet se jmenuje <strong>Účty a platby</strong>, <strong>Denní transakce</strong>, <strong>Měsíční přehled</strong>, <strong>Roční přehled</strong> a <strong>Cíle spoření</strong>. Pro vlastní zkoušku spusťte <strong>Support/Test-Sandbox.cmd</strong>. Otevřete tím samostatný, zpočátku prázdný rozpočet, který se uchová i po zavření. <strong>Support/Try-Demo.cmd</strong> otevře oddělená ukázková data.</p>
+<h3 class="example">Který soubor spustit</h3>
+<table><thead><tr><th>Soubor</th><th>Co se otevře</th></tr></thead><tbody>
+<tr><td>BudgetDesk.exe</td><td>Váš běžný rozpočet. Po rozbalení nové verze do jiné složky se načtou data z dosavadního umístění.</td></tr>
+<tr><td>Support/Test-Sandbox.cmd</td><td>Samostatný rozpočet pro zkoušení. Zkušební transakce v něm zůstanou i po zavření.</td></tr>
+<tr><td>Support/Try-Demo.cmd</td><td>Oddělený rozpočet s ukázkovými částkami pro seznámení se všemi pěti kartami.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>První kontrola</h3><p>Ve zkušebním rozpočtu založte účet s 10 000 CZK. Zapište výdaj 300 CZK a zkontrolujte zůstatek 9 700 CZK. Zavřete a znovu otevřete stejný zkušební rozpočet. Nákup v něm najdete i po spuštění.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="appearance">
+<h2>Jazyk a vzhled</h2>
+<h3 class="action">Přizpůsobení prostředí</h3>
+<p>Otevřete <strong>Settings &amp; backup</strong>. V poli <strong>Language / Jazyk</strong> vyberte <strong>English</strong>, <strong>Ελληνικά</strong> nebo <strong>Čeština</strong>. V poli <strong>Appearance / Vzhled</strong> vyberte <strong>Světlý</strong> nebo <strong>Tmavý</strong> a potvrďte tlačítkem <strong>Uložit</strong>. Změna se projeví ihned. Volby se uloží s tímto rozpočtem a jsou součástí jeho zálohy JSON.</p>
+<p>Pro návrat k angličtině otevřete Nastavení a zálohy a v prvním poli zvolte English. Vlastní názvy účtů, příjemci, popisy a částky zůstávají zachovány. Pozastavená pravidelná platba má v obou režimech červenou kartu.</p>
+<h3 class="example">Co se projeví po uložení</h3>
+<table><thead><tr><th>Nastavení</th><th>Výsledek</th></tr></thead><tbody>
+<tr><td>Jazyk</td><td>Hned se změní nabídky, tlačítka, popisy stavů i názvy barev. Vlastní názvy účtů a texty transakcí si zachovají původní znění.</td></tr>
+<tr><td>Světlý nebo tmavý vzhled</td><td>Přepnou se všechny karty. Barvy jednotlivých položek se přizpůsobí podkladu.</td></tr>
+<tr><td>Samostatné rozpočty</td><td>Ve zkušebním rozpočtu si můžete nastavit jiný vzhled a snadno ho odlišit od běžného okna.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Jak najít cestu zpět</h3><p>V angličtině otevřete “Settings &amp; backup”, v řečtině “Ρυθμίσεις &amp; αντίγραφα”. V seznamu jazyků uvidíte vždy názvy English, Ελληνικά a Čeština v původním jazyce.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="colors">
+<h2>Barva jednotlivých položek</h2>
+<h3 class="action">Výběr při vytváření nebo úpravě</h3>
+<p>Otevřete nový či existující účet, pravidelnou platbu, transakci, plánovaný výdaj, cíl spoření nebo šablonu. V řádku <strong>Barva položky</strong> stiskněte tlačítko s aktuální barvou.</p>
+<p>Vyberte jeden z 32 odstínů. Jeho název zobrazíte najetím myší nebo přechodem pomocí šipek. Zatržítko označuje nynější volbu. Po výběru se paleta zavře. Volbu potvrďte tlačítkem <strong>Uložit</strong> ve formuláři položky.</p>
+<h3 class="example">Kde se vybraná barva projeví</h3>
+<table><thead><tr><th>Položka</th><th>Výsledek</th></tr></thead><tbody>
+<tr><td>Účet nebo pravidelná platba</td><td>Na kartičce se zobrazí tónované pozadí a proužek v přesném odstínu. Pozastavená platba zčervená. Po obnovení se vrátí její vlastní barva.</td></tr>
+<tr><td>Transakce nebo plánovaný výdaj</td><td>Obarví se příslušný řádek. Zaúčtovaný výdaj přebírá barvu plánu. Nová barva pravidelné platby se vztahuje na další úhrady.</td></tr>
+<tr><td>Cíl nebo šablona</td><td>Každý cíl má vlastní barvu řádku. Šablona nabídne svou barvu v novém konceptu, kde ji můžete upravit.</td></tr>
+</tbody></table>
+<div class="palette"><h3>Všech 32 dostupných barev</h3><ul>
+<li><span style="background-color:#87263F"></span>Vínová</li>
+<li><span style="background-color:#C73842"></span>Červená</li>
+<li><span style="background-color:#E76E61"></span>Korálová</li>
+<li><span style="background-color:#ED97B4"></span>Růžová</li>
+<li><span style="background-color:#B52D82"></span>Purpurová</li>
+<li><span style="background-color:#82416F"></span>Švestková</li>
+<li><span style="background-color:#794EAF"></span>Fialová</li>
+<li><span style="background-color:#BCA5DB"></span>Levandulová</li>
+<li><span style="background-color:#855536"></span>Hnědá</li>
+<li><span style="background-color:#B2532A"></span>Rezavá</li>
+<li><span style="background-color:#EB812A"></span>Oranžová</li>
+<li><span style="background-color:#F3B38C"></span>Broskvová</li>
+<li><span style="background-color:#D79924"></span>Jantarová</li>
+<li><span style="background-color:#F2D53F"></span>Žlutá</li>
+<li><span style="background-color:#7E842D"></span>Olivová</li>
+<li><span style="background-color:#A7C944"></span>Limetková</li>
+<li><span style="background-color:#276441"></span>Lesní zelená</li>
+<li><span style="background-color:#39854E"></span>Zelená</li>
+<li><span style="background-color:#91D8B0"></span>Mátová</li>
+<li><span style="background-color:#147A78"></span>Petrolejová</li>
+<li><span style="background-color:#39BDB0"></span>Tyrkysová</li>
+<li><span style="background-color:#50CBDF"></span>Azurová</li>
+<li><span style="background-color:#89BFE9"></span>Nebesky modrá</li>
+<li><span style="background-color:#3475CC"></span>Modrá</li>
+<li><span style="background-color:#294573"></span>Tmavě modrá</li>
+<li><span style="background-color:#54529C"></span>Indigová</li>
+<li><span style="background-color:#D8BE95"></span>Písková</li>
+<li><span style="background-color:#FFFFFF"></span>Bílá</li>
+<li><span style="background-color:#BAC4CC"></span>Stříbrná</li>
+<li><span style="background-color:#858A90"></span>Šedá</li>
+<li><span style="background-color:#526578"></span>Břidlicová</li>
+<li><span style="background-color:#212329"></span>Černá</li>
+</ul></div>
+<aside class="tip"><h3>Zkouška na dvou účtech</h3><p>Vyberte modrou pro Banku a oranžovou pro Hotovost. Otevřete Banku, zvolte fialovou a zrušte celý formulář. Banka zůstane modrá a Hotovost oranžová. Chcete-li barvu odstranit, zvolte Výchozí barva a uložte změnu.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="accounts">
+<h2>Účty a kategorie</h2>
+<h3 class="action">Uspořádání účtů</h3>
+<p>V <strong>Účty a platby → + Přidat účet</strong> zadejte název, ikonu, měnu a počáteční zůstatek. Použijte stav na začátku zvoleného dne před započtením jeho transakcí. Počáteční zůstatek vstupuje do stavu účtu. V přehledu příjmů se objeví až zaúčtované příjmy. Kliknutím na kartu účet upravíte. Pořadí karet změníte přetažením nebo číselnou hodnotou <strong>Pořadí zobrazení</strong>.</p>
+<p>V <strong>Denní transakce → Kategorie</strong> lze přidat či přejmenovat kategorii a nastavit měsíční rozpočet. Nula ponechá kategorii bez limitu. Rozpočet může obsahovat až 20 účtů, 20 kategorií a 20 pravidelných plateb. V nabídkách účtů, kategorií a ikon jsou názvy seřazené abecedně a symbol je až za názvem. Stiskněte písmeno v aktivní nabídce a výběr přeskočí na první odpovídající název.</p>
+<p>První kliknutí na záhlaví sloupce seřadí položky vzestupně, druhé sestupně a třetí obnoví výchozí pořadí. Datum se řadí podle času a částka podle hodnoty. Řazení zahrne všechny stránky. Mezi nimi přecházejte pomocí <strong>Předchozí / Další</strong>.</p>
+<figure><img src="images/cs-accounts.png" alt="Dva účty se samostatnými barvami a vlastními počátečními zůstatky."><figcaption>Dva účty se samostatnými barvami a vlastními počátečními zůstatky.</figcaption></figure>
+<h3 class="example">Jak pracovat s počátečním zůstatkem</h3>
+<table><thead><tr><th>Příklad</th><th>Dopad na účet a přehledy</th></tr></thead><tbody>
+<tr><td>10 000 CZK na začátku dne</td><td>Účet má zůstatek 10 000 CZK. Dnešní zaúčtovaný příjem je nula.</td></tr>
+<tr><td>Dnešní nákup za 300 CZK</td><td>Zůstatek klesne na 9 700 CZK. U vybrané kategorie se zobrazí výdaj 300 CZK.</td></tr>
+<tr><td>Dnešní výplata 2 000 CZK</td><td>Zůstatek vzroste na 11 700 CZK. Přehled příjmů ukáže 2 000 CZK.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Který den zvolit</h3><p>Vyjděte ze zůstatku těsně před první transakcí, kterou chcete evidovat. Pokud jste opsali konečný zůstatek ze včerejšího výpisu, nastavte jako počáteční datum dnešek. Včerejší pohyby tak započítáte pouze jednou.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="entries">
+<h2>Každodenní transakce</h2>
+<h3 class="action">Od účtenky k záznamu</h3>
+<p>V <strong>Denní transakce → + Výdaj</strong> vyberte místní datum a čas, obchodníka nebo popis, účet, částku a kategorii. Klikněte na <strong>Uložit</strong>. Pomocí <strong>+ Příjem</strong> připíšete příjem. U <strong>Převod</strong> vyberte zdrojový i cílový účet. Pokud mají různé měny, zadejte také částku skutečně připsanou v cílové měně. Převod přesune peníze mezi účty a nezapočítá se do příjmů ani výdajů.</p>
+<p>Obsahuje-li účtenka více kategorií, zadejte celou cenu, otevřete <strong>Rozdělení nákupu</strong>, rozepište částky a potvrďte <strong>Použít rozdělení</strong>. Jejich součet musí odpovídat ceně na účtence v původní měně. Z účtu se odečte jediná platba. <strong>Upravit výběr</strong> opraví vybranou transakci. <strong>Smazat</strong> ji odstraní a zůstatky se přepočítají.</p>
+<figure><img src="images/cs-entries.png" alt="Dva výdaje s vlastními barvami řádků. Částky si zachovávají označení výdaje."><figcaption>Dva výdaje s vlastními barvami řádků. Částky si zachovávají označení výdaje.</figcaption></figure>
+<h3 class="example">Jeden nákup ve dvou kategoriích</h3>
+<table><thead><tr><th>Postup</th><th>Co zkontrolovat</th></tr></thead><tbody>
+<tr><td>Začněte s 1 500 CZK v hotovosti</td><td>Založte výdaj na celou účtenku, tedy na 1 000 CZK. Jako platící účet zvolte Hotovost.</td></tr>
+<tr><td>Rozdělte 600 a 400 CZK</td><td>V rozdělení nákupu vyberte dvě kategorie. Před uložením musí být součet 1 000 CZK.</td></tr>
+<tr><td>Otevřete zaúčtované záznamy</td><td>V hotovosti zbývá 500 CZK a je zaúčtován jeden výdaj. V měsíčním přehledu uvidíte u kategorií 600 a 400 CZK.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Oprava nesprávné částky</h3><p>Najděte původní řádek a otevřete ho k úpravě. Změnou výdaje z 300 na 350 CZK se zůstatek sníží o dalších 50 CZK. Při smazání opraveného řádku se na účet vrátí celých 350 CZK.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="currency">
+<h2>Platba v jiné měně</h2>
+<h3 class="action">Kontrola účtenky a částky na účtu</h3>
+<p>V <strong>+ Výdaj</strong> vyberte korunový účet. U pole <strong>Částka / měna</strong> se nejdříve zobrazí CZK. Jestliže je účtenka na 20 eur, zadejte <strong>20</strong> a vedle vyberte <strong>EUR</strong>. Při kurzu 25 Kč za euro zadejte v části <strong>Přepočet</strong> hodnotu <strong>25</strong>. Náhled ukáže zatížení účtu <strong>500 CZK</strong>. Po uložení klesne zůstatek z 10 000 na 9 500 Kč a na transakci zůstane částka 20 EUR.</p>
+<p>Kurz udává počet jednotek měny účtu za jednu jednotku měny nákupu. Můžete upravit navržený kurz podle výpisu z banky. Pokud kurz chybí, doplňte jej před uložením. V <strong>Nastavení a zálohy</strong> se zadávají kurzy vůči CZK pro EUR, USD, GBP, CHF a PLN. Měna přehledu určuje, v čem se zobrazují souhrny. Zůstatky se oceňují aktuálním kurzem. Zaúčtovaná částka a její původní korunová hodnota se po změně kurzu zachovají. Měnu lze stejně vybrat u příjmů, plánů i pravidelných plateb.</p>
+<h3 class="example">Ocenění účtu a historická hodnota nákupu</h3>
+<table><thead><tr><th>Kdy</th><th>Co se zapíše</th></tr></thead><tbody>
+<tr><td>Účet se 100 EUR při kurzu 25 CZK/EUR</td><td>Do celkového zůstatku se připočte 2 500 CZK.</td></tr>
+<tr><td>Výdaj 10 EUR při stejném kurzu</td><td>Na účtu zbývá 90 EUR. V přehledu v korunách představuje výdaj 250 CZK.</td></tr>
+<tr><td>Pozdější změna kurzu na 26</td><td>Současných 90 EUR odpovídá 2 340 CZK. Starší výdaj v přehledu nadále činí 250 CZK.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Ověření kurzu</h3><p>U nákupu v EUR placeného z korunového účtu vydělte částku strženou v CZK částkou na účtence v EUR. Při stržení 500 CZK za 20 EUR je kurz 25. Před uložením porovnejte náhled dopadu na účet s výpisem.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="planned">
+<h2>Jednorázový plánovaný výdaj</h2>
+<h3 class="action">Zaúčtování ve zvolený čas</h3>
+<p>Otevřete <strong>Denní transakce → + Budoucí výdaj</strong>. Zadejte částku, měnu, účet, kategorii a místní datum a čas splatnosti. Nový plán má zapnutou volbu <strong>Zapsat automaticky v termínu</strong>. Do zaúčtování ho najdete v části <strong>Budoucí / plány</strong> s označením Auto nebo Ručně.</p>
+<p>Po probuzení počítače nebo otevření rozpočtu aplikace doplní zmeškané platby. Jedná se o záznam do rozpočtu. Případný skutečný bankovní převod provedete zvlášť.</p>
+<p>Pro pouhou připomínku automatický zápis vypněte. Plány vytvořené před verzí 1.2 zůstávají ruční. Chcete-li takový plán automatizovat, otevřete ho, zvolte čas splatnosti, zapněte automatický zápis a uložte. Je-li již po termínu, výdaj se zaúčtuje ihned.</p>
+<p>U ruční připomínky se po uplynutí času změní „Splatné dnes“ na „Dnes po termínu“. Připomínka bez času je splatná celý den. Po zaplacení zvolte <strong>Zapsat úhradu</strong>. Potvrzením se použije aktuální čas nebo čas, který zadáte. <strong>CSV plánů</strong> obsahuje všechny čekající plány včetně jejich stavu.</p>
+<h3 class="example">Ve 21:14 naplánujte 900 CZK na 21:15</h3>
+<table><thead><tr><th>Čas</th><th>Co uvidíte</th></tr></thead><tbody>
+<tr><td>21:14</td><td>Položka za 900 CZK je mezi plány. Disponibilní zůstatek i skutečné měsíční výdaje jsou dosud stejné.</td></tr>
+<tr><td>21:15 se zapnutým automatickým zápisem</td><td>Plán zmizí ze seznamu, vznikne jeden výdaj 900 CZK a účet se jednou sníží.</td></tr>
+<tr><td>21:16 při opětovném otevření</td><td>Automatický výdaj má čas 21:15. Dalším spuštěním se stejná částka nepřipíše podruhé k výdajům.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Chcete jen připomínku?</h3><p>Vypněte automatický zápis. Po termínu bude plán stále čekat. Zaplatíte-li ve 21:18, zvolte v tuto chvíli Zapsat úhradu. V záznamu bude čas platby 21:18 a původní splatnost 21:15.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="recurring">
+<h2>Pravidelné platby</h2>
+<h3 class="action">Nastavení další neuhrazené splátky</h3>
+<p>V <strong>Účty a platby → + Pravidelná platba</strong> zadejte účet, kategorii, částku, datum a čas příští nezaplacené splátky a interval. Pro čtvrtletní platbu nastavte <strong>3 Měsíce</strong>. Má-li měsíční platba termín 31. dne, v kratším měsíci připadne na jeho poslední den. Jakmile to kalendář dovolí, vrátí se na 31.</p>
+<p>Přepínač <strong>Stav</strong> určuje, zda je plán aktivní. Aktivní <strong>Ručně</strong> čeká na <strong>Zapsat platbu</strong>. Po potvrzení se zaúčtuje jedna úhrada s aktuálním časem a posune se další termín. S volbou <strong>Automatický zápis</strong> se zobrazí <strong>Auto</strong>. Aplikace zkontroluje splatné platby při otevření rozpočtu a nastaví další kontrolu na čas nejbližší platby. Po delší přestávce doplní zmeškané splátky s jejich plánovanými časy. Opětovné spuštění stejnou splátku nezdvojí.</p>
+<p><strong>Pozastavit / obnovit</strong> plán pozastaví nebo obnoví. Karta pozastavené platby zčervená. Má bílý text a tučné označení <strong>Pozastaveno</strong>. Červená zůstane i po výběru jiné platby nebo opětovném otevření rozpočtu. Po obnovení se vrátí původní barvy. Při obnovení automatického plánu po splatnosti aplikace požádá o potvrzení doplnění plateb. Chcete-li některé vynechat, před obnovením upravte příští nezaplacený termín. Změny částky se použijí na další splátky. Po najetí myší na kartu uvidíte celé údaje včetně termínu a režimu.</p>
+<h3 class="example">Co říká stav na kartičce</h3>
+<table><thead><tr><th>Stav</th><th>Kdy se posune další termín</th></tr></thead><tbody>
+<tr><td>Automaticky</td><td>Aktivní plán zaúčtuje každou splatnou platbu. Termíny zmeškané během zavření aplikace se zpracují po návratu.</td></tr>
+<tr><td>Ručně</td><td>Po zaplacení zvolte Zapsat platbu. Potvrzením vznikne jeden výdaj a plán se posune o jedno období.</td></tr>
+<tr><td>Pozastaveno</td><td>Kartička je červená a automatický zápis je pozastaven. Před obnovením zkontrolujte nejbližší nezaplacený termín.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Změna předplatného</h3><p>U čtvrtletního poplatku zvolte interval 3 měsíce. Po zaúčtování 200 CZK nastavte v plánu novou částku 250 CZK pro příští úhradu. U zaplacených 200 CZK se v historii zachová původní částka i barva.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="shortcuts">
+<h2>Šablony a obchodníci</h2>
+<h3 class="action">Příprava opakovaných údajů</h3>
+<p>V <strong>Denní transakce → Šablony → + Nová</strong> pojmenujte šablonu, zvolte výdaj či příjem a doplňte opakující se údaje. Když ponecháte <strong>Zapamatovat částku</strong> vypnuté, částku zadáte při každém použití. Šablona rozdělené platby si uchová pevnou celkovou částku a její rozpis. Cizoměnová šablona si pamatuje měnu účtenky. Kurz zkontrolujte při použití.</p>
+<p><strong>Použít šablonu</strong> otevře nový rozepsaný záznam s dnešním datem a časem. <strong>Uložit</strong> zaúčtuje jednu transakci, <strong>Zrušit</strong> ji zruší. Pomocí <strong>Uložit jako šablonu</strong> lze rozepsaný záznam uložit jako šablonu. Ta zůstane i po zrušení samotného záznamu.</p>
+<p>Do <strong>Příjemce / obchod</strong> napište název obchodu a výdaj uložte. Výběr známého obchodu v novém prázdném záznamu nabídne zapamatovaný účet a kategorii. Ruční výběr i údaje ze šablony mají přednost. V <strong>Příjemci</strong> lze změnit výchozí údaje, profil přejmenovat nebo smazat. Název na dříve uložených nákupech se zachová.</p>
+<h3 class="example">Jakou pomůcku zvolit</h3>
+<table><thead><tr><th>Situace</th><th>Doporučené nastavení</th></tr></thead><tbody>
+<tr><td>Stejný obchod, pokaždé jiná částka</td><td>Uložte šablonu s vypnutým zapamatováním částky. Při každém nákupu doplníte cenu z účtenky.</td></tr>
+<tr><td>Stejný nákup ve dvou kategoriích</td><td>Nastavte šabloně pevný součet a rozdělení. Před uložením transakce zkontrolujte částky, účet a barvu konceptu.</td></tr>
+<tr><td>Opakuje se hlavně obchodník</td><td>V prázdném záznamu vyberte známého příjemce či obchod. Navržený účet i kategorii lze změnit.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Vyzkoušení bez zaúčtování</h3><p>Použijte šablonu a koncept zrušte. Zůstatek i počet záznamů budou stejné. Při dalším použití koncept uložte a vznikne jedna transakce. Pozdější přejmenování příjemce ponechá původní název u starších nákupů.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="reports">
+<h2>Přehledy a hledání v historii</h2>
+<h3 class="action">Dohledání položek v součtech</h3>
+<p><strong>Měsíční přehled</strong> ukazuje skutečné příjmy, výdaje, jejich rozdíl a čerpání rozpočtů kategorií za vybraný měsíc. <strong>Roční přehled</strong> zobrazí všech dvanáct měsíců. Dvojklik na měsíc otevře jeho podrobnosti. Měsíční či roční CSV zahrne všechny zaúčtované transakce za dané období, včetně převodů jako samostatného typu. Neuhrazené plány mají vlastní export.</p>
+<p>V <strong>Denní transakce → Celá historie</strong> kombinujte text, účet, kategorii, typ, datum od/do včetně krajních dnů a celou částku. Filtr částky pracuje s celkovou částkou z účtenky v její původní měně. Při filtrování podle kategorie se v součtu použije jen její část rozděleného nákupu. <strong>Zrušit filtry</strong> obnoví celou historii. Výsledek lze upravit nebo přes <strong>CSV výsledků</strong> vyvézt všechny odpovídající záznamy ze všech stránek. CSV rozlišuje částku nákupu, částku na účtu, měny, kurz a příslušné časy.</p>
+<h3 class="example">Co patří do příjmů a výdajů</h3>
+<table><thead><tr><th>Záznam</th><th>Dopad na skutečné příjmy a výdaje</th></tr></thead><tbody>
+<tr><td>Výplata 2 000 CZK a rozdělený nákup za 1 000 CZK</td><td>Příjmy 2 000 CZK, výdaje 1 000 CZK, rozdíl +1 000 CZK. Oba díly kategorií tvoří jeden výdaj.</td></tr>
+<tr><td>Převod 500 CZK z Banky do Hotovosti</td><td>Změní se zůstatky obou účtů. Příjmy, výdaje a rozdíl zůstanou stejné.</td></tr>
+<tr><td>Dosud nezaplacený plán</td><td>Najdete jej v plánech i v exportu plánů. Do skutečných výdajů se promítne při zaúčtování.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Vyhledání rozdělené účtenky</h3><p>U nákupu za 1 000 CZK s díly 600 a 400 hledejte celkovou částku 1 000. Filtrem první kategorie zobrazíte její díl 600 CZK. Export výsledků obsahuje všechny odpovídající stránky, i když jsou na obrazovce jen první řádky.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="goals">
+<h2>Cíle spoření</h2>
+<h3 class="action">Nastavení a sledování cíle</h3>
+<p>V <strong>Cíle spoření → + Nový cíl</strong> zadejte cílovou částku, měnu, dosavadní úsporu a volitelně termín. <strong>Přidat úspory</strong> zvýší evidovanou úsporu. Při cíli 10 000 Kč bude po uložení 1 000 Kč splněno 10 % a bude zbývat 9 000 Kč. Skutečný pohyb peněz mezi účty zaznamenejte zvlášť pomocí <strong>Převod</strong>.</p>
+<figure><img src="images/cs-goals.png" alt="Barevný řádek cíle ukazuje cílovou částku, naspořenou hodnotu a průběh."><figcaption>Barevný řádek cíle ukazuje cílovou částku, naspořenou hodnotu a průběh.</figcaption></figure>
+<h3 class="example">Příklad cíle ve výši 10 000 CZK</h3>
+<table><thead><tr><th>Akce</th><th>Průběh a zbývající částka</th></tr></thead><tbody>
+<tr><td>Založte cíl s nulovou naspořenou částkou</td><td>Zobrazuje 0 % a zbývá 10 000 CZK. Vyberte barvu pro snadné rozpoznání řádku.</td></tr>
+<tr><td>Zvolte Přidat úspory a zadejte 1 000 CZK</td><td>Zobrazuje 10 % a zbývá 9 000 CZK. Zůstatky na bankovních účtech se nemění.</td></tr>
+<tr><td>Při úpravě změňte naspořenou částku na 2 500 CZK</td><td>Zobrazuje 25 % a zbývá 7 500 CZK. Ve stejném poli můžete opravit chybu nebo snížit odloženou částku.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Jak číst sloupec za měsíc</h3><p>Zbývá-li naspořit 9 000 CZK během tří kalendářních měsíců včetně tohoto měsíce a měsíce cíle, vychází částka na 3 000 CZK měsíčně. Pro její zobrazení nastavte datum cíle. Pokud zároveň přesouváte peníze mezi účty, zapište samostatný převod.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
+<section id="backup">
+<h2>Zálohy a obnova rozpočtu</h2>
+<h3 class="action">Uložení a návrat k dřívější verzi</h3>
+<p>Změny se ukládají na tomto počítači. <strong>Nastavení a zálohy → Otevřít složku dat</strong> otevře složku právě používaného rozpočtu. Běžný rozpočet je v %LOCALAPPDATA%\BudgetDesk\Data. Podsložka Backups uchovává až 20 předchozích uložených stavů. <strong>Vyexportovat zálohu</strong> vytvoří úplnou zálohu JSON včetně účtů, pohybů, plánů, šablon, obchodníků a cílů. CSV slouží k prohlížení či dalšímu zpracování.</p>
+<p><strong>Obnovit zálohu</strong> ověří vybraný JSON a před nahrazením rozpočtu vyžádá potvrzení. Později přidané záznamy se vrátí do stavu ze zálohy. Obnovu si můžete vyzkoušet v testovacím okně. Stejný rozpočet nelze otevřít dvakrát současně. Při problémech se spuštěním zavřete další kopie a zkuste diagnostiku přes <strong>Support/Start-BudgetDesk.cmd</strong>. Pokud soubor s daty nejde načíst, dialog obnovy umožní vybrat starší zálohu JSON.</p>
+<h3 class="example">Který soubor použít</h3>
+<table><thead><tr><th>Co potřebujete</th><th>Vhodný soubor nebo volba</th></tr></thead><tbody>
+<tr><td>Později obnovit celý rozpočet</td><td>Export zálohy do JSON. Obsahuje barvy položek, jazyk, vzhled, účty, transakce, plány, cíle, šablony i příjemce.</td></tr>
+<tr><td>Analyzovat transakce v tabulce</td><td>Export měsíce, roku, historie nebo plánů do CSV. Zvolte pohled, který zahrnuje požadované záznamy.</td></tr>
+<tr><td>Najít starší místní uložení</td><td>Otevřete datovou složku aktivního rozpočtu a podsložku Backups. Ověřte datum a rozpočet, ke kterému záloha patří.</td></tr>
+</tbody></table>
+<aside class="tip"><h3>Nácvik obnovení</h3><p>Spusťte Test-Sandbox.cmd, vyexportujte JSON, přidejte malý nákup a ve stejném zkušebním okně obnovte uložený JSON. Dodatečný nákup zmizí. Před zavřením si ověřte známý zůstatek, barvu kartičky a jeden dosud neuhrazený plán.</p></aside>
+<a class="back" href="#contents">Zpět na obsah ↑</a></section>
 </main></body></html>

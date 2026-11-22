@@ -48,6 +48,8 @@ namespace BudgetDesk
                     foreach (PlannedExpense plan in d.PlannedExpenses.Where(p => p != null)) plan.AutoRecord = false;
                 d.SchemaVersion = 6;
             }
+            // Missing color fields in earlier budgets deserialize to zero (theme default).
+            if (d != null && d.SchemaVersion == 6) d.SchemaVersion = 7;
             Ledger.Validate(d); return d;
         }
         public static BudgetData Clone(BudgetData d) { return Parse(Serialize(d)); }

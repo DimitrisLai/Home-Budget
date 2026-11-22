@@ -75,11 +75,12 @@ namespace BudgetDesk
     internal sealed class RecurringCardPanel : Panel
     {
         private readonly bool paused;
+        private readonly int colorIndex;
         private Color border;
 
-        internal RecurringCardPanel(bool paused)
+        internal RecurringCardPanel(bool paused, int colorIndex)
         {
-            this.paused = paused;
+            this.paused = paused; this.colorIndex = colorIndex;
         }
 
         internal void SetSelected(bool selected)
@@ -91,7 +92,7 @@ namespace BudgetDesk
             }
             else
             {
-                BackColor = selected ? Theme.Pale : Theme.Surface;
+                BackColor = ItemPalette.Surface(colorIndex, selected);
                 border = selected ? Theme.Teal : Theme.Line;
             }
             Invalidate();
@@ -100,6 +101,7 @@ namespace BudgetDesk
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
+            if (!paused) ItemPalette.DrawStripe(e.Graphics, ClientRectangle, colorIndex);
             using (Pen pen = new Pen(border))
                 e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
         }
@@ -111,6 +113,7 @@ namespace BudgetDesk
         internal object[] SortKeys;
         internal object Key(int column) { return SortKeys == null ? Cells[column] : SortKeys[column]; }
         internal string Id;
+        internal int ColorIndex;
         internal int ColorColumn = -1;
         internal Color Color = Color.Empty;
         internal GridItem(string id, params object[] cells) { Id = id; Cells = cells; }
@@ -175,6 +178,10 @@ namespace BudgetDesk
         {
             Name = name; Dock = DockStyle.Fill; Margin = new Padding(0); BackColor = Theme.Surface;
             Grid = Theme.Grid(); Grid.Name = name + "Grid"; Grid.Dock = DockStyle.None;
+            Grid.RowPostPaint += delegate(object sender, DataGridViewRowPostPaintEventArgs e) {
+                object tag = Grid.Rows[e.RowIndex].Cells[0].Tag;
+                if (tag is int) ItemPalette.DrawStripe(e.Graphics, e.RowBounds, (int)tag);
+            };
             sort = new ColumnOrder(Grid, delegate { ApplyOrder(true); });
             Grid.KeyPress += delegate(object source, KeyPressEventArgs e) {
                 if (!Char.IsLetter(e.KeyChar) || items.Count == 0 || Grid.CurrentCell == null) return;
@@ -231,7 +238,19 @@ namespace BudgetDesk
                 foreach (GridItem item in items.Skip(pageIndex * capacity).Take(capacity))
                 {
                     int row = Grid.Rows.Add(item.Cells); Grid.Rows[row].Tag = item.Id;
-                    if (item.ColorColumn >= 0 && !item.Color.IsEmpty) Grid.Rows[row].Cells[item.ColorColumn].Style.ForeColor = item.Color;
+                    if (item.ColorIndex > 0)
+                    {
+                        DataGridViewRow coloredRow = Grid.Rows[row];
+                        coloredRow.Cells[0].Tag = item.ColorIndex;
+                        coloredRow.DefaultCellStyle.BackColor = ItemPalette.Surface(item.ColorIndex, false);
+                        coloredRow.DefaultCellStyle.SelectionBackColor = ItemPalette.Surface(item.ColorIndex, true);
+                    }
+                    if (item.ColorColumn >= 0 && !item.Color.IsEmpty)
+                    {
+                        DataGridViewCellStyle style = Grid.Rows[row].Cells[item.ColorColumn].Style;
+                        style.ForeColor = ItemPalette.DetailColor(item.ColorIndex, item.Color);
+                        if (item.ColorIndex > 0) style.SelectionForeColor = style.ForeColor;
+                    }
                 }
                 int first = items.Count == 0 ? 0 : pageIndex * capacity + 1;
                 int last = Math.Min(items.Count, (pageIndex + 1) * capacity);
