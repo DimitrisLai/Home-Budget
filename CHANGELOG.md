@@ -1,5 +1,11 @@
 # Budget Desk version history
 
+## 1.3.0 — 22 November 2026
+
+- Added 32 named swatches plus a theme default to the item editors for accounts, recurring payments, transactions, one-off plans, savings goals and templates. Each choice is saved per item and travels with the budget backup. Previously saved items start with their default appearance.
+- Cards and rows use the selected color with theme-aware text. Pausing a recurring payment keeps its red status visible. Resuming restores its choice. Payments and template drafts inherit their source color at creation.
+- Rebuilt the English, Greek and Czech offline guides with linked contents, screenshots in the corresponding language, a visual palette, worked examples, status tables, search, conversion and recovery instructions.
+
 ## 1.2.0 — 22 November 2026
 
 - Choose English, Greek or Czech and a light or dark theme in Settings & backup. Both apply immediately, are saved per budget and travel with its backup.

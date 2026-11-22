@@ -10,13 +10,13 @@ For 1.0.1, it downloads the successful review artifact from run 42411149445, ver
 
 The workflow verifies all internal checksums and the completed ZIP. It creates a draft release, downloads and checks the uploaded assets, then publishes the release as latest. It does not overwrite an existing version. Failed builds or checks stop publication.
 
-Users download the attached **BudgetDesk_v1.2.0_Windows.zip** from [Releases](https://github.com/DimitrisLai/Home-Budget/releases), extract it and run BudgetDesk.exe. The second asset, **SHA256SUMS.txt**, contains the ZIP checksum. GitHub also supplies source-code archives.
+Users download the attached **BudgetDesk_v1.3.0_Windows.zip** from [Releases](https://github.com/DimitrisLai/Home-Budget/releases), extract it and run BudgetDesk.exe. The second asset, **SHA256SUMS.txt**, contains the ZIP checksum. GitHub also supplies source-code archives.
 
 ## Prepare the next version
 
 1. Finish and test the intended application changes.
 2. Update application/manifest version identifiers, launch labels, README, CHANGELOG and RELEASE-NOTES.md for that version.
-3. Set **VERSION** to the matching unused three-part number, for example **1.2.1**, and commit the prepared changes to **main** together.
+3. Set **VERSION** to the matching unused three-part number, for example **1.3.1**, and commit the prepared changes to **main** together.
 4. GitHub creates the matching version tag and Windows ZIP, verifies the downloads and publishes the release. No manual release creation or ZIP upload is required.
 
 The workflow also runs when its build/publishing files change, allowing a failed setup to be fixed. A manual **Run workflow** action is available for retries. An existing published release remains unchanged; publish a new version for changed application files.

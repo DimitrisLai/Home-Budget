@@ -130,7 +130,7 @@ $ledger = Build-Test -Name 'LedgerTests' -TestSources @($sources + 'Tests/Ledger
 Run-CheckedProcess -Executable $ledger -Arguments @() -Name 'accounting'
 $compatibility = Build-Test -Name 'FrameworkCompatibilityTests' -TestSources @('Tests/FrameworkCompatibilityTests.cs')
 Run-CheckedProcess -Executable $compatibility -Arguments @('"' + $executable + '"') -Name 'compatibility'
-foreach ($name in @('UiSmokeTests', 'QuickEntryTests', 'AccountLayoutTests', 'AccountRefreshTests', 'ScrollFreeTests', 'OrderCategoryTests', 'YearPlanTests', 'GoalSplitTests', 'Release110Tests', 'Release120Tests')) {
+foreach ($name in @('UiSmokeTests', 'QuickEntryTests', 'AccountLayoutTests', 'AccountRefreshTests', 'ScrollFreeTests', 'OrderCategoryTests', 'YearPlanTests', 'GoalSplitTests', 'Release110Tests', 'Release120Tests', 'Release130Tests')) {
     $test = Build-Test -Name $name -TestSources @($sources + "Tests/$name.cs")
     $images = Join-Path $checks "$name-images"
     Run-CheckedProcess -Executable $test -Arguments @('"' + $images + '"') -Name $name
@@ -162,6 +162,14 @@ foreach ($language in @('English', 'Cesky', 'Ellinika')) {
         $relative = "Manuals/$language.$extension"
         if ((Get-FileHash -LiteralPath (Join-Path $package $relative)).Hash -ne (Get-FileHash -LiteralPath (Join-Path $root $relative)).Hash) {
             throw "Manual differs from the release source: $relative"
+        }
+    }
+}
+foreach ($manual in Get-ChildItem -LiteralPath (Join-Path $package 'Manuals') -Filter '*.html') {
+    foreach ($match in [regex]::Matches([IO.File]::ReadAllText($manual.FullName), '<img src="([^"]+)"')) {
+        $relative = 'Manuals/' + $match.Groups[1].Value
+        if ((Get-FileHash -LiteralPath (Join-Path $package $relative)).Hash -ne (Get-FileHash -LiteralPath (Join-Path $root $relative)).Hash) {
+            throw "Illustration differs from the manual source: $relative"
         }
     }
 }

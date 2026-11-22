@@ -7,6 +7,7 @@ namespace BudgetDesk
 {
     public sealed class Account
     {
+        public int ColorIndex { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
         public string Icon { get; set; }
@@ -28,6 +29,7 @@ namespace BudgetDesk
 
     public sealed class Entry
     {
+        public int ColorIndex { get; set; }
         public string Id { get; set; }
         public string Kind { get; set; }
         public string Date { get; set; }
@@ -65,6 +67,7 @@ namespace BudgetDesk
 
     public sealed class QuickEntryTemplate
     {
+        public int ColorIndex { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
         public string Kind { get; set; }
@@ -91,6 +94,7 @@ namespace BudgetDesk
 
     public sealed class SavingsGoal
     {
+        public int ColorIndex { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
         public string Icon { get; set; }
@@ -102,6 +106,7 @@ namespace BudgetDesk
 
     public sealed class PlannedExpense
     {
+        public int ColorIndex { get; set; }
         public bool AutoRecord { get; set; }
         public string Id { get; set; }
         public string DueDate { get; set; }
@@ -116,6 +121,7 @@ namespace BudgetDesk
 
     public sealed class RecurringBill
     {
+        public int ColorIndex { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
         public string Icon { get; set; }
@@ -182,7 +188,8 @@ namespace BudgetDesk
         public static readonly string[] Currencies = { "CZK", "EUR", "USD", "GBP", "CHF", "PLN" };
         public static readonly string[] Units = { "Months", "Weeks", "Years", "Days" };
         public const int ItemLimit = 20;
-        public const int CurrentSchemaVersion = 6;
+        public const int CurrentSchemaVersion = 7;
+        public const int CardColorCount = 32;
         public static string NewId() { return Guid.NewGuid().ToString("N"); }
         public static string Iso(DateTime date) { return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); }
         public static DateTime Day(string value)
@@ -249,6 +256,9 @@ namespace BudgetDesk
                 Require(!String.IsNullOrWhiteSpace(id) && id.Length <= 100 && seen.Add(id), UiText.Format("Invalid or duplicate {0} ID.", UiText.Get(label)));
         }
 
+        private static void ValidateColor(int index)
+        { Require(index >= 0 && index <= CardColorCount, "Choose a color from the palette."); }
+
         public static void Validate(BudgetData d)
         {
             Require(d != null && d.SchemaVersion == CurrentSchemaVersion, "This backup is not a supported Budget Desk version.");
@@ -279,6 +289,7 @@ namespace BudgetDesk
                 "Use a different name for each category.");
             foreach (Account a in d.Accounts)
             {
+                ValidateColor(a.ColorIndex);
                 TextValue(a.Name, "Account name", 60); TextValue(a.Icon, "Account icon", 30);
                 Require(Currencies.Contains(a.Currency) && d.Rates.ContainsKey(a.Currency), UiText.Get("Set a manual exchange rate for ") + a.Currency + ".");
                 Money(a.OpeningBalance, false, "Opening balance"); Day(a.OpeningDate);
@@ -291,6 +302,7 @@ namespace BudgetDesk
             }
             foreach (Entry e in d.Entries)
             {
+                ValidateColor(e.ColorIndex);
                 Require(e.Kind == "Expense" || e.Kind == "Income" || e.Kind == "Transfer", "Unknown entry type.");
                 Account a = d.Accounts.FirstOrDefault(x => x.Id == e.AccountId);
                 Require(a != null, "An entry refers to a missing account.");
@@ -322,6 +334,7 @@ namespace BudgetDesk
             }
             foreach (PlannedExpense p in d.PlannedExpenses)
             {
+                ValidateColor(p.ColorIndex);
                 TextValue(p.Description, "Planned expense description", 300);
                 Account a = d.Accounts.FirstOrDefault(x => x.Id == p.AccountId);
                 Require(a != null && d.Categories.Any(c => c.Id == p.CategoryId), "Choose an account and category for each planned expense.");
@@ -333,6 +346,7 @@ namespace BudgetDesk
             }
             foreach (RecurringBill b in d.Bills)
             {
+                ValidateColor(b.ColorIndex);
                 TextValue(b.Name, "Payment name", 80); TextValue(b.Icon, "Payment icon", 30);
                 Account a = d.Accounts.FirstOrDefault(x => x.Id == b.AccountId);
                 Require(a != null && d.Categories.Any(c => c.Id == b.CategoryId), "Choose an account and category for each recurring payment.");
@@ -345,6 +359,7 @@ namespace BudgetDesk
             }
             foreach (SavingsGoal g in d.Goals)
             {
+                ValidateColor(g.ColorIndex);
                 TextValue(g.Name, "Goal name", 80); TextValue(g.Icon, "Goal icon", 30);
                 Require(Currencies.Contains(g.Currency) && d.Rates.ContainsKey(g.Currency), UiText.Get("Set a manual exchange rate for the goal currency ") + g.Currency + ".");
                 Money(g.TargetAmount, true, "Goal target"); Money(g.SavedAmount, false, "Saved amount");
@@ -359,6 +374,7 @@ namespace BudgetDesk
             }
             foreach (QuickEntryTemplate t in d.Templates)
             {
+                ValidateColor(t.ColorIndex);
                 TextValue(t.Name, "Template name", 80);
                 Require(t.Kind == "Expense" || t.Kind == "Income", "Templates support expenses or income.");
                 Require(t.Description != null && t.Description.Length <= 300 && (t.Payee == null || t.Payee.Length <= 80), "Check the template description and payee length.");
@@ -437,7 +453,7 @@ namespace BudgetDesk
         {
             QuickEntryTemplate t = d.Templates.FirstOrDefault(x => x.Id == templateId); Require(t != null, "Choose an existing template.");
             return new Entry { Id = NewId(), Kind = t.Kind, Date = Iso(date), Payee = t.Payee, Description = t.Description, AccountId = t.AccountId, CategoryId = t.CategoryId,
-                Time = Clock(date), PurchaseCurrency = t.PurchaseCurrency, Amount = t.Amount ?? 0, RateToCzk = Rate(d, d.Accounts.First(a => a.Id == t.AccountId).Currency),
+                ColorIndex = t.ColorIndex, Time = Clock(date), PurchaseCurrency = t.PurchaseCurrency, Amount = t.Amount ?? 0, RateToCzk = Rate(d, d.Accounts.First(a => a.Id == t.AccountId).Currency),
                 Splits = t.Splits == null ? null : t.Splits.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() };
         }
         public static QuickEntryTemplate TemplateFromEntry(Entry e)
@@ -445,7 +461,7 @@ namespace BudgetDesk
             Require(e.Kind == "Expense" || e.Kind == "Income", "Choose an expense or income for a quick-entry template.");
             string name = !String.IsNullOrWhiteSpace(e.Description) ? e.Description : !String.IsNullOrWhiteSpace(e.Payee) ? e.Payee : "New template";
             return new QuickEntryTemplate { Id = NewId(), Name = name.Length > 80 ? name.Substring(0, 80) : name, Kind = e.Kind, Payee = e.Payee, Description = e.Description ?? "", AccountId = e.AccountId, CategoryId = e.CategoryId,
-                PurchaseCurrency = e.PurchaseCurrency, Amount = e.Amount > 0 ? (decimal?)e.Amount : null, Splits = e.Splits == null ? null : e.Splits.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() };
+                ColorIndex = e.ColorIndex, PurchaseCurrency = e.PurchaseCurrency, Amount = e.Amount > 0 ? (decimal?)e.Amount : null, Splits = e.Splits == null ? null : e.Splits.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() };
         }
         public static IEnumerable<Entry> SearchEntries(BudgetData d, EntrySearch query)
         {
@@ -506,7 +522,7 @@ namespace BudgetDesk
             Day(Iso(paidOn));
             d.Entries.Add(new Entry { Id = NewId(), Kind = "Expense", Date = Iso(paidOn), Time = Clock(paidOn), AccountId = p.AccountId,
                 CategoryId = p.CategoryId, Description = p.Description, Amount = p.Amount, RateToCzk = Rate(d, a.Currency),
-                PlanId = p.Id, ScheduledDate = p.DueDate, ScheduledTime = p.DueTime, PurchaseCurrency = p.PurchaseCurrency, ExchangeRate = p.ExchangeRate });
+                ColorIndex = p.ColorIndex, PlanId = p.Id, ScheduledDate = p.DueDate, ScheduledTime = p.DueTime, PurchaseCurrency = p.PurchaseCurrency, ExchangeRate = p.ExchangeRate });
             d.PlannedExpenses.Remove(p);
         }
 
@@ -552,7 +568,7 @@ namespace BudgetDesk
                 d.Entries.Add(new Entry {
                     Id = NewId(), Kind = "Expense", Date = Iso(booked), Time = automatic ? b.DueTime : Clock(booked), AccountId = b.AccountId,
                     CategoryId = b.CategoryId, Description = b.Name, Amount = b.Amount,
-                    RateToCzk = Rate(d, a.Currency), BillId = b.Id, ScheduledDate = Iso(due), ScheduledTime = b.DueTime, PurchaseCurrency = b.PurchaseCurrency, ExchangeRate = b.ExchangeRate
+                    ColorIndex = b.ColorIndex, RateToCzk = Rate(d, a.Currency), BillId = b.Id, ScheduledDate = Iso(due), ScheduledTime = b.DueTime, PurchaseCurrency = b.PurchaseCurrency, ExchangeRate = b.ExchangeRate
                 });
                 d.ProcessedOccurrences.Add(key);
             }
