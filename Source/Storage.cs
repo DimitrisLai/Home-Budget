@@ -19,7 +19,7 @@ namespace BudgetDesk
         {
             BudgetData d;
             try { d = Serializer().Deserialize<BudgetData>(json); }
-            catch (Exception ex) { throw new BudgetException("The file could not be read as Budget Desk data. " + ex.Message); }
+            catch (Exception ex) { throw new BudgetException(UiText.Get("The file could not be read as Budget Desk data. ") + ex.Message); }
             // Schema 4 prevents older apps from silently dropping payees or templates.
             // Loading migrates in memory; the first save keeps the old file in Backups.
             if (d != null && d.SchemaVersion == 1)
@@ -40,6 +40,14 @@ namespace BudgetDesk
             }
             // Older entries retain a date only and are denominated in their own account currency.
             if (d != null && d.SchemaVersion == 4) d.SchemaVersion = 5;
+            // Previous one-off plans were manual, even when they had a due time.
+            if (d != null && d.SchemaVersion == 5)
+            {
+                d.Language = "en"; d.Appearance = "light";
+                if (d.PlannedExpenses != null)
+                    foreach (PlannedExpense plan in d.PlannedExpenses.Where(p => p != null)) plan.AutoRecord = false;
+                d.SchemaVersion = 6;
+            }
             Ledger.Validate(d); return d;
         }
         public static BudgetData Clone(BudgetData d) { return Parse(Serialize(d)); }
@@ -129,7 +137,7 @@ namespace BudgetDesk
                 Account a = d.Accounts.First(x => x.Id == p.AccountId);
                 Category c = d.Categories.First(x => x.Id == p.CategoryId);
                 string[] cells = { p.DueDate, p.Description, c.Name, a.Name, p.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), p.PurchaseCurrency ?? a.Currency,
-                    Ledger.PlanInBase(d, p).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), d.BaseCurrency, "Planned - not deducted", p.DueTime,
+                    Ledger.PlanInBase(d, p).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), d.BaseCurrency, p.AutoRecord ? "Scheduled - automatic" : "Planned - not deducted", p.DueTime,
                     Ledger.AccountAmount(p.Amount, p.ExchangeRate).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), a.Currency,
                     p.ExchangeRate == 0 ? "" : p.ExchangeRate.ToString(System.Globalization.CultureInfo.InvariantCulture) };
                 s.AppendLine(String.Join(",", cells.Select(Cell)));

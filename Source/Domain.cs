@@ -17,6 +17,9 @@ namespace BudgetDesk
 
     public sealed class Category
     {
+        // Only categories seeded by this app have a translation key. Renaming one turns it into user text.
+        public string DefaultNameKey { get; set; }
+        internal string DisplayName { get { return Name == DefaultNameKey ? UiText.Get(Name) : Name; } }
         public string Id { get; set; }
         public string Name { get; set; }
         public string Icon { get; set; }
@@ -99,6 +102,7 @@ namespace BudgetDesk
 
     public sealed class PlannedExpense
     {
+        public bool AutoRecord { get; set; }
         public string Id { get; set; }
         public string DueDate { get; set; }
         public string DueTime { get; set; }
@@ -133,6 +137,8 @@ namespace BudgetDesk
     {
         public int SchemaVersion { get; set; }
         public string BaseCurrency { get; set; }
+        public string Language { get; set; }
+        public string Appearance { get; set; }
         // Rates use one stable reference. One unit of currency is worth this many CZK.
         public Dictionary<string, decimal> Rates { get; set; }
         public List<Account> Accounts { get; set; }
@@ -149,7 +155,7 @@ namespace BudgetDesk
         public static BudgetData Empty()
         {
             BudgetData d = new BudgetData {
-                SchemaVersion = Ledger.CurrentSchemaVersion, BaseCurrency = "CZK",
+                SchemaVersion = Ledger.CurrentSchemaVersion, BaseCurrency = "CZK", Language = "en", Appearance = "light",
                 Rates = new Dictionary<string, decimal> { { "CZK", 1m } },
                 Accounts = new List<Account>(), Categories = new List<Category>(),
                 Entries = new List<Entry>(), Bills = new List<RecurringBill>(),
@@ -161,14 +167,14 @@ namespace BudgetDesk
             string[] names = { "Groceries", "Eating out", "Transport", "Home", "Health", "Shopping", "Bills", "Entertainment" };
             string[] icons = { "Basket", "Coffee", "Car", "Home", "Health", "Bag", "Bolt", "Music" };
             for (int i = 0; i < names.Length; i++)
-                d.Categories.Add(new Category { Id = Ledger.NewId(), Name = names[i], Icon = icons[i] });
+                d.Categories.Add(new Category { Id = Ledger.NewId(), Name = names[i], DefaultNameKey = names[i], Icon = icons[i] });
             return d;
         }
     }
 
     public sealed class BudgetException : Exception
     {
-        public BudgetException(string message) : base(message) { }
+        public BudgetException(string message) : base(UiText.Get(message)) { }
     }
 
     public static class Ledger
@@ -176,7 +182,7 @@ namespace BudgetDesk
         public static readonly string[] Currencies = { "CZK", "EUR", "USD", "GBP", "CHF", "PLN" };
         public static readonly string[] Units = { "Months", "Weeks", "Years", "Days" };
         public const int ItemLimit = 20;
-        public const int CurrentSchemaVersion = 5;
+        public const int CurrentSchemaVersion = 6;
         public static string NewId() { return Guid.NewGuid().ToString("N"); }
         public static string Iso(DateTime date) { return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); }
         public static DateTime Day(string value)
@@ -198,7 +204,7 @@ namespace BudgetDesk
         }
         public static string DateLabel(string date, string time)
         {
-            return Moment(date, time).ToString(String.IsNullOrEmpty(time) ? "d MMM yyyy" : "d MMM yyyy HH:mm:ss", CultureInfo.GetCultureInfo("en-GB"));
+            return Moment(date, time).ToString(String.IsNullOrEmpty(time) ? "d MMM yyyy" : "d MMM yyyy HH:mm:ss", UiText.Culture);
         }
         public static bool PlanOverdue(PlannedExpense plan, DateTime now)
         {
@@ -229,23 +235,25 @@ namespace BudgetDesk
         }
         static void TextValue(string s, string field, int max)
         {
-            Require(!String.IsNullOrWhiteSpace(s) && s.Trim().Length <= max, field + " is required (maximum " + max + " characters).");
+            Require(!String.IsNullOrWhiteSpace(s) && s.Trim().Length <= max, UiText.Format("{0} is required (maximum {1} characters).", UiText.Get(field), max));
         }
         static void Money(decimal n, bool positive, string field)
         {
             Require((!positive || n > 0) && Math.Abs(n) <= 999999999999m && Decimal.Round(n, 2) == n,
-                field + " must " + (positive ? "be greater than zero and " : "") + "have at most two decimal places.");
+                UiText.Format(positive ? "{0} must be greater than zero and have at most two decimal places." : "{0} must have at most two decimal places.", UiText.Get(field)));
         }
         static void Unique(IEnumerable<string> ids, string label)
         {
             HashSet<string> seen = new HashSet<string>();
             foreach (string id in ids)
-                Require(!String.IsNullOrWhiteSpace(id) && id.Length <= 100 && seen.Add(id), "Invalid or duplicate " + label + " ID.");
+                Require(!String.IsNullOrWhiteSpace(id) && id.Length <= 100 && seen.Add(id), UiText.Format("Invalid or duplicate {0} ID.", UiText.Get(label)));
         }
 
         public static void Validate(BudgetData d)
         {
             Require(d != null && d.SchemaVersion == CurrentSchemaVersion, "This backup is not a supported Budget Desk version.");
+            Require(d.Language == "en" || d.Language == "el" || d.Language == "cs", "Choose a supported interface language.");
+            Require(d.Appearance == "light" || d.Appearance == "dark", "Choose a supported appearance.");
             Require(d.Accounts != null && d.Categories != null && d.Bills != null && d.Entries != null && d.Rates != null && d.ProcessedOccurrences != null && d.PlannedExpenses != null && d.Goals != null && d.Payees != null && d.Templates != null,
                 "The data file is incomplete.");
             Require(d.Accounts.Count <= 20 && d.Categories.Count <= 20 && d.Bills.Count <= 20,
@@ -272,7 +280,7 @@ namespace BudgetDesk
             foreach (Account a in d.Accounts)
             {
                 TextValue(a.Name, "Account name", 60); TextValue(a.Icon, "Account icon", 30);
-                Require(Currencies.Contains(a.Currency) && d.Rates.ContainsKey(a.Currency), "Set a manual exchange rate for " + a.Currency + ".");
+                Require(Currencies.Contains(a.Currency) && d.Rates.ContainsKey(a.Currency), UiText.Get("Set a manual exchange rate for ") + a.Currency + ".");
                 Money(a.OpeningBalance, false, "Opening balance"); Day(a.OpeningDate);
             }
             foreach (Category c in d.Categories)
@@ -318,6 +326,7 @@ namespace BudgetDesk
                 Account a = d.Accounts.FirstOrDefault(x => x.Id == p.AccountId);
                 Require(a != null && d.Categories.Any(c => c.Id == p.CategoryId), "Choose an account and category for each planned expense.");
                 Require(Moment(p.DueDate, p.DueTime) >= Day(a.OpeningDate), "The planned date is before the account's starting date.");
+                Require(!p.AutoRecord || !String.IsNullOrEmpty(p.DueTime), "Choose a due time for automatic recording.");
                 Money(p.Amount, true, "Planned amount");
                 CheckPurchase(p.PurchaseCurrency, p.ExchangeRate, a, p.Amount);
                 Require(!d.Entries.Any(e => e.PlanId == p.Id), "This planned expense has already been recorded.");
@@ -337,7 +346,7 @@ namespace BudgetDesk
             foreach (SavingsGoal g in d.Goals)
             {
                 TextValue(g.Name, "Goal name", 80); TextValue(g.Icon, "Goal icon", 30);
-                Require(Currencies.Contains(g.Currency) && d.Rates.ContainsKey(g.Currency), "Set a manual exchange rate for the goal currency " + g.Currency + ".");
+                Require(Currencies.Contains(g.Currency) && d.Rates.ContainsKey(g.Currency), UiText.Get("Set a manual exchange rate for the goal currency ") + g.Currency + ".");
                 Money(g.TargetAmount, true, "Goal target"); Money(g.SavedAmount, false, "Saved amount");
                 Require(g.SavedAmount >= 0, "A goal's saved amount cannot be negative.");
                 if (!String.IsNullOrEmpty(g.TargetDate)) Day(g.TargetDate);
@@ -366,7 +375,7 @@ namespace BudgetDesk
 
         public static decimal Rate(BudgetData d, string currency)
         {
-            Require(d.Rates.ContainsKey(currency), "An exchange rate is missing for " + currency + ".");
+            Require(d.Rates.ContainsKey(currency), UiText.Get("An exchange rate is missing for ") + currency + ".");
             return d.Rates[currency];
         }
         public static decimal ToBase(BudgetData d, decimal amount, string currency)
@@ -455,7 +464,7 @@ namespace BudgetDesk
             if (query.MaximumAmount.HasValue) result = result.Where(e => e.Amount <= query.MaximumAmount.Value);
             string[] words = (query.Text ?? "").Split(new char[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (words.Length > 0) result = result.Where(e => {
-                string text = (e.Description ?? "") + " " + (e.Payee ?? "") + " " + String.Join(" ", d.Accounts.Where(a => a.Id == e.AccountId || a.Id == e.ToAccountId).Select(a => a.Name)) + " " + String.Join(" ", d.Categories.Where(c => HasCategory(e, c.Id)).Select(c => c.Name));
+                string text = (e.Description ?? "") + " " + (e.Payee ?? "") + " " + String.Join(" ", d.Accounts.Where(a => a.Id == e.AccountId || a.Id == e.ToAccountId).Select(a => a.Name)) + " " + String.Join(" ", d.Categories.Where(c => HasCategory(e, c.Id)).Select(c => c.Name + " " + c.DisplayName));
                 return words.All(word => text.IndexOf(word, StringComparison.OrdinalIgnoreCase) >= 0);
             });
             return result;
@@ -550,6 +559,12 @@ namespace BudgetDesk
             b.NextIndex++;
             return fresh;
         }
+        public static DateTime? NextAutomaticMoment(BudgetData data)
+        {
+            var recurring = data.Bills.Where(b => b.Enabled && b.AutoRecord).Select(b => (DateTime?)DueMoment(b));
+            var plans = data.PlannedExpenses.Where(p => p.AutoRecord).Select(p => (DateTime?)Moment(p.DueDate, p.DueTime));
+            return recurring.Concat(plans).Min();
+        }
         public static int PostDue(BudgetData d, DateTime today)
         {
             int count = 0;
@@ -561,6 +576,11 @@ namespace BudgetDesk
                     Require(++guard <= 10000, "This schedule has more than 10,000 overdue payments. Edit its next due date first.");
                     if (RecordOccurrence(d, b, today, true)) count++;
                 }
+            }
+            foreach (PlannedExpense plan in d.PlannedExpenses.Where(p => p.AutoRecord && Moment(p.DueDate, p.DueTime) <= today).ToList())
+            {
+                RecordPlanned(d, plan.Id, Moment(plan.DueDate, plan.DueTime), today);
+                count++;
             }
             return count;
         }
@@ -597,7 +617,7 @@ namespace BudgetDesk
         {
             int current = d.Accounts.FindIndex(a => a.Id == id);
             Require(current >= 0, "Choose an existing account to move.");
-            Require(position >= 0 && position < d.Accounts.Count, "Choose a display position between 1 and " + d.Accounts.Count + ".");
+            Require(position >= 0 && position < d.Accounts.Count, UiText.Get("Choose a display position between 1 and ") + d.Accounts.Count + ".");
             if (current == position) return;
             Account account = d.Accounts[current]; d.Accounts.RemoveAt(current); d.Accounts.Insert(position, account);
         }

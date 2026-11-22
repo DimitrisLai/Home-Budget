@@ -15,7 +15,7 @@ namespace BudgetDesk
                 for (int i = 0; i < Items.Count; i++)
                 {
                     Pick item = Items[i] as Pick;
-                    if (item != null && item.Id.Length > 0 && CultureInfo.CurrentCulture.CompareInfo.IsPrefix(item.Text,
+                    if (item != null && item.Id.Length > 0 && UiText.Culture.CompareInfo.IsPrefix(item.Text,
                         e.KeyChar.ToString(), CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace))
                     {
                         SelectedIndex = i;
@@ -46,6 +46,7 @@ namespace BudgetDesk
         {
             bool dated = !String.IsNullOrEmpty(oldDate);
             DateTime initial = dated ? Ledger.Moment(oldDate, oldTime) : value;
+            if (!dated && !pastOnly) initial = initial.AddTicks(-(initial.Ticks % TimeSpan.TicksPerMinute));
             Date = new DateTimePicker { Name = name, Dock = DockStyle.Fill, Format = DateTimePickerFormat.Short,
                 MinDate = new DateTime(1900, 1, 1), MaxDate = pastOnly ? DateTime.Today : new DateTime(2199, 12, 31), Value = initial.Date };
             Time = new DateTimePicker { Name = name + "Time", Dock = DockStyle.Fill, Format = DateTimePickerFormat.Custom,
@@ -132,9 +133,9 @@ namespace BudgetDesk
         }
         private void UpdatePreview()
         {
-            if (ForeignCurrency == null) { preview.Text = "Account amount  " + Theme.MoneyText(amount.Value, accountCode); return; }
-            string charge = rate.Value > 0 ? Theme.MoneyText(Ledger.AccountAmount(amount.Value, rate.Value), accountCode) : "enter a rate";
-            preview.Text = "Account amount  " + charge + Environment.NewLine + "Rate: " + accountCode + " per 1 " + Code;
+            if (ForeignCurrency == null) { preview.Text = UiText.Get("Account amount  ") + Theme.MoneyText(amount.Value, accountCode); return; }
+            string charge = rate.Value > 0 ? Theme.MoneyText(Ledger.AccountAmount(amount.Value, rate.Value), accountCode) : UiText.Get("enter a rate");
+            preview.Text = UiText.Get("Account amount  ") + charge + Environment.NewLine + UiText.Get("Rate: ") + accountCode + UiText.Get(" per 1 ") + Code;
         }
     }
 }

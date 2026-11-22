@@ -41,15 +41,15 @@ namespace BudgetDesk
         private Panel HistoryFilters()
         {
             FlowLayoutPanel panel = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = false, Margin = new Padding(0) };
-            CheckBox dated = new CheckBox { Text = "Date range", Checked = historyDateRange, Width = 96, Height = 28, Margin = new Padding(0, 5, 4, 0), Name = "HistoryUseDates" };
+            CheckBox dated = new CheckBox { Text = UiText.Get("Date range"), Checked = historyDateRange, Width = 96, Height = 28, Margin = new Padding(0, 5, 4, 0), Name = "HistoryUseDates" };
             DateTimePicker from = DatePicker(historyFrom), through = DatePicker(historyThrough); from.Name = "HistoryFrom"; through.Name = "HistoryThrough";
             foreach (DateTimePicker picker in new DateTimePicker[] { from, through }) { picker.Dock = DockStyle.None; picker.Width = 119; picker.Height = 27; picker.CustomFormat = "dd MMM yyyy"; picker.Font = Theme.Font(9, false); picker.Margin = new Padding(0, 5, 4, 0); picker.Enabled = dated.Checked; }
-            CheckBox amounts = new CheckBox { Text = "Full amount", Checked = historyAmountRange, Width = 105, Height = 28, Margin = new Padding(13, 5, 4, 0), Name = "HistoryUseAmounts" };
+            CheckBox amounts = new CheckBox { Text = UiText.Get("Full amount"), Checked = historyAmountRange, Width = 105, Height = 28, Margin = new Padding(13, 5, 4, 0), Name = "HistoryUseAmounts" };
             NumericUpDown minimum = Theme.Money(historyMinimum), maximum = Theme.Money(historyMaximum); minimum.Name = "HistoryMinimum"; maximum.Name = "HistoryMaximum";
             foreach (NumericUpDown value in new NumericUpDown[] { minimum, maximum }) { value.Minimum = 0; value.Dock = DockStyle.None; value.Width = 117; value.Font = Theme.Font(9.5f, false); value.Height = 27; value.Margin = new Padding(0, 5, 4, 0); value.Enabled = amounts.Checked; }
-            Func<Label> to = delegate { Label label = Theme.Label("to", 9, false, Theme.Muted); label.Dock = DockStyle.None; label.Size = new Size(19, 28); label.Margin = new Padding(0, 5, 3, 0); return label; };
+            Func<Label> to = delegate { Label label = Theme.Label(UiText.Get("to"), 9, false, Theme.Muted); label.Dock = DockStyle.None; label.Size = new Size(19, 28); label.Margin = new Padding(0, 5, 3, 0); return label; };
             panel.Controls.Add(dated); panel.Controls.Add(from); panel.Controls.Add(to()); panel.Controls.Add(through); panel.Controls.Add(amounts); panel.Controls.Add(minimum); panel.Controls.Add(to()); panel.Controls.Add(maximum);
-            Button reset = Theme.Button("Reset filters", false); reset.Name = "ResetHistoryFilters"; reset.Width = 119; reset.Height = 30; reset.Margin = new Padding(3, 3, 0, 0); reset.Font = Theme.Font(9, true); panel.Controls.Add(reset);
+            Button reset = Theme.Button(UiText.Get("Reset filters"), false); reset.Name = "ResetHistoryFilters"; reset.Width = 119; reset.Height = 30; reset.Margin = new Padding(3, 3, 0, 0); reset.Font = Theme.Font(9, true); panel.Controls.Add(reset);
             EventHandler changed = delegate {
                 historyDateRange = dated.Checked; historyFrom = from.Value.Date; historyThrough = through.Value.Date;
                 historyAmountRange = amounts.Checked; historyMinimum = minimum.Value; historyMaximum = maximum.Value;
@@ -68,36 +68,36 @@ namespace BudgetDesk
         private void Templates()
         {
             string chosen = null;
-            using (Form f = new Form { Text = "Quick-entry templates", Width = 900, Height = 590, MinimumSize = new Size(760, 460), StartPosition = FormStartPosition.CenterParent,
-                BackColor = Theme.Canvas, Font = Theme.Font(10, false), Padding = new Padding(20) })
+            using (Form f = new Form { Text = UiText.Get("Quick-entry templates"), Width = 900, Height = 590, MinimumSize = new Size(760, 460), StartPosition = FormStartPosition.CenterParent,
+                ForeColor = Theme.Ink, BackColor = Theme.Canvas, Font = Theme.Font(10, false), Padding = new Padding(20) })
             {
                 TableLayoutPanel shell = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
                 shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 48)); shell.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 55));
-                shell.Controls.Add(Theme.Label("Use a template to open a draft dated today. Review the details and Save to record it. A template alone never changes a balance.", 10, false, Theme.Muted), 0, 0);
+                shell.Controls.Add(Theme.Label(UiText.Get("Use a template to open a draft dated today. Review the details and Save to record it. A template alone never changes a balance."), 10, false, Theme.Muted), 0, 0);
                 PagedGridPanel pager = new PagedGridPanel("TemplatesPager"); DataGridView grid = pager.Grid;
-                Theme.Column(grid, "name", "TEMPLATE", 27); Theme.Column(grid, "type", "TYPE", 12); Theme.Column(grid, "payee", "PAYEE", 20); Theme.Column(grid, "account", "ACCOUNT", 21); Theme.Column(grid, "amount", "AMOUNT", 20);
-                Action fill = delegate { pager.SetRows(Data.Templates.OrderBy(t => t.Name).Select(t => new GridItem(t.Id, t.Name, t.Kind, t.Payee ?? "", Data.Accounts.First(a => a.Id == t.AccountId).Name,
-                    t.Amount.HasValue ? Theme.MoneyText(t.Amount.Value, t.PurchaseCurrency ?? Data.Accounts.First(a => a.Id == t.AccountId).Currency) : "Enter amount") { SortKeys = new object[] { t.Name, t.Kind, t.Payee ?? "", Data.Accounts.First(a => a.Id == t.AccountId).Name, t.Amount } }), false); }; fill(); shell.Controls.Add(pager, 0, 1);
+                Theme.Column(grid, "name", UiText.Get("TEMPLATE"), 27); Theme.Column(grid, "type", UiText.Get("TYPE"), 12); Theme.Column(grid, "payee", UiText.Get("PAYEE"), 20); Theme.Column(grid, "account", UiText.Get("ACCOUNT"), 21); Theme.Column(grid, "amount", UiText.Get("AMOUNT"), 20);
+                Action fill = delegate { pager.SetRows(Data.Templates.OrderBy(t => t.Name).Select(t => new GridItem(t.Id, t.Name, UiText.Get(t.Kind), t.Payee ?? "", Data.Accounts.First(a => a.Id == t.AccountId).Name,
+                    t.Amount.HasValue ? Theme.MoneyText(t.Amount.Value, t.PurchaseCurrency ?? Data.Accounts.First(a => a.Id == t.AccountId).Currency) : UiText.Get("Enter amount")) { SortKeys = new object[] { t.Name, UiText.Get(t.Kind), t.Payee ?? "", Data.Accounts.First(a => a.Id == t.AccountId).Name, t.Amount } }), false); }; fill(); shell.Controls.Add(pager, 0, 1);
                 FlowLayoutPanel buttons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(0, 9, 0, 0) };
-                Button use = Theme.Button("Use template", true), add = Theme.Button("+ New", false), edit = Theme.Button("Edit", false), delete = Theme.Button("Delete", false), close = Theme.Button("Close", false);
+                Button use = Theme.Button(UiText.Get("Use template"), true), add = Theme.Button(UiText.Get("+ New"), false), edit = Theme.Button(UiText.Get("Edit"), false), delete = Theme.Button(UiText.Get("Delete"), false), close = Theme.Button(UiText.Get("Close"), false);
                 use.Name = "UseQuickTemplate"; add.Name = "NewQuickTemplate"; edit.Name = "EditQuickTemplate"; delete.Name = "DeleteQuickTemplate";
                 foreach (Button button in new Button[] { use, add, edit, delete, close }) buttons.Controls.Add(button);
                 shell.Controls.Add(buttons, 0, 2); f.Controls.Add(shell);
-                Func<QuickEntryTemplate> selected = delegate { Ledger.Require(grid.SelectedRows.Count > 0, "Select a template first."); return Data.Templates.First(t => t.Id == (string)grid.SelectedRows[0].Tag); };
+                Func<QuickEntryTemplate> selected = delegate { Ledger.Require(grid.SelectedRows.Count > 0, UiText.Get("Select a template first.")); return Data.Templates.First(t => t.Id == (string)grid.SelectedRows[0].Tag); };
                 Action choose = delegate { ActionSafely(delegate { chosen = selected().Id; f.Close(); }); };
                 use.Click += delegate { choose(); }; grid.CellDoubleClick += delegate(object sender, DataGridViewCellEventArgs e) { if (e.RowIndex >= 0) choose(); };
                 add.Click += delegate { TemplateEditor(null, null, f); fill(); };
                 edit.Click += delegate { ActionSafely(delegate { TemplateEditor(selected(), null, f); fill(); }); };
-                delete.Click += delegate { ActionSafely(delegate { string id = selected().Id; if (Confirm("Delete this quick-entry template? Recorded entries will be kept.")) { Commit(d => d.Templates.RemoveAll(t => t.Id == id)); fill(); } }); };
+                delete.Click += delegate { ActionSafely(delegate { string id = selected().Id; if (Confirm(UiText.Get("Delete this quick-entry template? Recorded entries will be kept."))) { Commit(d => d.Templates.RemoveAll(t => t.Id == id)); fill(); } }); };
                 close.Click += delegate { f.Close(); }; f.ShowDialog(this);
             }
             if (chosen != null) ActionSafely(delegate { UseTemplate(chosen); });
         }
         private void TemplateEditor(QuickEntryTemplate existing, QuickEntryTemplate preset, IWin32Window owner)
         {
-            if (Data.Accounts.Count == 0) { ActionSafely(delegate { throw new BudgetException("Add an account before creating a template."); }); return; }
+            if (Data.Accounts.Count == 0) { ActionSafely(delegate { throw new BudgetException(UiText.Get("Add an account before creating a template.")); }); return; }
             QuickEntryTemplate seed = existing ?? preset;
-            using (Editor f = new Editor(existing == null ? "New quick-entry template" : "Edit quick-entry template", "Set reusable details for an expense or income. Leave Remember amount off to enter the price each time. Split templates keep a fixed total. No transaction is recorded when you save a template.", 44))
+            using (Editor f = new Editor(existing == null ? UiText.Get("New quick-entry template") : UiText.Get("Edit quick-entry template"), UiText.Get("Set reusable details for an expense or income. Leave Remember amount off to enter the price each time. Split templates keep a fixed total. No transaction is recorded when you save a template."), 44))
             {
                 TextBox name = Theme.Text(seed == null ? "" : seed.Name); name.MaxLength = 80; name.Name = "TemplateName";
                 ComboBox kind = Strings(new[] { "Expense", "Income" }, seed == null ? "Expense" : seed.Kind); kind.Name = "TemplateKind";
@@ -105,25 +105,25 @@ namespace BudgetDesk
                 TextBox description = Theme.Text(seed == null ? "" : seed.Description); description.Name = "TemplateDescription";
                 ComboBox account = AccountChoices(seed == null ? accountFilter : seed.AccountId, false), category = CategoryChoices(seed == null ? categoryFilter : seed.CategoryId, false);
                 account.Name = "TemplateAccount"; category.Name = "TemplateCategory";
-                CheckBox remember = new CheckBox { Text = "Remember amount", Checked = seed != null && seed.Amount.HasValue, Dock = DockStyle.Fill, Name = "TemplateRememberAmount" };
+                CheckBox remember = new CheckBox { Text = UiText.Get("Remember amount"), Checked = seed != null && seed.Amount.HasValue, Dock = DockStyle.Fill, Name = "TemplateRememberAmount" };
                 NumericUpDown amount = Theme.Money(seed == null ? 0 : seed.Amount ?? 0); amount.Minimum = 0; amount.Name = "TemplateAmount";
                 PurchaseFields price = new PurchaseFields(Data, account, amount, seed == null ? null : seed.PurchaseCurrency, 0);
                 f.Disposed += delegate { price.RateRow.Dispose(); };
                 List<ExpenseSplit> parts = seed != null && seed.Splits != null ? seed.Splits.Select(p => new ExpenseSplit { CategoryId = p.CategoryId, Amount = p.Amount }).ToList() : new List<ExpenseSplit>();
                 FlowLayoutPanel splits = new FlowLayoutPanel { Dock = DockStyle.Fill, Margin = new Padding(0), Padding = new Padding(0, 4, 0, 0), WrapContents = false };
-                Button split = Theme.Button("Split purchase…", false), single = Theme.Button("One category", false); split.Width = 154; single.Width = 130; split.Height = single.Height = 32; split.Name = "TemplateEditSplit"; single.Name = "TemplateClearSplit"; splits.Controls.Add(split); splits.Controls.Add(single);
+                Button split = Theme.Button(UiText.Get("Split purchase…"), false), single = Theme.Button(UiText.Get("One category"), false); split.Width = 154; single.Width = 130; split.Height = single.Height = 32; split.Name = "TemplateEditSplit"; single.Name = "TemplateClearSplit"; splits.Controls.Add(split); splits.Controls.Add(single);
                 Action configure = delegate {
                     bool expense = Icons.Selected(kind) == "Expense", activeSplit = expense && parts.Count > 0;
                     category.Enabled = expense && !activeSplit; remember.Enabled = !activeSplit; amount.Enabled = remember.Checked;
-                    split.Enabled = expense && remember.Checked; single.Visible = activeSplit; split.Text = activeSplit ? "Edit split (" + parts.Count + ")" : "Split purchase…";
+                    split.Enabled = expense && remember.Checked; single.Visible = activeSplit; split.Text = activeSplit ? UiText.Get("Edit split (") + parts.Count + ")" : UiText.Get("Split purchase…");
                 };
                 kind.SelectedIndexChanged += delegate { configure(); }; remember.CheckedChanged += delegate { configure(); }; configure();
-                split.Click += delegate { try { Ledger.Require(amount.Value > 0, "Enter a positive total before splitting the template.");
+                split.Click += delegate { try { Ledger.Require(amount.Value > 0, UiText.Get("Enter a positive total before splitting the template."));
                     List<ExpenseSplit> initial = parts.Count > 0 ? parts : new List<ExpenseSplit> { new ExpenseSplit { CategoryId = Icons.Selected(category), Amount = amount.Value } };
                     List<ExpenseSplit> edited = SplitExpenseEditor(amount.Value, price.Code, initial, f); if (edited != null) { parts = edited; remember.Checked = true; configure(); }
-                } catch (BudgetException ex) { MessageBox.Show(f, ex.Message, "Template split", MessageBoxButtons.OK, MessageBoxIcon.Information); } };
+                } catch (BudgetException ex) { MessageBox.Show(f, ex.Message, UiText.Get("Template split"), MessageBoxButtons.OK, MessageBoxIcon.Information); } };
                 single.Click += delegate { parts = new List<ExpenseSplit>(); configure(); };
-                f.Field("Template name", name); f.Field("Type", kind); f.Field("Payee / shop", payee); f.Field("Description", description); f.Field("Account", account); f.Field("Expense category", category); f.Field("Default amount", remember); f.Field("Amount / currency", price.AmountRow); f.Field("Split purchase", splits);
+                f.Field(UiText.Get("Template name"), name); f.Field(UiText.Get("Type"), kind); f.Field(UiText.Get("Payee / shop"), payee); f.Field(UiText.Get("Description"), description); f.Field(UiText.Get("Account"), account); f.Field(UiText.Get("Expense category"), category); f.Field(UiText.Get("Default amount"), remember); f.Field(UiText.Get("Amount / currency"), price.AmountRow); f.Field(UiText.Get("Split purchase"), splits);
                 f.Finish(delegate { Commit(d => {
                     QuickEntryTemplate t = existing == null ? new QuickEntryTemplate { Id = Ledger.NewId() } : d.Templates.First(x => x.Id == existing.Id);
                     t.Name = name.Text.Trim(); t.Kind = Icons.Selected(kind); t.Payee = payee.Text.Trim(); t.Description = description.Text.Trim(); t.AccountId = Icons.Selected(account); t.PurchaseCurrency = price.ForeignCurrency;
@@ -135,36 +135,36 @@ namespace BudgetDesk
         }
         private void Payees()
         {
-            using (Form f = new Form { Text = "Payees and autofill", Width = 800, Height = 570, MinimumSize = new Size(650, 440), StartPosition = FormStartPosition.CenterParent,
-                BackColor = Theme.Canvas, Font = Theme.Font(10, false), Padding = new Padding(20) })
+            using (Form f = new Form { Text = UiText.Get("Payees and autofill"), Width = 800, Height = 570, MinimumSize = new Size(650, 440), StartPosition = FormStartPosition.CenterParent,
+                ForeColor = Theme.Ink, BackColor = Theme.Canvas, Font = Theme.Font(10, false), Padding = new Padding(20) })
             {
                 TableLayoutPanel shell = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
                 shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 55)); shell.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 55));
-                shell.Controls.Add(Theme.Label("Known payees suggest their last saved account and category on new entries. Editing or deleting a profile leaves recorded payee names unchanged.", 10, false, Theme.Muted), 0, 0);
+                shell.Controls.Add(Theme.Label(UiText.Get("Known payees suggest their last saved account and category on new entries. Editing or deleting a profile leaves recorded payee names unchanged."), 10, false, Theme.Muted), 0, 0);
                 PagedGridPanel pager = new PagedGridPanel("PayeesPager"); DataGridView grid = pager.Grid;
-                Theme.Column(grid, "name", "PAYEE", 40); Theme.Column(grid, "account", "DEFAULT ACCOUNT", 30); Theme.Column(grid, "category", "DEFAULT CATEGORY", 30);
+                Theme.Column(grid, "name", UiText.Get("PAYEE"), 40); Theme.Column(grid, "account", UiText.Get("DEFAULT ACCOUNT"), 30); Theme.Column(grid, "category", UiText.Get("DEFAULT CATEGORY"), 30);
                 Action fill = delegate { pager.SetRows(Data.Payees.OrderBy(p => p.Name).Select(p => new GridItem(p.Id, p.Name,
-                    Data.Accounts.Where(a => a.Id == p.DefaultAccountId).Select(a => a.Name).FirstOrDefault() ?? "No default",
-                    Data.Categories.Where(c => c.Id == p.DefaultCategoryId).Select(c => c.Name).FirstOrDefault() ?? "No default")), false); }; fill(); shell.Controls.Add(pager, 0, 1);
+                    Data.Accounts.Where(a => a.Id == p.DefaultAccountId).Select(a => a.Name).FirstOrDefault() ?? UiText.Get("No default"),
+                    Data.Categories.Where(c => c.Id == p.DefaultCategoryId).Select(c => c.DisplayName).FirstOrDefault() ?? UiText.Get("No default"))), false); }; fill(); shell.Controls.Add(pager, 0, 1);
                 FlowLayoutPanel buttons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(0, 9, 0, 0) };
-                Button add = Theme.Button("+ New payee", true), edit = Theme.Button("Edit", false), delete = Theme.Button("Delete", false), close = Theme.Button("Close", false);
+                Button add = Theme.Button(UiText.Get("+ New payee"), true), edit = Theme.Button(UiText.Get("Edit"), false), delete = Theme.Button(UiText.Get("Delete"), false), close = Theme.Button(UiText.Get("Close"), false);
                 add.Name = "NewPayee"; edit.Name = "EditPayee"; delete.Name = "DeletePayee";
                 foreach (Button button in new Button[] { add, edit, delete, close }) buttons.Controls.Add(button); shell.Controls.Add(buttons, 0, 2); f.Controls.Add(shell);
-                Func<PayeeProfile> selected = delegate { Ledger.Require(grid.SelectedRows.Count > 0, "Select a payee first."); return Data.Payees.First(p => p.Id == (string)grid.SelectedRows[0].Tag); };
+                Func<PayeeProfile> selected = delegate { Ledger.Require(grid.SelectedRows.Count > 0, UiText.Get("Select a payee first.")); return Data.Payees.First(p => p.Id == (string)grid.SelectedRows[0].Tag); };
                 add.Click += delegate { PayeeEditor(null, f); fill(); }; edit.Click += delegate { ActionSafely(delegate { PayeeEditor(selected(), f); fill(); }); };
                 grid.CellDoubleClick += delegate(object sender, DataGridViewCellEventArgs e) { if (e.RowIndex >= 0) ActionSafely(delegate { PayeeEditor(selected(), f); fill(); }); };
-                delete.Click += delegate { ActionSafely(delegate { string id = selected().Id; if (Confirm("Delete this payee's autofill profile? Recorded entries and their payee names will be kept.")) { Commit(d => d.Payees.RemoveAll(p => p.Id == id)); fill(); } }); };
+                delete.Click += delegate { ActionSafely(delegate { string id = selected().Id; if (Confirm(UiText.Get("Delete this payee's autofill profile? Recorded entries and their payee names will be kept."))) { Commit(d => d.Payees.RemoveAll(p => p.Id == id)); fill(); } }); };
                 close.Click += delegate { f.Close(); }; f.ShowDialog(this);
             }
         }
         private void PayeeEditor(PayeeProfile existing, IWin32Window owner)
         {
-            using (Editor f = new Editor(existing == null ? "New payee" : "Edit payee", "Default account and category are optional suggestions for new entries. Rename changes this profile; existing entries keep the name recorded at the time."))
+            using (Editor f = new Editor(existing == null ? UiText.Get("New payee") : UiText.Get("Edit payee"), UiText.Get("Default account and category are optional suggestions for new entries. Rename changes this profile; existing entries keep the name recorded at the time.")))
             {
                 TextBox name = Theme.Text(existing == null ? "" : existing.Name); name.MaxLength = 80; name.Name = "PayeeName";
                 ComboBox account = AccountChoices(existing == null ? "" : existing.DefaultAccountId, true), category = CategoryChoices(existing == null ? "" : existing.DefaultCategoryId, true);
-                account.Items[0] = new Pick("", "No default account"); category.Items[0] = new Pick("", "No default category"); account.Name = "PayeeDefaultAccount"; category.Name = "PayeeDefaultCategory";
-                f.Field("Payee name", name); f.Field("Default account", account); f.Field("Default category", category);
+                account.Items[0] = new Pick("", UiText.Get("No default account")); category.Items[0] = new Pick("", UiText.Get("No default category")); account.Name = "PayeeDefaultAccount"; category.Name = "PayeeDefaultCategory";
+                f.Field(UiText.Get("Payee name"), name); f.Field(UiText.Get("Default account"), account); f.Field(UiText.Get("Default category"), category);
                 f.Finish(delegate { Commit(d => { PayeeProfile p = existing == null ? new PayeeProfile { Id = Ledger.NewId() } : d.Payees.First(x => x.Id == existing.Id);
                     p.Name = name.Text.Trim(); p.DefaultAccountId = Icons.Selected(account); p.DefaultCategoryId = Icons.Selected(category); if (existing == null) d.Payees.Add(p);
                 }); }); f.ShowDialog(owner);

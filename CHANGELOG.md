@@ -1,5 +1,12 @@
 # Budget Desk version history
 
+## 1.2.0 — 22 November 2026
+
+- Choose English, Greek or Czech and a light or dark theme in Settings & backup. Both apply immediately, are saved per budget and travel with its backup.
+- One-off plans can now book automatically at the scheduled local date and time. New plans start with this option enabled. Earlier plans remain manual until edited.
+- The open app checks the next deadline and catches up at startup or on return. Automatic entries preserve the original due time. Manual payment records the confirmation time.
+- Added print-ready English, Czech and Greek PDFs alongside the updated offline HTML manuals. The portable launch folder still contains the executable, its configuration, Manuals and Support.
+
 ## 1.1.1 — 18 November 2026
 
 - Paused recurring payments now have a red card with white text and a bold leading Paused label. Selecting another payment or reopening the budget keeps the card red. Resume restores the active card colors.

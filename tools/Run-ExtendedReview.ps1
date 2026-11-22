@@ -36,7 +36,7 @@ $csc = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 $common = @('/nologo', '/noconfig', '/nostdlib+', '/warn:4', '/warnaserror+', '/langversion:5', '/codepage:65001', '/platform:anycpu', '/optimize+')
 foreach ($name in @('mscorlib','System','System.Core','System.Drawing','System.Windows.Forms','System.Web.Extensions','System.Xml')) { $common += '/reference:' + (Join-Path $references ($name + '.dll')) }
 $sources = @(Get-ChildItem Source -Filter '*.cs' | Sort-Object Name | ForEach-Object FullName)
-$suites = @('LedgerTests','FrameworkCompatibilityTests','UiSmokeTests','QuickEntryTests','StartupSmokeTests','AccountLayoutTests','AccountRefreshTests','ScrollFreeTests','OrderCategoryTests','YearPlanTests','GoalSplitTests','Release110Tests')
+$suites = @('LedgerTests','FrameworkCompatibilityTests','UiSmokeTests','QuickEntryTests','StartupSmokeTests','AccountLayoutTests','AccountRefreshTests','ScrollFreeTests','OrderCategoryTests','YearPlanTests','GoalSplitTests','Release110Tests', 'Release120Tests')
 foreach ($suite in $suites) {
     $test = Join-Path $work ($suite + '.exe')
     $testSources = @((Get-Item -LiteralPath ("Tests/$suite.cs")).FullName)

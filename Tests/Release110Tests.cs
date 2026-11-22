@@ -60,7 +60,7 @@ internal static class Release110Tests
         var old = Sample(); old.SchemaVersion = 4;
         old.Entries.Add(new Entry { Id = "old", Date = "2026-11-17", Kind = "Income", AccountId = "cz", Description = "Legacy", Amount = 100, RateToCzk = 1 });
         var legacy = BudgetStore.Parse(BudgetStore.Serialize(old));
-        Check(legacy.SchemaVersion == 5 && legacy.Entries[0].Time == null && Ledger.Balance(legacy, "cz", due) == 10100, "schema 4 keeps old balances and a date-only history");
+        Check(legacy.SchemaVersion == Ledger.CurrentSchemaVersion && legacy.Entries[0].Time == null && Ledger.Balance(legacy, "cz", due) == 10100, "schema 4 keeps old balances and a date-only history");
         var bill = new RecurringBill { Id = "bill", Name = "Gym", Icon = "Sport", AnchorDate = Ledger.Iso(due), DueTime = Ledger.Clock(due), AccountId = "cz",
             CategoryId = d.Categories[0].Id, Amount = 10, PurchaseCurrency = "EUR", ExchangeRate = 25, Unit = "Months", Interval = 1, Enabled = true, AutoRecord = true };
         d.Bills.Add(bill);

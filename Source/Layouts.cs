@@ -86,12 +86,12 @@ namespace BudgetDesk
         {
             if (paused)
             {
-                BackColor = selected ? Theme.DarkRed : Theme.Red;
+                BackColor = selected ? Theme.DarkRed : Theme.Paused;
                 border = selected ? Color.White : Theme.DarkRed;
             }
             else
             {
-                BackColor = selected ? Theme.Pale : Color.White;
+                BackColor = selected ? Theme.Pale : Theme.Surface;
                 border = selected ? Theme.Teal : Theme.Line;
             }
             Invalidate();
@@ -148,7 +148,7 @@ namespace BudgetDesk
             internal static readonly SortKeyComparer Instance = new SortKeyComparer();
             public int Compare(object left, object right)
             {
-                if (left is string && right is string) return StringComparer.CurrentCultureIgnoreCase.Compare((string)left, (string)right);
+                if (left is string && right is string) return UiText.Comparer.Compare((string)left, (string)right);
                 return System.Collections.Comparer.Default.Compare(left, right);
             }
         }
@@ -173,20 +173,20 @@ namespace BudgetDesk
 
         internal PagedGridPanel(string name)
         {
-            Name = name; Dock = DockStyle.Fill; Margin = new Padding(0); BackColor = Color.White;
+            Name = name; Dock = DockStyle.Fill; Margin = new Padding(0); BackColor = Theme.Surface;
             Grid = Theme.Grid(); Grid.Name = name + "Grid"; Grid.Dock = DockStyle.None;
             sort = new ColumnOrder(Grid, delegate { ApplyOrder(true); });
             Grid.KeyPress += delegate(object source, KeyPressEventArgs e) {
                 if (!Char.IsLetter(e.KeyChar) || items.Count == 0 || Grid.CurrentCell == null) return;
                 int column = Grid.CurrentCell.ColumnIndex;
-                int index = items.FindIndex(item => item.Key(column) is string && System.Globalization.CultureInfo.CurrentCulture.CompareInfo.IsPrefix(
+                int index = items.FindIndex(item => item.Key(column) is string && UiText.Culture.CompareInfo.IsPrefix(
                     (string)item.Key(column), e.KeyChar.ToString(), System.Globalization.CompareOptions.IgnoreCase | System.Globalization.CompareOptions.IgnoreNonSpace));
                 if (index < 0) return;
                 PageIndex = index / capacity;
                 Grid.CurrentCell = Grid.Rows[index % capacity].Cells[column];
                 e.Handled = true;
             };
-            previous = Theme.Button("Previous", false); next = Theme.Button("Next", false);
+            previous = Theme.Button(UiText.Get("Previous"), false); next = Theme.Button(UiText.Get("Next"), false);
             previous.Name = name + "Previous"; next.Name = name + "Next";
             previous.Margin = next.Margin = new Padding(0);
             info = Theme.Label("", 9, false, Theme.Muted); info.Dock = DockStyle.None;
@@ -235,7 +235,7 @@ namespace BudgetDesk
                 }
                 int first = items.Count == 0 ? 0 : pageIndex * capacity + 1;
                 int last = Math.Min(items.Count, (pageIndex + 1) * capacity);
-                info.Text = "Page " + (pageIndex + 1) + " / " + PageCount + "    " + first + "–" + last + " of " + items.Count;
+                info.Text = UiText.Get("Page ") + (pageIndex + 1) + " / " + PageCount + "    " + first + "–" + last + UiText.Get(" of ") + items.Count;
                 previous.Enabled = pageIndex > 0; next.Enabled = pageIndex + 1 < PageCount;
             }
             finally { rendering = false; }
