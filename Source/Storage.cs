@@ -50,6 +50,11 @@ namespace BudgetDesk
             }
             // Missing color fields in earlier budgets deserialize to zero (theme default).
             if (d != null && d.SchemaVersion == 6) d.SchemaVersion = 7;
+            if (d != null && d.SchemaVersion == 7)
+            {
+                d.TermDeposits = new List<TermDeposit>();
+                d.SchemaVersion = 8;
+            }
             Ledger.Validate(d); return d;
         }
         public static BudgetData Clone(BudgetData d) { return Parse(Serialize(d)); }
@@ -115,8 +120,8 @@ namespace BudgetDesk
             StringBuilder s = new StringBuilder("Date,Type,Description,Category,From account,Amount,Currency,To account,Received amount,Destination currency,Reporting amount,Reporting currency,Payee,Time,Account amount,Account currency,Account units per purchase unit,Original due date,Original due time\r\n");
             foreach (Entry e in entries.OrderBy(x => x.Date).ThenBy(x => x.Time).ThenBy(x => x.Id))
             {
-                Account a = d.Accounts.First(x => x.Id == e.AccountId);
-                Account target = d.Accounts.FirstOrDefault(x => x.Id == e.ToAccountId);
+                Account a = d.AllAccounts.First(x => x.Id == e.AccountId);
+                Account target = d.AllAccounts.FirstOrDefault(x => x.Id == e.ToAccountId);
                 Category c = d.Categories.FirstOrDefault(x => x.Id == e.CategoryId);
                 string purchaseCurrency = e.PurchaseCurrency ?? a.Currency;
                 string categoryText = Ledger.HasSplits(e) ? "Split: " + String.Join("; ", e.Splits.Select(p => d.Categories.First(x => x.Id == p.CategoryId).Name + "=" + p.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " " + purchaseCurrency)) : c == null ? "" : c.Name;

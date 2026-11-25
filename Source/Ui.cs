@@ -260,7 +260,7 @@ namespace BudgetDesk
             UiText.Language = Data.Language; Theme.Dark = Data.Appearance == "dark";
             refreshPageLayout = null; currentPage = null;
             if (Controls.Count > 0) Controls[0].Dispose();
-            Text = "Budget Desk 1.3.0" + (demo ? UiText.Get("  |  DEMO DATA") : "");
+            Text = "Budget Desk 1.4.0" + (demo ? UiText.Get("  |  DEMO DATA") : "");
             BackColor = Theme.Canvas;
             Font = Theme.Font(10, false); ForeColor = Theme.Ink; AutoScaleMode = AutoScaleMode.Dpi;
             TableLayoutPanel shell = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4, Padding = new Padding(26, 8, 26, 8), Margin = new Padding(0) };
@@ -277,12 +277,23 @@ namespace BudgetDesk
             header.Controls.Add(Theme.Label(DateTime.Today.ToString("ddd, d MMM yyyy", UiText.Culture), 10, false, Theme.Muted), 1, 0);
             Button settings = Theme.Button(UiText.Get("Settings & backup"), false); settings.Name = "SettingsBackup"; settings.Anchor = AnchorStyles.Right;
             settings.Click += delegate { Settings(); }; header.Controls.Add(settings, 2, 0); shell.Controls.Add(header, 0, 0);
-            FlowLayoutPanel nav = new FlowLayoutPanel { Dock = DockStyle.Fill, Margin = new Padding(0) };
-            string[] labels = { UiText.Get("Accounts & bills"), UiText.Get("Daily expenses"), UiText.Get("Monthly overview"), UiText.Get("Yearly overview"), UiText.Get("Savings goals") }; tabs = new Button[5];
-            for (int i = 0; i < tabs.Length; i++)
+            string[] labels = { "Accounts & bills", "Daily expenses", "Monthly overview", "Yearly overview", "Savings goals", "Term deposits" };
+            // Page IDs stay stable for existing navigation and the month drill-down.
+            int[] order = { 0, DepositsPageId, 1, 2, 3, 4 };
+            tabs = new Button[labels.Length];
+            TableLayoutPanel nav = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = labels.Length, RowCount = 1, Margin = Padding.Empty };
+            for (int column = 0; column < order.Length; column++)
             {
-                int index = i; tabs[i] = Theme.Button(labels[i], false); tabs[i].Width = 174;
-                tabs[i].Margin = new Padding(0, 0, 8, 7); tabs[i].Click += delegate { ShowPage(index); }; nav.Controls.Add(tabs[i]);
+                int index = order[column];
+                Button tab = Theme.Button(UiText.Get(labels[index]), false);
+                int textWidth = TextRenderer.MeasureText(tab.Text, tab.Font, Size.Empty,
+                    TextFormatFlags.SingleLine | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding).Width;
+                nav.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, textWidth + 28));
+                tabs[index] = tab;
+                tab.Dock = DockStyle.Fill;
+                tab.Margin = new Padding(0, 0, 5, 6);
+                tab.Click += delegate { ShowPage(index); };
+                nav.Controls.Add(tab, column, 0);
             }
             shell.Controls.Add(nav, 0, 1);
             pageHost = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0) }; shell.Controls.Add(pageHost, 0, 2);
@@ -340,6 +351,7 @@ namespace BudgetDesk
                 else
                 {
                     if (initial && !File.Exists(Store.FilePath)) Store.Save(Data);
+                    if (pageIndex == DepositsPageId && depositsAsOf != now.Date) ShowPage(DepositsPageId);
                     if (pageIndex == 1 && showPlans && Data.PlannedExpenses.Count > 0)
                     {
                         FillPlans(false);
@@ -374,7 +386,7 @@ namespace BudgetDesk
                     tabs[i].ForeColor = i == index ? Color.White : Theme.Muted;
                     tabs[i].FlatAppearance.MouseOverBackColor = i == index ? Theme.Banner : Theme.Pale;
                 }
-                if (index == 0) AccountsPage(); else if (index == 1) EntriesPage(); else if (index == 2) OverviewPage(); else if (index == 3) YearlyPage(); else GoalsPage();
+                if (index == 0) AccountsPage(); else if (index == 1) EntriesPage(); else if (index == 2) OverviewPage(); else if (index == 3) YearlyPage(); else if (index == DepositsPageId) DepositsPage(); else GoalsPage();
             }
             finally
             {
@@ -441,7 +453,8 @@ namespace BudgetDesk
         {
             DashboardPanel page = new DashboardPanel { Name = "AccountsDashboard", Size = currentPage.ClientSize, Dock = DockStyle.Fill, Margin = new Padding(0), AutoScroll = false, AccountCount = Data.Accounts.Count, BillCount = Data.Bills.Count };
             Panel accounts = new Panel { Name = "AccountCards", AutoScroll = false, BackColor = Theme.Canvas };
-            foreach (Account account in Data.Accounts) accounts.Controls.Add(AccountCard(account));
+            var balances = Ledger.Balances(Data, DateTime.Today);
+            foreach (Account account in Data.Accounts) accounts.Controls.Add(AccountCard(account, balances[account.Id]));
             if (Data.Accounts.Count == 0)
             {
                 Label empty = Theme.Label(UiText.Get("Add a bank account, savings account or cash. Give each its own name and icon."), 10.5f, false, Theme.Muted);
@@ -452,7 +465,14 @@ namespace BudgetDesk
             Panel accountHeader = Section(UiText.Get("Your accounts"), Data.Accounts.Count + UiText.Get(" / 20 · Drag to reorder"), add); accountHeader.Name = "AccountsHeader";
             Panel total = new Panel { Name = "GrandTotal", BackColor = Theme.Banner, Padding = new Padding(10, 0, 10, 0) };
             Label caption = Theme.Label(UiText.Get("GRAND TOTAL  /  ALL ACCOUNTS"), 9, true, Color.FromArgb(178, 211, 213)); caption.Dock = DockStyle.Left; caption.Width = 285;
-            Label amount = Theme.Label(Theme.MoneyText(Ledger.TotalBalance(Data, DateTime.Today), Data.BaseCurrency), 16, true, Color.White); amount.TextAlign = ContentAlignment.MiddleRight; amount.AutoEllipsis = true;
+            Label amount = Theme.Label(Theme.MoneyText(Ledger.TotalInBase(Data, Data.AllAccounts, balances), Data.BaseCurrency), 16, true, Color.White); amount.TextAlign = ContentAlignment.MiddleRight; amount.AutoEllipsis = true;
+            if (Data.TermDeposits.Count > 0)
+            {
+                caption.Text = UiText.Format("Grand total incl. term deposits ({0})",
+                    Theme.MoneyText(Ledger.TotalInBase(Data, Data.TermDeposits, balances), Data.BaseCurrency));
+                caption.Width = 500;
+            }
+            amount.Name = "GrandTotalAmount";
             total.Controls.Add(amount); total.Controls.Add(caption);
             Panel bills = new Panel { Name = "RecurringCards", AutoScroll = false, BackColor = Theme.Canvas };
             if (!Data.Bills.Any(x => x.Id == selectedBillId)) selectedBillId = Data.Bills.OrderBy(x => x.Name, UiText.Comparer).Select(x => x.Id).FirstOrDefault();
@@ -526,9 +546,8 @@ namespace BudgetDesk
             card.Disposed += delegate { tip.Dispose(); };
             return card;
         }
-        private Panel AccountCard(Account a)
+        private Panel AccountCard(Account a, decimal balance)
         {
-            decimal balance = Ledger.Balance(Data, a.Id, DateTime.Today);
             Panel p = new Panel { Name = "AccountCard", Tag = a.Id, Width = 240, Height = 58, BackColor = ItemPalette.Surface(a.ColorIndex, false), Margin = new Padding(0), Padding = new Padding(9, 4, 9, 4), Cursor = Cursors.Hand };
             TableLayoutPanel t = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, RowCount = 2, Margin = new Padding(0) };
             t.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 25)); t.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20));
@@ -602,11 +621,12 @@ namespace BudgetDesk
             CheckDue(false);
         }
 
-        private ComboBox AccountChoices(string selected, bool includeAll)
+        private ComboBox AccountChoices(string selected, bool includeAll, bool includeDeposits = false)
         {
             ComboBox c = Theme.Combo();
             if (includeAll) c.Items.Add(new Pick("", UiText.Get("All accounts")));
-            foreach (Account a in Data.Accounts.OrderBy(x => x.Name, UiText.Comparer)) c.Items.Add(new Pick(a.Id, Icons.Named(a.Name, a.Icon) + "  (" + a.Currency + ")"));
+            foreach (Account a in (includeDeposits ? Data.AllAccounts : Data.Accounts).OrderBy(x => x.Name, UiText.Comparer))
+                c.Items.Add(AccountOption(a));
             Icons.Choose(c, !includeAll && String.IsNullOrEmpty(selected) && Data.Accounts.Count > 0 ? Data.Accounts[0].Id : selected); return c;
         }
         private ComboBox CategoryChoices(string selected, bool includeAll)
@@ -673,7 +693,10 @@ namespace BudgetDesk
             recorded.Name = "RecordedEntriesView"; planned.Name = "PlannedExpensesView"; history.Name = "AllHistoryView"; templates.Name = "QuickTemplates"; payees.Name = "ManagePayees";
             recorded.Width = 162; planned.Width = 202; history.Width = 174; templates.Width = 110; payees.Width = 100;
             foreach (Button button in new Button[] { recorded, planned, history, templates, payees }) { button.Height = 32; button.Margin = new Padding(0, 3, 7, 0); views.Controls.Add(button); }
-            recorded.Click += delegate { showPlans = false; allHistory = false; entriesPageIndex = 0; ShowPage(1); }; planned.Click += delegate { showPlans = true; allHistory = false; ShowPage(1); };
+            recorded.Click += delegate { showPlans = false; allHistory = false; entriesPageIndex = 0; ShowPage(1); }; planned.Click += delegate {
+                if (Data.TermDeposits.Any(d => d.Id == accountFilter)) accountFilter = "";
+                showPlans = true; allHistory = false; ShowPage(1);
+            };
             history.Click += delegate { showPlans = false; allHistory = true; entriesPageIndex = 0; ShowPage(1); };
             templates.Click += delegate { Templates(); }; payees.Click += delegate { Payees(); }; t.Controls.Add(views, 0, 2);
             Button cats = Theme.Button(UiText.Get("Categories  ") + Data.Categories.Count + "/20", false); cats.Click += delegate { Categories(); };
@@ -686,7 +709,7 @@ namespace BudgetDesk
             TableLayoutPanel filters = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Margin = new Padding(0) };
             filters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28)); filters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
             filters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 19)); filters.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28));
-            ComboBox account = AccountChoices(accountFilter, true), category = CategoryChoices(categoryFilter, true);
+            ComboBox account = AccountChoices(accountFilter, true, !showPlans), category = CategoryChoices(categoryFilter, true);
             ComboBox kind = showPlans ? Strings(new[] { "All dates", "Next 30 days", "Overdue" }, planWhen) : Strings(new[] { "All types", "Expense", "Income", "Transfer" }, kindFilter);
             kind.Name = showPlans ? "PlanDateFilter" : "EntryTypeFilter";
             TextBox search = Theme.Text(searchText); search.AccessibleName = UiText.Get("Search descriptions"); search.Name = "EntrySearchText";
@@ -757,8 +780,8 @@ namespace BudgetDesk
             catch (BudgetException ex) { entriesPager.SetRows(new GridItem[0], true); filteredTotal.Text = ex.Message; UpdateHistoryMetrics(0, 0); return; }
             foreach (Entry e in list)
             {
-                Account a = Data.Accounts.First(x => x.Id == e.AccountId); Category c = Data.Categories.FirstOrDefault(x => x.Id == e.CategoryId);
-                Account to = Data.Accounts.FirstOrDefault(x => x.Id == e.ToAccountId);
+                Account a = Data.AllAccounts.First(x => x.Id == e.AccountId); Category c = Data.Categories.FirstOrDefault(x => x.Id == e.CategoryId);
+                Account to = Data.AllAccounts.FirstOrDefault(x => x.Id == e.ToAccountId);
                 bool split = Ledger.HasSplits(e), share = split && categoryFilter != "";
                 string cat = e.Kind == "Transfer" ? UiText.Get("Between accounts") : split ? (share ? Data.Categories.First(x => x.Id == categoryFilter).DisplayName + UiText.Get(" [split]") : UiText.Get("Split · ") + e.Splits.Count + UiText.Get(" categories")) : c == null ? UiText.Get("Income") : Icons.Named(c.DisplayName, c.Icon);
                 decimal shownAmount = share ? Ledger.CategoryExpenseAmount(e, categoryFilter) : e.Amount;
@@ -1083,6 +1106,13 @@ namespace BudgetDesk
 
         private void EntryEditor(Entry existing, string initialKind)
         {
+            if (Data.Accounts.Count > 0 && Data.TermDeposits.Count > 0 &&
+                ((existing == null && initialKind == "Transfer") || (existing != null && existing.Kind == "Transfer" &&
+                Data.TermDeposits.Any(d => d.Id == existing.AccountId || d.Id == existing.ToAccountId))))
+            {
+                TransferEditor(null, false, existing);
+                return;
+            }
             if (Data.Accounts.Count == 0) { ActionSafely(delegate { throw new BudgetException(UiText.Get("Add an account on the first tab, then record your first entry.")); }); return; }
             if ((existing == null ? initialKind : existing.Kind) == "Transfer" && Data.Accounts.Count < 2) { ActionSafely(delegate { throw new BudgetException(UiText.Get("Add at least two accounts to record a transfer.")); }); return; }
             Entry seed = existing ?? newEntryPreset;
@@ -1314,7 +1344,7 @@ namespace BudgetDesk
                     {
                         if (dialog.ShowDialog(f) != DialogResult.OK) return;
                         BudgetData restored = BudgetStore.ReadBackup(dialog.FileName);
-                        if (!Confirm(UiText.Get("Replace the current budget with this backup?\n\n") + restored.Accounts.Count + UiText.Get(" accounts, ") + restored.Entries.Count + UiText.Get(" entries, ") + restored.Bills.Count + UiText.Get(" recurring payments, ") + restored.PlannedExpenses.Count + UiText.Get(" plans and ") + restored.Goals.Count + UiText.Get(" goals, ") + restored.Templates.Count + UiText.Get(" templates and ") + restored.Payees.Count + UiText.Get(" payees.\nYour current data will be kept in the automatic Backups folder."))) return;
+                        if (!Confirm(UiText.Get("Replace the current budget with this backup?\n\n") + restored.Accounts.Count + UiText.Get(" accounts, ") + UiText.Format("{0} term deposits, ", restored.TermDeposits.Count) + restored.Entries.Count + UiText.Get(" entries, ") + restored.Bills.Count + UiText.Get(" recurring payments, ") + restored.PlannedExpenses.Count + UiText.Get(" plans and ") + restored.Goals.Count + UiText.Get(" goals, ") + restored.Templates.Count + UiText.Get(" templates and ") + restored.Payees.Count + UiText.Get(" payees.\nYour current data will be kept in the automatic Backups folder."))) return;
                         Store.Save(restored); DisplayBudget(restored); status.Text = UiText.Get("Backup restored. Automatic due payments will be checked when this window closes."); f.Close();
                     }
                 }); };

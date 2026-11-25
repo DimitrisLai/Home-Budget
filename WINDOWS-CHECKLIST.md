@@ -3,6 +3,8 @@
 Open the new BudgetDesk.exe to check your existing budget. Support/Try-Demo.cmd provides separate sample data for testing new entries. The user confirmed 0.1.9 working before the version-only promotion to 1.0.0. This checklist remains useful for later releases.
 
 - [ ] Existing accounts, bank order, balances, entries, plans and savings goals load correctly.
+- [ ] Fund a term deposit with 4,000 CZK from a 10,000 CZK bank account. The account, deposit and combined balances should read 6,000, 4,000 and 10,000 CZK. Return part before maturity and the rest at maturity. Confirm the transfers appear once in history and leave income and expenses unchanged.
+- [ ] Reopen a JSON backup and check the deposit maturity, currency, color, transfers and remaining balance.
 - [ ] Daily expenses → Templates → + New: save a template with an optional amount. Use it, enter an amount and Save. Exactly one new transaction is recorded.
 - [ ] Use a template and cancel its draft. The balance and transaction count stay unchanged.
 - [ ] Create/use a fixed-amount split template. The purchase is deducted once and category shares remain correct.

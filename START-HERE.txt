@@ -1,4 +1,4 @@
-BUDGET DESK 1.3.0 — WINDOWS
+BUDGET DESK 1.4.0 — WINDOWS
 
 Updating? First export a JSON backup in the old app under Settings & backup,
 then close it. Extract the entire new ZIP to a new folder.
@@ -13,7 +13,7 @@ Support/Try-Demo.cmd       Separate budget with sample data
 Support/Start-BudgetDesk.cmd  Starts the app with diagnostics if needed
 
 Choose Item color when creating or editing an account, payment, entry or goal.
-The illustrated manuals include the palette and examples for all five tabs.
+The illustrated manuals include the palette and examples for all six tabs.
 Open Settings & backup to select the interface language and Light or Dark.
 New automatic one-off expenses post at the scheduled time. Existing plans
 keep their manual setting until you edit them.

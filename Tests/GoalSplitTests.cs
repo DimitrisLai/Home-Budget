@@ -150,7 +150,7 @@ internal static class GoalSplitTests
             using (MainForm main = new MainForm(store, d, false))
             {
                 main.Size = new Size(1000, 700); main.Show(); Pump(); main.ShowPage(4); Pump();
-                Check(Tree(main).OfType<Button>().Where(b => new string[] { "Accounts & bills", "Daily expenses", "Monthly overview", "Yearly overview", "Savings goals" }.Contains(b.Text)).All(b => { Visible(b); return b.Visible; }), "all five tabs fit at the minimum window width");
+                Check(Tree(main).OfType<Button>().Where(b => new string[] { "Accounts & bills", "Term deposits", "Daily expenses", "Monthly overview", "Yearly overview", "Savings goals" }.Contains(b.Text)).All(b => { Visible(b); return b.Visible; }), "all six tabs fit at the minimum window width");
                 Dialog(main, delegate { ((Button)Named(main, "AddSavingsGoal")).PerformClick(); }, delegate(Form f) {
                     Named(f, "GoalName").Text = "New car"; ((NumericUpDown)Named(f, "GoalTarget")).Value = 2000; ((NumericUpDown)Named(f, "GoalSaved")).Value = 250;
                     ((CheckBox)Named(f, "GoalUseDate")).Checked = true; ((DateTimePicker)Named(f, "GoalTargetDate")).Value = Today.AddMonths(2);

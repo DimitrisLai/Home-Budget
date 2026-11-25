@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace BudgetDesk
 {
-    public sealed class Account
+    public class Account
     {
         public int ColorIndex { get; set; }
         public string Id { get; set; }
@@ -14,6 +14,11 @@ namespace BudgetDesk
         public string Currency { get; set; }
         public decimal OpeningBalance { get; set; }
         public string OpeningDate { get; set; }
+    }
+
+    public sealed class TermDeposit : Account
+    {
+        public string MaturityDate { get; set; }
     }
 
     public sealed class Category
@@ -148,6 +153,8 @@ namespace BudgetDesk
         // Rates use one stable reference. One unit of currency is worth this many CZK.
         public Dictionary<string, decimal> Rates { get; set; }
         public List<Account> Accounts { get; set; }
+        public List<TermDeposit> TermDeposits { get; set; }
+        internal IEnumerable<Account> AllAccounts { get { return Accounts.Concat<Account>(TermDeposits); } }
         public List<Category> Categories { get; set; }
         public List<Entry> Entries { get; set; }
         public List<RecurringBill> Bills { get; set; }
@@ -163,7 +170,7 @@ namespace BudgetDesk
             BudgetData d = new BudgetData {
                 SchemaVersion = Ledger.CurrentSchemaVersion, BaseCurrency = "CZK", Language = "en", Appearance = "light",
                 Rates = new Dictionary<string, decimal> { { "CZK", 1m } },
-                Accounts = new List<Account>(), Categories = new List<Category>(),
+                Accounts = new List<Account>(), TermDeposits = new List<TermDeposit>(), Categories = new List<Category>(),
                 Entries = new List<Entry>(), Bills = new List<RecurringBill>(),
                 PlannedExpenses = new List<PlannedExpense>(),
                 Goals = new List<SavingsGoal>(),
@@ -188,7 +195,7 @@ namespace BudgetDesk
         public static readonly string[] Currencies = { "CZK", "EUR", "USD", "GBP", "CHF", "PLN" };
         public static readonly string[] Units = { "Months", "Weeks", "Years", "Days" };
         public const int ItemLimit = 20;
-        public const int CurrentSchemaVersion = 7;
+        public const int CurrentSchemaVersion = 8;
         public const int CardColorCount = 32;
         public static string NewId() { return Guid.NewGuid().ToString("N"); }
         public static string Iso(DateTime date) { return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); }
@@ -264,16 +271,16 @@ namespace BudgetDesk
             Require(d != null && d.SchemaVersion == CurrentSchemaVersion, "This backup is not a supported Budget Desk version.");
             Require(d.Language == "en" || d.Language == "el" || d.Language == "cs", "Choose a supported interface language.");
             Require(d.Appearance == "light" || d.Appearance == "dark", "Choose a supported appearance.");
-            Require(d.Accounts != null && d.Categories != null && d.Bills != null && d.Entries != null && d.Rates != null && d.ProcessedOccurrences != null && d.PlannedExpenses != null && d.Goals != null && d.Payees != null && d.Templates != null,
+            Require(d.Accounts != null && d.TermDeposits != null && d.Categories != null && d.Bills != null && d.Entries != null && d.Rates != null && d.ProcessedOccurrences != null && d.PlannedExpenses != null && d.Goals != null && d.Payees != null && d.Templates != null,
                 "The data file is incomplete.");
             Require(d.Accounts.Count <= 20 && d.Categories.Count <= 20 && d.Bills.Count <= 20,
                 "Version 1 supports up to 20 accounts, 20 categories and 20 recurring payments.");
-            Require(d.Accounts.All(a => a != null) && d.Categories.All(c => c != null) && d.Entries.All(e => e != null) && d.Bills.All(b => b != null) && d.PlannedExpenses.All(p => p != null) && d.Goals.All(g => g != null) && d.Payees.All(p => p != null) && d.Templates.All(t => t != null), "Invalid empty item in the data file.");
+            Require(d.AllAccounts.All(a => a != null) && d.Categories.All(c => c != null) && d.Entries.All(e => e != null) && d.Bills.All(b => b != null) && d.PlannedExpenses.All(p => p != null) && d.Goals.All(g => g != null) && d.Payees.All(p => p != null) && d.Templates.All(t => t != null), "Invalid empty item in the data file.");
             Require(Currencies.Contains(d.BaseCurrency) && d.Rates.ContainsKey(d.BaseCurrency), "Add an exchange rate for your reporting currency.");
             Require(d.Rates.ContainsKey("CZK") && d.Rates["CZK"] == 1m, "The CZK reference rate must be 1.");
             foreach (var rate in d.Rates)
                 Require(Currencies.Contains(rate.Key) && rate.Value > 0 && rate.Value <= 1000000m, "Exchange rates must be positive and use supported currencies.");
-            Unique(d.Accounts.Select(a => a.Id), "account");
+            Unique(d.AllAccounts.Select(a => a.Id), "account");
             Unique(d.Categories.Select(c => c.Id), "category");
             Unique(d.Entries.Select(e => e.Id), "entry");
             Unique(d.Bills.Select(b => b.Id), "payment");
@@ -283,16 +290,22 @@ namespace BudgetDesk
             Require(d.Payees.Select(p => (p.Name ?? "").Trim().ToUpperInvariant()).Distinct().Count() == d.Payees.Count, "Use a different name for each payee.");
             Require(d.Templates.Select(t => (t.Name ?? "").Trim().ToUpperInvariant()).Distinct().Count() == d.Templates.Count, "Use a different name for each template.");
             Unique(d.Entries.Where(e => !String.IsNullOrEmpty(e.PlanId)).Select(e => e.PlanId), "recorded plan");
-            Require(d.Accounts.Select(a => a.Name == null ? "" : a.Name.Trim().ToUpperInvariant()).Distinct().Count() == d.Accounts.Count,
+            Require(d.AllAccounts.Select(a => a.Name == null ? "" : a.Name.Trim().ToUpperInvariant()).Distinct().Count() == d.Accounts.Count + d.TermDeposits.Count,
                 "Use a different name for each account.");
             Require(d.Categories.Select(c => c.Name == null ? "" : c.Name.Trim().ToUpperInvariant()).Distinct().Count() == d.Categories.Count,
                 "Use a different name for each category.");
-            foreach (Account a in d.Accounts)
+            foreach (Account a in d.AllAccounts)
             {
                 ValidateColor(a.ColorIndex);
                 TextValue(a.Name, "Account name", 60); TextValue(a.Icon, "Account icon", 30);
                 Require(Currencies.Contains(a.Currency) && d.Rates.ContainsKey(a.Currency), UiText.Get("Set a manual exchange rate for ") + a.Currency + ".");
                 Money(a.OpeningBalance, false, "Opening balance"); Day(a.OpeningDate);
+                TermDeposit deposit = a as TermDeposit;
+                if (deposit != null)
+                {
+                    Require(Day(deposit.MaturityDate) >= Day(deposit.OpeningDate), "Maturity must be on or after the opening date.");
+                    Require(deposit.OpeningBalance >= 0, "A term deposit cannot have a negative balance.");
+                }
             }
             foreach (Category c in d.Categories)
             {
@@ -304,8 +317,9 @@ namespace BudgetDesk
             {
                 ValidateColor(e.ColorIndex);
                 Require(e.Kind == "Expense" || e.Kind == "Income" || e.Kind == "Transfer", "Unknown entry type.");
-                Account a = d.Accounts.FirstOrDefault(x => x.Id == e.AccountId);
+                Account a = d.AllAccounts.FirstOrDefault(x => x.Id == e.AccountId);
                 Require(a != null, "An entry refers to a missing account.");
+                Require(!(a is TermDeposit) || e.Kind == "Transfer", "Term deposits can only be used for transfers.");
                 DateTime date = Moment(e.Date, e.Time).Date;
                 Require(date >= Day(a.OpeningDate), "The entry date is before the account's starting date.");
                 Money(e.Amount, true, "Amount");
@@ -322,8 +336,9 @@ namespace BudgetDesk
                 else if (e.Kind == "Expense") Require(d.Categories.Any(c => c.Id == e.CategoryId), "Choose an expense category.");
                 if (e.Kind == "Transfer")
                 {
-                    Account target = d.Accounts.FirstOrDefault(x => x.Id == e.ToAccountId);
+                    Account target = d.AllAccounts.FirstOrDefault(x => x.Id == e.ToAccountId);
                     Require(target != null && target.Id != a.Id, "Choose a different destination account.");
+                    Require(!(a is TermDeposit && target is TermDeposit), "Choose a regular account on one side of the transfer.");
                     Require(date >= Day(target.OpeningDate), "The transfer is before the destination account's starting date.");
                     Money(e.ReceivedAmount, true, "Amount received");
                     Require(target.Currency != a.Currency || e.Amount == e.ReceivedAmount,
@@ -332,6 +347,7 @@ namespace BudgetDesk
                 if (!String.IsNullOrEmpty(e.ScheduledDate)) Moment(e.ScheduledDate, e.ScheduledTime);
                 if (!String.IsNullOrEmpty(e.PlanId)) Require(e.Kind == "Expense" && !String.IsNullOrEmpty(e.ScheduledDate), "A recorded one-off plan must be an expense with its original due date.");
             }
+            ValidateDepositBalances(d);
             foreach (PlannedExpense p in d.PlannedExpenses)
             {
                 ValidateColor(p.ColorIndex);
@@ -480,26 +496,90 @@ namespace BudgetDesk
             if (query.MaximumAmount.HasValue) result = result.Where(e => e.Amount <= query.MaximumAmount.Value);
             string[] words = (query.Text ?? "").Split(new char[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (words.Length > 0) result = result.Where(e => {
-                string text = (e.Description ?? "") + " " + (e.Payee ?? "") + " " + String.Join(" ", d.Accounts.Where(a => a.Id == e.AccountId || a.Id == e.ToAccountId).Select(a => a.Name)) + " " + String.Join(" ", d.Categories.Where(c => HasCategory(e, c.Id)).Select(c => c.Name + " " + c.DisplayName));
+                string text = (e.Description ?? "") + " " + (e.Payee ?? "") + " " + String.Join(" ", d.AllAccounts.Where(a => a.Id == e.AccountId || a.Id == e.ToAccountId).Select(a => a.Name)) + " " + String.Join(" ", d.Categories.Where(c => HasCategory(e, c.Id)).Select(c => c.Name + " " + c.DisplayName));
                 return words.All(word => text.IndexOf(word, StringComparison.OrdinalIgnoreCase) >= 0);
             });
             return result;
         }
 
-        public static decimal Balance(BudgetData d, string accountId, DateTime asOf)
+        internal static Dictionary<string, decimal> Balances(BudgetData d, DateTime asOf)
         {
-            Account a = d.Accounts.First(x => x.Id == accountId);
-            if (asOf.Date < Day(a.OpeningDate)) return 0m;
-            decimal total = a.OpeningBalance;
-            foreach (Entry e in d.Entries.Where(x => Day(x.Date) <= asOf.Date))
+            string cutoff = Iso(asOf);
+            var balances = d.AllAccounts.ToDictionary(a => a.Id,
+                a => String.CompareOrdinal(a.OpeningDate, cutoff) <= 0 ? a.OpeningBalance : 0m);
+            foreach (Entry entry in d.Entries)
             {
-                if (e.AccountId == a.Id) total += (e.Kind == "Income" ? 1 : -1) * AccountAmount(e.Amount, e.ExchangeRate);
-                if (e.Kind == "Transfer" && e.ToAccountId == a.Id) total += e.ReceivedAmount;
+                if (String.CompareOrdinal(entry.Date, cutoff) > 0) continue;
+                decimal charge = AccountAmount(entry.Amount, entry.ExchangeRate);
+                balances[entry.AccountId] += entry.Kind == "Income" ? charge : -charge;
+                if (entry.Kind == "Transfer") balances[entry.ToAccountId] += entry.ReceivedAmount;
             }
-            return total;
+            return balances;
         }
+
+        public static decimal Balance(BudgetData d, string accountId, DateTime asOf)
+        { return Balances(d, asOf)[accountId]; }
+
+        internal static decimal TotalInBase(BudgetData d, IEnumerable<Account> accounts, Dictionary<string, decimal> balances)
+        { return accounts.Sum(a => ToBase(d, balances[a.Id], a.Currency)); }
+
+        // Equal timestamps are simultaneous. A backdated correction must still cover every later withdrawal.
+        static void ValidateDepositBalances(BudgetData d)
+        {
+            if (d.TermDeposits.Count == 0) return;
+            var balances = d.TermDeposits.ToDictionary(x => x.Id, x => x.OpeningBalance);
+            var transfers = d.Entries.Where(e => e.Kind == "Transfer" &&
+                (balances.ContainsKey(e.AccountId) || balances.ContainsKey(e.ToAccountId)));
+            foreach (var moment in transfers.GroupBy(e => e.Date + " " + e.Time).OrderBy(group => group.Key, StringComparer.Ordinal))
+            {
+                var touched = new HashSet<string>();
+                foreach (var entry in moment)
+                {
+                    bool outgoing = balances.ContainsKey(entry.AccountId);
+                    string id = outgoing ? entry.AccountId : entry.ToAccountId;
+                    balances[id] += outgoing ? -entry.Amount : entry.ReceivedAmount;
+                    touched.Add(id);
+                }
+                Require(touched.All(id => balances[id] >= 0), "A term deposit cannot have a negative balance.");
+            }
+        }
+
+        public static decimal TermDepositTotal(BudgetData d, DateTime date)
+        { return TotalInBase(d, d.TermDeposits, Balances(d, date)); }
+
+        public static void SaveTransfer(BudgetData d, string entryId, Account from, Account to,
+            DateTime date, string time, decimal sent, decimal received, string description, int color)
+        {
+            Require(from != null && to != null && from.Id != to.Id, "Choose a different destination account.");
+            Require(!(from is TermDeposit && to is TermDeposit),
+                "Choose a regular account on one side of the transfer.");
+            Entry entry = entryId == null ? new Entry { Id = NewId(), Kind = "Transfer" } :
+                d.Entries.Single(e => e.Id == entryId && e.Kind == "Transfer");
+            if (to is TermDeposit && (entryId == null || entry.AccountId != from.Id ||
+                entry.Date != Iso(date) || sent > entry.Amount))
+            {
+                decimal available = Balance(d, from.Id, date);
+                if (entryId != null && Day(entry.Date) <= date.Date)
+                {
+                    if (entry.AccountId == from.Id) available += entry.Amount;
+                    if (entry.ToAccountId == from.Id) available -= entry.ReceivedAmount;
+                }
+                Require(sent <= available, "The transfer exceeds the available account balance.");
+            }
+            if (entryId == null || entry.AccountId != from.Id) entry.RateToCzk = Rate(d, from.Currency);
+            entry.AccountId = from.Id;
+            entry.ToAccountId = to.Id;
+            entry.Date = Iso(date);
+            entry.Time = time;
+            entry.Amount = sent;
+            entry.ReceivedAmount = received;
+            entry.Description = description;
+            entry.ColorIndex = color;
+            if (entryId == null) d.Entries.Add(entry);
+        }
+
         public static decimal TotalBalance(BudgetData d, DateTime date)
-        { return d.Accounts.Sum(a => ToBase(d, Balance(d, a.Id, date), a.Currency)); }
+        { return TotalInBase(d, d.AllAccounts, Balances(d, date)); }
 
         public static IEnumerable<Entry> MonthEntries(BudgetData d, DateTime month)
         { return d.Entries.Where(e => Day(e.Date).Year == month.Year && Day(e.Date).Month == month.Month); }
