@@ -1,5 +1,11 @@
 # Budget Desk version history
 
+## 1.4.0 — 24 November 2026
+
+- Added a term-deposit tab beside accounts, with a required maturity date, currency, opening balance and item color. Bank-funded deposits create a single transfer. Pre-existing deposits can start from a separate opening balance.
+- Added two-way transfers, partial and early withdrawals, maturity status, history and CSV support. Regular and deposit balances contribute once to the overall total. Deposit movements preserve the income and expense reports.
+- Added schema 8 migration, updated the English, Czech and Greek manuals, and added automated Windows coverage for term-deposit accounting, storage and forms.
+
 ## 1.3.0 — 22 November 2026
 
 - Added 32 named swatches plus a theme default to the item editors for accounts, recurring payments, transactions, one-off plans, savings goals and templates. Each choice is saved per item and travels with the budget backup. Previously saved items start with their default appearance.

@@ -98,7 +98,8 @@ internal static class Release130Tests
     private static void LedgerColors()
     {
         var d = BudgetData.Empty(); d.Accounts.Add(Account("bank", "Bank"));
-        var old = BudgetStore.Parse(BudgetStore.Serialize(d).Replace("\"SchemaVersion\":7", "\"SchemaVersion\":6").Replace("\"ColorIndex\":0,", ""));
+        var legacy = BudgetStore.Clone(d); legacy.SchemaVersion = 6;
+        var old = BudgetStore.Parse(BudgetStore.Serialize(legacy).Replace("\"ColorIndex\":0,", ""));
         Check(old.SchemaVersion == Ledger.CurrentSchemaVersion && old.Accounts[0].ColorIndex == 0, "1.2 backup with missing colors reopens with the theme default");
         var bill = Bill(d); bill.AutoRecord = true; bill.ColorIndex = 3; d.Bills.Add(bill);
         var now = DateTime.Today.AddHours(12);

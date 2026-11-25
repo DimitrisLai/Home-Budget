@@ -143,10 +143,10 @@ internal static class UiSmokeTests
                 string before = BudgetStore.Serialize(main.Data), disk = File.ReadAllText(main.Store.FilePath);
                 try { main.Commit(d => d.Accounts[0].Name = ""); throw new Exception("Expected invalid commit rejection"); } catch (BudgetException) { }
                 Check(before == BudgetStore.Serialize(main.Data) && disk == File.ReadAllText(main.Store.FilePath), "invalid UI commit changes neither memory nor disk");
-                for (int i = 0; i < 5; i++) { main.ShowPage(i); Capture(main, "working-page-" + i); }
+                for (int i = 0; i < 6; i++) { main.ShowPage(i); Capture(main, "working-page-" + i); }
                 main.Size = new Size(1000, 700); Application.DoEvents();
-                for (int i = 0; i < 5; i++) { main.ShowPage(i); Capture(main, "minimum-page-" + i); }
-                Check(main.ClientSize.Width > 900 && main.Visible, "all five pages render at the minimum window size");
+                for (int i = 0; i < 6; i++) { main.ShowPage(i); Capture(main, "minimum-page-" + i); }
+                Check(main.ClientSize.Width > 900 && main.Visible, "all six pages render at the minimum window size");
                 main.Commit(d => {
                     while (d.Accounts.Count < 20) Ledger.AddAccount(d, new Account { Id = Ledger.NewId(), Name = "Extra account " + d.Accounts.Count, Icon = "Bank", Currency = "CZK", OpeningBalance = 100m, OpeningDate = Ledger.Iso(DateTime.Today) });
                     while (d.Bills.Count < 20) Ledger.AddBill(d, new RecurringBill { Id = Ledger.NewId(), Name = "Payment " + d.Bills.Count, Icon = "Phone", AccountId = bank, CategoryId = d.Categories[0].Id, Amount = 10, AnchorDate = Ledger.Iso(DateTime.Today.AddDays(1)), Interval = 3, Unit = "Months", Enabled = true, AutoRecord = false });

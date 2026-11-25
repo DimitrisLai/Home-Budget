@@ -12,8 +12,8 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("Offline personal accounts, recurring payments and daily expenses")]
 [assembly: AssemblyCompany("Dimitris L.")]
 [assembly: AssemblyProduct("Budget Desk")]
-[assembly: AssemblyVersion("1.3.0.0")]
-[assembly: AssemblyFileVersion("1.3.0.0")]
+[assembly: AssemblyVersion("1.4.0.0")]
+[assembly: AssemblyFileVersion("1.4.0.0")]
 [assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.5", FrameworkDisplayName = ".NET Framework 4.5")]
 
 namespace BudgetDesk

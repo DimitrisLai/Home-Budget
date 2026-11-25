@@ -32,7 +32,7 @@ namespace BudgetDesk
                 {
                     string full = Path.GetFullPath(candidate);
                     Directory.CreateDirectory(Path.GetDirectoryName(full));
-                    File.WriteAllText(full, "Budget Desk 1.3.0 startup report\r\n" +
+                    File.WriteAllText(full, "Budget Desk 1.4.0 startup report\r\n" +
                         "UTC: " + DateTime.UtcNow.ToString("o") + "\r\n" +
                         "OS: " + Environment.OSVersion + "\r\n" +
                         "CLR: " + Environment.Version + "\r\n" +
